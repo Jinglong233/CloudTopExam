@@ -1,0 +1,36 @@
+export default {
+  'menu.userManager.userList': '用户列表',
+
+  'userList.form.status': '状态',
+  'userList.form.status.online': '已上线',
+  'userList.form.status.offline': '已下线',
+  'userList.form.search': '查询',
+  'userList.form.reset': '重置',
+  'userList.form.selectDefault': '全部',
+  'userList.operation.create': '新建',
+  'userList.operation.import': '批量导入',
+  'userList.operation.download': '下载',
+  'userList.operation.refresh': '刷新',
+  'userList.operation.density': '尺寸',
+  'userList.operation.derive': '导出',
+
+  'userList.form.placeholder.userName': '输入用户名',
+  'userList.form.placeholder.phone': '输入手机号',
+  'userList.form.placeholder.roles': '选择角色',
+  'userList.form.placeholder.state': '选择状态',
+
+  // columns
+  'userList.columns.id': 'id',
+  'userList.columns.userName': '用户名',
+  'userList.columns.avatar': '头像',
+  'userList.columns.realName': '真实姓名',
+  'userList.columns.sex': '性别',
+  'userList.columns.deptText': '部门',
+  'userList.columns.phone': '手机号',
+  'userList.columns.option': '操作',
+  'userList.columns.state': '状态',
+  'userList.columns.status.0': '正常',
+  'userList.columns.status.1': '隐藏',
+  'userList.columns.view': '查看',
+  'userList.columns.delete': '删除',
+};

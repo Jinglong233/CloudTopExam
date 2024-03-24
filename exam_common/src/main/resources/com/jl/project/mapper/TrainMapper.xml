@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.TrainMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.Train">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 题库ID -->
+		<result column="repo_id" property="repoId"/>
+		<!-- 回答数量 -->
+		<result column="answer_count" property="answerCount"/>
+		<!-- 正确数量 -->
+		<result column="right_count" property="rightCount"/>
+		<!-- 训练者 -->
+		<result column="user_id" property="userId"/>
+		<!-- 训练模式 -->
+		<result column="mode" property="mode"/>
+		<!-- 训练进度 -->
+		<result column="percent" property="percent"/>
+		<!-- 状态 0:未完成1:完成 -->
+		<result column="state" property="state"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,repo_id,answer_count,right_count,user_id,mode,percent,state
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.repoId != null and query.repoId!= ''">
+			and repo_id = #{query.repoId}
+		</if>
+		<if test="query.answerCount != null">
+			and answer_count = #{query.answerCount}
+		</if>
+		<if test="query.rightCount != null">
+			and right_count = #{query.rightCount}
+		</if>
+		<if test="query.userId != null and query.userId!= ''">
+			and user_id = #{query.userId}
+		</if>
+		<if test="query.mode != null">
+			and mode = #{query.mode}
+		</if>
+		<if test="query.percent != null and query.percent!= ''">
+			and percent = #{query.percent}
+		</if>
+		<if test="query.state != null">
+			and state = #{query.state}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.repoIdFuzzy != null and query.repoIdFuzzy != '' ">
+			and repo_id like concat('%', #{query.repoIdFuzzy}, '%')
+		</if>
+		<if test="query.userIdFuzzy != null and query.userIdFuzzy != '' ">
+			and user_id like concat('%', #{query.userIdFuzzy}, '%')
+		</if>
+		<if test="query.percentFuzzy != null and query.percentFuzzy != '' ">
+			and percent like concat('%', #{query.percentFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM train
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM train
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.Train">
+
+		INSERT INTO train
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.repoId != null">
+				repo_id,
+			</if>
+			<if test="bean.answerCount != null">
+				answer_count,
+			</if>
+			<if test="bean.rightCount != null">
+				right_count,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.mode != null">
+				mode,
+			</if>
+			<if test="bean.percent != null">
+				percent,
+			</if>
+			<if test="bean.state != null">
+				state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.repoId != null">
+				#{bean.repoId},
+			</if>
+			<if test="bean.answerCount != null">
+				#{bean.answerCount},
+			</if>
+			<if test="bean.rightCount != null">
+				#{bean.rightCount},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.mode != null">
+				#{bean.mode},
+			</if>
+			<if test="bean.percent != null">
+				#{bean.percent},
+			</if>
+			<if test="bean.state != null">
+				#{bean.state},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.Train">
+		INSERT INTO train
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.repoId != null">
+				repo_id,
+			</if>
+			<if test="bean.answerCount != null">
+				answer_count,
+			</if>
+			<if test="bean.rightCount != null">
+				right_count,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.mode != null">
+				mode,
+			</if>
+			<if test="bean.percent != null">
+				percent,
+			</if>
+			<if test="bean.state != null">
+				state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.repoId != null">
+				#{bean.repoId},
+			</if>
+			<if test="bean.answerCount != null">
+				#{bean.answerCount},
+			</if>
+			<if test="bean.rightCount != null">
+				#{bean.rightCount},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.mode != null">
+				#{bean.mode},
+			</if>
+			<if test="bean.percent != null">
+				#{bean.percent},
+			</if>
+			<if test="bean.state != null">
+				#{bean.state},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.repoId != null">
+				repo_id= VALUES(repo_id),
+			</if>
+			<if test="bean.answerCount != null">
+				answer_count= VALUES(answer_count),
+			</if>
+			<if test="bean.rightCount != null">
+				right_count= VALUES(right_count),
+			</if>
+			<if test="bean.userId != null">
+				user_id= VALUES(user_id),
+			</if>
+			<if test="bean.mode != null">
+				mode= VALUES(mode),
+			</if>
+			<if test="bean.percent != null">
+				percent= VALUES(percent),
+			</if>
+			<if test="bean.state != null">
+				state= VALUES(state),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Train">
+		INSERT INTO train(id,repo_id,answer_count,right_count,user_id,mode,percent,state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.userId},#{item.mode},#{item.percent},#{item.state})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Train">
+		INSERT INTO 
+		train(id,repo_id,answer_count,right_count,user_id,mode,percent,state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.userId},#{item.mode},#{item.percent},#{item.state})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),repo_id= VALUES(repo_id),answer_count= VALUES(answer_count),right_count= VALUES(right_count),user_id= VALUES(user_id),mode= VALUES(mode),percent= VALUES(percent),state= VALUES(state)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from train where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.Train">
+		update train
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.repoId != null">
+				repo_id = #{bean.repoId},
+			</if>
+			<if test="bean.answerCount != null">
+				answer_count = #{bean.answerCount},
+			</if>
+			<if test="bean.rightCount != null">
+				right_count = #{bean.rightCount},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.mode != null">
+				mode = #{bean.mode},
+			</if>
+			<if test="bean.percent != null">
+				percent = #{bean.percent},
+			</if>
+			<if test="bean.state != null">
+				state = #{bean.state},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from train where id=#{id}
+	</delete>
+</mapper>
+

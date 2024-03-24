@@ -1,0 +1,57 @@
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import { Message } from '@arco-design/web-vue';
+import { getToken } from '@/utils/auth';
+
+export interface HttpResponse<T = unknown> {
+  status: string;
+  info: string;
+  code: number;
+  data: T;
+}
+
+if (import.meta.env.VITE_API_BASE_URL) {
+  axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+}
+
+axios.interceptors.request.use(
+  (config: AxiosRequestConfig) => {
+    const token = getToken();
+    if (token) {
+      if (!config.headers) {
+        config.headers = {};
+      }
+      config.headers.Authorization = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// 响应拦截器
+axios.interceptors.response.use(
+  (response: AxiosResponse<HttpResponse>) => {
+    const res = response.data;
+    if (res.code === 200) {
+      // Message.success({
+      //   content: '',
+      //   duration: 5 * 1000,
+      // });
+      return res;
+    }
+    Message.error({
+      content: res.info || '请求出错',
+      duration: 5 * 1000,
+    });
+    return Promise.reject(new Error(res.info || '请求出错'));
+  },
+  (error) => {
+    Message.error({
+      content: error.msg || 'Request Error',
+      duration: 2 * 1000,
+    });
+    return Promise.reject(error);
+  }
+);

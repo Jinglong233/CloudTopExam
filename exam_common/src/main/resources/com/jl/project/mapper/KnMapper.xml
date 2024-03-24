@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.KnMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.Kn">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 知识点内容 -->
+		<result column="content" property="content"/>
+		<!-- 关联的学科的ID -->
+		<result column="subject_id" property="subjectId"/>
+		<!-- 创建时间 -->
+		<result column="create_time" property="createTime"/>
+		<!-- 创建者 -->
+		<result column="create_by" property="createBy"/>
+		<!-- 更新时间 -->
+		<result column="update_time" property="updateTime"/>
+		<!-- 更新者 -->
+		<result column="update_by" property="updateBy"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,content,subject_id,create_time,create_by,update_time,update_by
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.content != null and query.content!= ''">
+			and content = #{query.content}
+		</if>
+		<if test="query.subjectId != null and query.subjectId!= ''">
+			and subject_id = #{query.subjectId}
+		</if>
+		<if test="query.createTime != null">
+			and create_time = #{query.createTime}
+		</if>
+		<if test="query.createBy != null and query.createBy!= ''">
+			and create_by = #{query.createBy}
+		</if>
+		<if test="query.updateTime != null">
+			and update_time = #{query.updateTime}
+		</if>
+		<if test="query.updateBy != null and query.updateBy!= ''">
+			and update_by = #{query.updateBy}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.contentFuzzy != null and query.contentFuzzy != '' ">
+			and content like concat('%', #{query.contentFuzzy}, '%')
+		</if>
+		<if test="query.subjectIdFuzzy != null and query.subjectIdFuzzy != '' ">
+			and subject_id like concat('%', #{query.subjectIdFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != '' ">
+			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != '' ">
+			<![CDATA[ and create_time < data_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.createByFuzzy != null and query.createByFuzzy != '' ">
+			and create_by like concat('%', #{query.createByFuzzy}, '%')
+		</if>
+		<if test="query.updateTimeStart != null and query.updateTimeStart != '' ">
+			<![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.updateTimeEnd != null and query.updateTimeEnd != '' ">
+			<![CDATA[ and update_time < data_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
+			and update_by like concat('%', #{query.updateByFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM kn
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM kn
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.Kn">
+
+		INSERT INTO kn
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.content != null">
+				content,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.content != null">
+				#{bean.content},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.Kn">
+		INSERT INTO kn
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.content != null">
+				content,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.content != null">
+				#{bean.content},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.content != null">
+				content= VALUES(content),
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id= VALUES(subject_id),
+			</if>
+			<if test="bean.createTime != null">
+				create_time= VALUES(create_time),
+			</if>
+			<if test="bean.createBy != null">
+				create_by= VALUES(create_by),
+			</if>
+			<if test="bean.updateTime != null">
+				update_time= VALUES(update_time),
+			</if>
+			<if test="bean.updateBy != null">
+				update_by= VALUES(update_by),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Kn">
+		INSERT INTO kn(id,content,subject_id,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.content},#{item.subjectId},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Kn">
+		INSERT INTO 
+		kn(id,content,subject_id,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.content},#{item.subjectId},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),content= VALUES(content),subject_id= VALUES(subject_id),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from kn where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.Kn">
+		update kn
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.content != null">
+				content = #{bean.content},
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id = #{bean.subjectId},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				create_by = #{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				update_by = #{bean.updateBy},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from kn where id=#{id}
+	</delete>
+</mapper>
+

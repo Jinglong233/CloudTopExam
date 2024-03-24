@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.ExamMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.Exam">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 试卷ID -->
+		<result column="paper_id" property="paperId"/>
+		<!-- 考试标题 -->
+		<result column="title" property="title"/>
+		<!-- 考试部门编码 -->
+		<result column="dept_code" property="deptCode"/>
+		<!-- 考试部门名称 -->
+		<result column="dept_text" property="deptText"/>
+		<!-- 考试开始时间 -->
+		<result column="start_time" property="startTime"/>
+		<!-- 考试结束时间 -->
+		<result column="end_time" property="endTime"/>
+		<!-- 考试状态 0:未开始1:已开始2:已结束 -->
+		<result column="statue" property="statue"/>
+		<!-- 开放权限 0:完全公开 1:指定学生 -->
+		<result column="open_type" property="openType"/>
+		<!-- 考试时长 -->
+		<result column="duration" property="duration"/>
+		<!-- 感谢语 -->
+		<result column="thanks" property="thanks"/>
+		<!-- 允许迟到时间 -->
+		<result column="late_max" property="lateMax"/>
+		<!-- 最少答题时间 -->
+		<result column="hand_min" property="handMin"/>
+		<!-- 结果显示类型（只显示分数/显示分数+答题详情/展示答题详情） -->
+		<result column="result_type" property="resultType"/>
+		<!-- 及格分数 -->
+		<result column="qualify_score" property="qualifyScore"/>
+		<!-- 是否需要阅卷0:不需要1:需要 -->
+		<result column="review_quire" property="reviewQuire"/>
+		<!-- 创建时间 -->
+		<result column="create_time" property="createTime"/>
+		<!-- 创建者 -->
+		<result column="create_by" property="createBy"/>
+		<!-- 更新时间 -->
+		<result column="update_time" property="updateTime"/>
+		<!-- 更新者 -->
+		<result column="update_by" property="updateBy"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.paperId != null and query.paperId!= ''">
+			and paper_id = #{query.paperId}
+		</if>
+		<if test="query.title != null and query.title!= ''">
+			and title = #{query.title}
+		</if>
+		<if test="query.deptCode != null and query.deptCode!= ''">
+			and dept_code = #{query.deptCode}
+		</if>
+		<if test="query.deptText != null and query.deptText!= ''">
+			and dept_text = #{query.deptText}
+		</if>
+		<if test="query.startTime != null">
+			and start_time = #{query.startTime}
+		</if>
+		<if test="query.endTime != null">
+			and end_time = #{query.endTime}
+		</if>
+		<if test="query.statue != null">
+			and statue = #{query.statue}
+		</if>
+		<if test="query.openType != null">
+			and open_type = #{query.openType}
+		</if>
+		<if test="query.duration != null">
+			and duration = #{query.duration}
+		</if>
+		<if test="query.thanks != null and query.thanks!= ''">
+			and thanks = #{query.thanks}
+		</if>
+		<if test="query.lateMax != null">
+			and late_max = #{query.lateMax}
+		</if>
+		<if test="query.handMin != null">
+			and hand_min = #{query.handMin}
+		</if>
+		<if test="query.resultType != null">
+			and result_type = #{query.resultType}
+		</if>
+		<if test="query.qualifyScore != null">
+			and qualify_score = #{query.qualifyScore}
+		</if>
+		<if test="query.reviewQuire != null">
+			and review_quire = #{query.reviewQuire}
+		</if>
+		<if test="query.createTime != null">
+			and create_time = #{query.createTime}
+		</if>
+		<if test="query.createBy != null and query.createBy!= ''">
+			and create_by = #{query.createBy}
+		</if>
+		<if test="query.updateTime != null">
+			and update_time = #{query.updateTime}
+		</if>
+		<if test="query.updateBy != null and query.updateBy!= ''">
+			and update_by = #{query.updateBy}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.paperIdFuzzy != null and query.paperIdFuzzy != '' ">
+			and paper_id like concat('%', #{query.paperIdFuzzy}, '%')
+		</if>
+		<if test="query.titleFuzzy != null and query.titleFuzzy != '' ">
+			and title like concat('%', #{query.titleFuzzy}, '%')
+		</if>
+		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
+		</if>
+		<if test="query.deptTextFuzzy != null and query.deptTextFuzzy != '' ">
+			and dept_text like concat('%', #{query.deptTextFuzzy}, '%')
+		</if>
+		<if test="query.startTimeStart != null and query.startTimeStart != '' ">
+			<![CDATA[ and start_time >= str_to_date(#{query.startTimeStart}, '%Y-%m-%d %H:%i:%s') ]]>
+		</if>
+		<if test="query.startTimeEnd != null and query.startTimeEnd != '' ">
+			<![CDATA[ and start_time < str_to_date(#{query.startTimeEnd}, '%Y-%m-%d %H:%i:%s') ]]>
+		</if>
+		<if test="query.endTimeStart != null and query.endTimeStart != '' ">
+			<![CDATA[ and end_time >= str_to_date(#{query.endTimeStart}, '%Y-%m-%d %H:%i:%s') ]]>
+		</if>
+		<if test="query.endTimeEnd != null and query.endTimeEnd != '' ">
+			<![CDATA[ and end_time < str_to_date(#{query.endTimeEnd}, '%Y-%m-%d %H:%i:%s') ]]>
+		</if>
+		<if test="query.thanksFuzzy != null and query.thanksFuzzy != '' ">
+			and thanks like concat('%', #{query.thanksFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != '' ">
+			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != '' ">
+			<![CDATA[ and create_time < data_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.createByFuzzy != null and query.createByFuzzy != '' ">
+			and create_by like concat('%', #{query.createByFuzzy}, '%')
+		</if>
+		<if test="query.updateTimeStart != null and query.updateTimeStart != '' ">
+			<![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.updateTimeEnd != null and query.updateTimeEnd != '' ">
+			<![CDATA[ and update_time < data_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
+			and update_by like concat('%', #{query.updateByFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM exam
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM exam
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.Exam">
+
+		INSERT INTO exam
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.paperId != null">
+				paper_id,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.deptText != null">
+				dept_text,
+			</if>
+			<if test="bean.startTime != null">
+				start_time,
+			</if>
+			<if test="bean.endTime != null">
+				end_time,
+			</if>
+			<if test="bean.statue != null">
+				statue,
+			</if>
+			<if test="bean.openType != null">
+				open_type,
+			</if>
+			<if test="bean.duration != null">
+				duration,
+			</if>
+			<if test="bean.thanks != null">
+				thanks,
+			</if>
+			<if test="bean.lateMax != null">
+				late_max,
+			</if>
+			<if test="bean.handMin != null">
+				hand_min,
+			</if>
+			<if test="bean.resultType != null">
+				result_type,
+			</if>
+			<if test="bean.qualifyScore != null">
+				qualify_score,
+			</if>
+			<if test="bean.reviewQuire != null">
+				review_quire,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.paperId != null">
+				#{bean.paperId},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				#{bean.deptText},
+			</if>
+			<if test="bean.startTime != null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.statue != null">
+				#{bean.statue},
+			</if>
+			<if test="bean.openType != null">
+				#{bean.openType},
+			</if>
+			<if test="bean.duration != null">
+				#{bean.duration},
+			</if>
+			<if test="bean.thanks != null">
+				#{bean.thanks},
+			</if>
+			<if test="bean.lateMax != null">
+				#{bean.lateMax},
+			</if>
+			<if test="bean.handMin != null">
+				#{bean.handMin},
+			</if>
+			<if test="bean.resultType != null">
+				#{bean.resultType},
+			</if>
+			<if test="bean.qualifyScore != null">
+				#{bean.qualifyScore},
+			</if>
+			<if test="bean.reviewQuire != null">
+				#{bean.reviewQuire},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.Exam">
+		INSERT INTO exam
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.paperId != null">
+				paper_id,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.deptText != null">
+				dept_text,
+			</if>
+			<if test="bean.startTime != null">
+				start_time,
+			</if>
+			<if test="bean.endTime != null">
+				end_time,
+			</if>
+			<if test="bean.statue != null">
+				statue,
+			</if>
+			<if test="bean.openType != null">
+				open_type,
+			</if>
+			<if test="bean.duration != null">
+				duration,
+			</if>
+			<if test="bean.thanks != null">
+				thanks,
+			</if>
+			<if test="bean.lateMax != null">
+				late_max,
+			</if>
+			<if test="bean.handMin != null">
+				hand_min,
+			</if>
+			<if test="bean.resultType != null">
+				result_type,
+			</if>
+			<if test="bean.qualifyScore != null">
+				qualify_score,
+			</if>
+			<if test="bean.reviewQuire != null">
+				review_quire,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.paperId != null">
+				#{bean.paperId},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				#{bean.deptText},
+			</if>
+			<if test="bean.startTime != null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.statue != null">
+				#{bean.statue},
+			</if>
+			<if test="bean.openType != null">
+				#{bean.openType},
+			</if>
+			<if test="bean.duration != null">
+				#{bean.duration},
+			</if>
+			<if test="bean.thanks != null">
+				#{bean.thanks},
+			</if>
+			<if test="bean.lateMax != null">
+				#{bean.lateMax},
+			</if>
+			<if test="bean.handMin != null">
+				#{bean.handMin},
+			</if>
+			<if test="bean.resultType != null">
+				#{bean.resultType},
+			</if>
+			<if test="bean.qualifyScore != null">
+				#{bean.qualifyScore},
+			</if>
+			<if test="bean.reviewQuire != null">
+				#{bean.reviewQuire},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.paperId != null">
+				paper_id= VALUES(paper_id),
+			</if>
+			<if test="bean.title != null">
+				title= VALUES(title),
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code= VALUES(dept_code),
+			</if>
+			<if test="bean.deptText != null">
+				dept_text= VALUES(dept_text),
+			</if>
+			<if test="bean.startTime != null">
+				start_time= VALUES(start_time),
+			</if>
+			<if test="bean.endTime != null">
+				end_time= VALUES(end_time),
+			</if>
+			<if test="bean.statue != null">
+				statue= VALUES(statue),
+			</if>
+			<if test="bean.openType != null">
+				open_type= VALUES(open_type),
+			</if>
+			<if test="bean.duration != null">
+				duration= VALUES(duration),
+			</if>
+			<if test="bean.thanks != null">
+				thanks= VALUES(thanks),
+			</if>
+			<if test="bean.lateMax != null">
+				late_max= VALUES(late_max),
+			</if>
+			<if test="bean.handMin != null">
+				hand_min= VALUES(hand_min),
+			</if>
+			<if test="bean.resultType != null">
+				result_type= VALUES(result_type),
+			</if>
+			<if test="bean.qualifyScore != null">
+				qualify_score= VALUES(qualify_score),
+			</if>
+			<if test="bean.reviewQuire != null">
+				review_quire= VALUES(review_quire),
+			</if>
+			<if test="bean.createTime != null">
+				create_time= VALUES(create_time),
+			</if>
+			<if test="bean.createBy != null">
+				create_by= VALUES(create_by),
+			</if>
+			<if test="bean.updateTime != null">
+				update_time= VALUES(update_time),
+			</if>
+			<if test="bean.updateBy != null">
+				update_by= VALUES(update_by),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Exam">
+		INSERT INTO exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Exam">
+		INSERT INTO 
+		exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),paper_id= VALUES(paper_id),title= VALUES(title),dept_code= VALUES(dept_code),dept_text= VALUES(dept_text),start_time= VALUES(start_time),end_time= VALUES(end_time),statue= VALUES(statue),open_type= VALUES(open_type),duration= VALUES(duration),thanks= VALUES(thanks),late_max= VALUES(late_max),hand_min= VALUES(hand_min),result_type= VALUES(result_type),qualify_score= VALUES(qualify_score),review_quire= VALUES(review_quire),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from exam where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.Exam">
+		update exam
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.paperId != null">
+				paper_id = #{bean.paperId},
+			</if>
+			<if test="bean.title != null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code = #{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				dept_text = #{bean.deptText},
+			</if>
+			<if test="bean.startTime != null">
+				start_time = #{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				end_time = #{bean.endTime},
+			</if>
+			<if test="bean.statue != null">
+				statue = #{bean.statue},
+			</if>
+			<if test="bean.openType != null">
+				open_type = #{bean.openType},
+			</if>
+			<if test="bean.duration != null">
+				duration = #{bean.duration},
+			</if>
+			<if test="bean.thanks != null">
+				thanks = #{bean.thanks},
+			</if>
+			<if test="bean.lateMax != null">
+				late_max = #{bean.lateMax},
+			</if>
+			<if test="bean.handMin != null">
+				hand_min = #{bean.handMin},
+			</if>
+			<if test="bean.resultType != null">
+				result_type = #{bean.resultType},
+			</if>
+			<if test="bean.qualifyScore != null">
+				qualify_score = #{bean.qualifyScore},
+			</if>
+			<if test="bean.reviewQuire != null">
+				review_quire = #{bean.reviewQuire},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				create_by = #{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				update_by = #{bean.updateBy},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from exam where id=#{id}
+	</delete>
+</mapper>
+

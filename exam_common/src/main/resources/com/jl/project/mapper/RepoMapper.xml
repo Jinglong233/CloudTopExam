@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.RepoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.Repo">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 部门编码（专业） -->
+		<result column="dept_code" property="deptCode"/>
+		<!-- 部门名称 -->
+		<result column="dept_Text" property="deptText"/>
+		<!-- 学科ID -->
+		<result column="subject_id" property="subjectId"/>
+		<!-- 学科名称 -->
+		<result column="subject_text" property="subjectText"/>
+		<!-- 总题数 -->
+		<result column="total_count" property="totalCount"/>
+		<!-- 主观题数 -->
+		<result column="sub_count" property="subCount"/>
+		<!-- 客观题数 -->
+		<result column="obj_count" property="objCount"/>
+		<!-- 题库标题 -->
+		<result column="title" property="title"/>
+		<!-- 是否用于考试 -->
+		<result column="is_exam" property="isExam"/>
+		<!-- 是否用于训练 -->
+		<result column="is_train" property="isTrain"/>
+		<!-- 备注 -->
+		<result column="remark" property="remark"/>
+		<!-- 创建时间 -->
+		<result column="create_time" property="createTime"/>
+		<!-- 创建者 -->
+		<result column="create_by" property="createBy"/>
+		<!-- 更新时间 -->
+		<result column="update_time" property="updateTime"/>
+		<!-- 更新者 -->
+		<result column="update_by" property="updateBy"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.deptCode != null and query.deptCode!= ''">
+			and dept_code = #{query.deptCode}
+		</if>
+		<if test="query.deptText != null and query.deptText!= ''">
+			and dept_Text = #{query.deptText}
+		</if>
+		<if test="query.subjectId != null and query.subjectId!= ''">
+			and subject_id = #{query.subjectId}
+		</if>
+		<if test="query.subjectText != null and query.subjectText!= ''">
+			and subject_text = #{query.subjectText}
+		</if>
+		<if test="query.totalCount != null">
+			and total_count = #{query.totalCount}
+		</if>
+		<if test="query.subCount != null">
+			and sub_count = #{query.subCount}
+		</if>
+		<if test="query.objCount != null">
+			and obj_count = #{query.objCount}
+		</if>
+		<if test="query.title != null and query.title!= ''">
+			and title = #{query.title}
+		</if>
+		<if test="query.isExam != null">
+			and is_exam = #{query.isExam}
+		</if>
+		<if test="query.isTrain != null">
+			and is_train = #{query.isTrain}
+		</if>
+		<if test="query.remark != null and query.remark!= ''">
+			and remark = #{query.remark}
+		</if>
+		<if test="query.createTime != null">
+			and create_time = #{query.createTime}
+		</if>
+		<if test="query.createBy != null and query.createBy!= ''">
+			and create_by = #{query.createBy}
+		</if>
+		<if test="query.updateTime != null">
+			and update_time = #{query.updateTime}
+		</if>
+		<if test="query.updateBy != null and query.updateBy!= ''">
+			and update_by = #{query.updateBy}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
+		</if>
+		<if test="query.deptTextFuzzy != null and query.deptTextFuzzy != '' ">
+			and dept_Text like concat('%', #{query.deptTextFuzzy}, '%')
+		</if>
+		<if test="query.subjectIdFuzzy != null and query.subjectIdFuzzy != '' ">
+			and subject_id like concat('%', #{query.subjectIdFuzzy}, '%')
+		</if>
+		<if test="query.subjectTextFuzzy != null and query.subjectTextFuzzy != '' ">
+			and subject_text like concat('%', #{query.subjectTextFuzzy}, '%')
+		</if>
+		<if test="query.titleFuzzy != null and query.titleFuzzy != '' ">
+			and title like concat('%', #{query.titleFuzzy}, '%')
+		</if>
+		<if test="query.remarkFuzzy != null and query.remarkFuzzy != '' ">
+			and remark like concat('%', #{query.remarkFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != '' ">
+			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != '' ">
+			<![CDATA[ and create_time < data_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.createByFuzzy != null and query.createByFuzzy != '' ">
+			and create_by like concat('%', #{query.createByFuzzy}, '%')
+		</if>
+		<if test="query.updateTimeStart != null and query.updateTimeStart != '' ">
+			<![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.updateTimeEnd != null and query.updateTimeEnd != '' ">
+			<![CDATA[ and update_time < data_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
+			and update_by like concat('%', #{query.updateByFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM repo
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM repo
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.Repo">
+
+		INSERT INTO repo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.deptText != null">
+				dept_Text,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.subjectText != null">
+				subject_text,
+			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
+			<if test="bean.subCount != null">
+				sub_count,
+			</if>
+			<if test="bean.objCount != null">
+				obj_count,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.isExam != null">
+				is_exam,
+			</if>
+			<if test="bean.isTrain != null">
+				is_train,
+			</if>
+			<if test="bean.remark != null">
+				remark,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				#{bean.deptText},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.subjectText != null">
+				#{bean.subjectText},
+			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
+			<if test="bean.subCount != null">
+				#{bean.subCount},
+			</if>
+			<if test="bean.objCount != null">
+				#{bean.objCount},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.isExam != null">
+				#{bean.isExam},
+			</if>
+			<if test="bean.isTrain != null">
+				#{bean.isTrain},
+			</if>
+			<if test="bean.remark != null">
+				#{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.Repo">
+		INSERT INTO repo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.deptText != null">
+				dept_Text,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.subjectText != null">
+				subject_text,
+			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
+			<if test="bean.subCount != null">
+				sub_count,
+			</if>
+			<if test="bean.objCount != null">
+				obj_count,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.isExam != null">
+				is_exam,
+			</if>
+			<if test="bean.isTrain != null">
+				is_train,
+			</if>
+			<if test="bean.remark != null">
+				remark,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				#{bean.deptText},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.subjectText != null">
+				#{bean.subjectText},
+			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
+			<if test="bean.subCount != null">
+				#{bean.subCount},
+			</if>
+			<if test="bean.objCount != null">
+				#{bean.objCount},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.isExam != null">
+				#{bean.isExam},
+			</if>
+			<if test="bean.isTrain != null">
+				#{bean.isTrain},
+			</if>
+			<if test="bean.remark != null">
+				#{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.deptCode != null">
+				dept_code= VALUES(dept_code),
+			</if>
+			<if test="bean.deptText != null">
+				dept_Text= VALUES(dept_Text),
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id= VALUES(subject_id),
+			</if>
+			<if test="bean.subjectText != null">
+				subject_text= VALUES(subject_text),
+			</if>
+			<if test="bean.totalCount != null">
+				total_count= VALUES(total_count),
+			</if>
+			<if test="bean.subCount != null">
+				sub_count= VALUES(sub_count),
+			</if>
+			<if test="bean.objCount != null">
+				obj_count= VALUES(obj_count),
+			</if>
+			<if test="bean.title != null">
+				title= VALUES(title),
+			</if>
+			<if test="bean.isExam != null">
+				is_exam= VALUES(is_exam),
+			</if>
+			<if test="bean.isTrain != null">
+				is_train= VALUES(is_train),
+			</if>
+			<if test="bean.remark != null">
+				remark= VALUES(remark),
+			</if>
+			<if test="bean.createTime != null">
+				create_time= VALUES(create_time),
+			</if>
+			<if test="bean.createBy != null">
+				create_by= VALUES(create_by),
+			</if>
+			<if test="bean.updateTime != null">
+				update_time= VALUES(update_time),
+			</if>
+			<if test="bean.updateBy != null">
+				update_by= VALUES(update_by),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Repo">
+		INSERT INTO repo(id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.deptCode},#{item.deptText},#{item.subjectId},#{item.subjectText},#{item.totalCount},#{item.subCount},#{item.objCount},#{item.title},#{item.isExam},#{item.isTrain},#{item.remark},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Repo">
+		INSERT INTO 
+		repo(id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.deptCode},#{item.deptText},#{item.subjectId},#{item.subjectText},#{item.totalCount},#{item.subCount},#{item.objCount},#{item.title},#{item.isExam},#{item.isTrain},#{item.remark},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),dept_code= VALUES(dept_code),dept_Text= VALUES(dept_Text),subject_id= VALUES(subject_id),subject_text= VALUES(subject_text),total_count= VALUES(total_count),sub_count= VALUES(sub_count),obj_count= VALUES(obj_count),title= VALUES(title),is_exam= VALUES(is_exam),is_train= VALUES(is_train),remark= VALUES(remark),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from repo where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.Repo">
+		update repo
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code = #{bean.deptCode},
+			</if>
+			<if test="bean.deptText != null">
+				dept_Text = #{bean.deptText},
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id = #{bean.subjectId},
+			</if>
+			<if test="bean.subjectText != null">
+				subject_text = #{bean.subjectText},
+			</if>
+			<if test="bean.totalCount != null">
+				total_count = #{bean.totalCount},
+			</if>
+			<if test="bean.subCount != null">
+				sub_count = #{bean.subCount},
+			</if>
+			<if test="bean.objCount != null">
+				obj_count = #{bean.objCount},
+			</if>
+			<if test="bean.title != null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.isExam != null">
+				is_exam = #{bean.isExam},
+			</if>
+			<if test="bean.isTrain != null">
+				is_train = #{bean.isTrain},
+			</if>
+			<if test="bean.remark != null">
+				remark = #{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				create_by = #{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				update_by = #{bean.updateBy},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from repo where id=#{id}
+	</delete>
+</mapper>
+

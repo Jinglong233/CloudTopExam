@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.UserAnswerMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.UserAnswer">
+		<!-- id -->
+		<id column="id" property="id"/>
+		<!-- 是否已答0:未答1:已答 -->
+		<result column="answered" property="answered"/>
+		<!-- 关联的题目Id -->
+		<result column="qu_id" property="quId"/>
+		<!-- 答案Id -->
+		<result column="answer_id" property="answerId"/>
+		<!-- 所属记录Id -->
+		<result column="examRecord_id" property="examRecordId"/>
+		<!-- 是否答对0:错1:对 -->
+		<result column="is_right" property="isRight"/>
+		<!-- 用户id -->
+		<result column="user_id" property="userId"/>
+		<!-- 题目排序（只在乱序的时候生效） -->
+		<result column="sort" property="sort"/>
+		<!-- 得分 -->
+		<result column="score" property="score"/>
+		<!-- 填空，主观题答案 -->
+		<result column="answer" property="answer"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,answered,qu_id,answer_id,examRecord_id,is_right,user_id,sort,score,answer
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.answered != null">
+			and answered = #{query.answered}
+		</if>
+		<if test="query.quId != null and query.quId!= ''">
+			and qu_id = #{query.quId}
+		</if>
+		<if test="query.answerId != null and query.answerId!= ''">
+			and answer_id = #{query.answerId}
+		</if>
+		<if test="query.examRecordId != null and query.examRecordId!= ''">
+			and examRecord_id = #{query.examRecordId}
+		</if>
+		<if test="query.isRight != null">
+			and is_right = #{query.isRight}
+		</if>
+		<if test="query.userId != null and query.userId!= ''">
+			and user_id = #{query.userId}
+		</if>
+		<if test="query.sort != null and query.sort!= ''">
+			and sort = #{query.sort}
+		</if>
+		<if test="query.score != null">
+			and score = #{query.score}
+		</if>
+		<if test="query.answer != null and query.answer!= ''">
+			and answer = #{query.answer}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.quIdFuzzy != null and query.quIdFuzzy != '' ">
+			and qu_id like concat('%', #{query.quIdFuzzy}, '%')
+		</if>
+		<if test="query.answerIdFuzzy != null and query.answerIdFuzzy != '' ">
+			and answer_id like concat('%', #{query.answerIdFuzzy}, '%')
+		</if>
+		<if test="query.examRecordIdFuzzy != null and query.examRecordIdFuzzy != '' ">
+			and examRecord_id like concat('%', #{query.examRecordIdFuzzy}, '%')
+		</if>
+		<if test="query.userIdFuzzy != null and query.userIdFuzzy != '' ">
+			and user_id like concat('%', #{query.userIdFuzzy}, '%')
+		</if>
+		<if test="query.sortFuzzy != null and query.sortFuzzy != '' ">
+			and sort like concat('%', #{query.sortFuzzy}, '%')
+		</if>
+		<if test="query.answerFuzzy != null and query.answerFuzzy != '' ">
+			and answer like concat('%', #{query.answerFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM user_answer
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM user_answer
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.UserAnswer">
+
+		INSERT INTO user_answer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.answered != null">
+				answered,
+			</if>
+			<if test="bean.quId != null">
+				qu_id,
+			</if>
+			<if test="bean.answerId != null">
+				answer_id,
+			</if>
+			<if test="bean.examRecordId != null">
+				examRecord_id,
+			</if>
+			<if test="bean.isRight != null">
+				is_right,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.sort != null">
+				sort,
+			</if>
+			<if test="bean.score != null">
+				score,
+			</if>
+			<if test="bean.answer != null">
+				answer,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.answered != null">
+				#{bean.answered},
+			</if>
+			<if test="bean.quId != null">
+				#{bean.quId},
+			</if>
+			<if test="bean.answerId != null">
+				#{bean.answerId},
+			</if>
+			<if test="bean.examRecordId != null">
+				#{bean.examRecordId},
+			</if>
+			<if test="bean.isRight != null">
+				#{bean.isRight},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.sort != null">
+				#{bean.sort},
+			</if>
+			<if test="bean.score != null">
+				#{bean.score},
+			</if>
+			<if test="bean.answer != null">
+				#{bean.answer},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.UserAnswer">
+		INSERT INTO user_answer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.answered != null">
+				answered,
+			</if>
+			<if test="bean.quId != null">
+				qu_id,
+			</if>
+			<if test="bean.answerId != null">
+				answer_id,
+			</if>
+			<if test="bean.examRecordId != null">
+				examRecord_id,
+			</if>
+			<if test="bean.isRight != null">
+				is_right,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.sort != null">
+				sort,
+			</if>
+			<if test="bean.score != null">
+				score,
+			</if>
+			<if test="bean.answer != null">
+				answer,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.answered != null">
+				#{bean.answered},
+			</if>
+			<if test="bean.quId != null">
+				#{bean.quId},
+			</if>
+			<if test="bean.answerId != null">
+				#{bean.answerId},
+			</if>
+			<if test="bean.examRecordId != null">
+				#{bean.examRecordId},
+			</if>
+			<if test="bean.isRight != null">
+				#{bean.isRight},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.sort != null">
+				#{bean.sort},
+			</if>
+			<if test="bean.score != null">
+				#{bean.score},
+			</if>
+			<if test="bean.answer != null">
+				#{bean.answer},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.answered != null">
+				answered= VALUES(answered),
+			</if>
+			<if test="bean.quId != null">
+				qu_id= VALUES(qu_id),
+			</if>
+			<if test="bean.answerId != null">
+				answer_id= VALUES(answer_id),
+			</if>
+			<if test="bean.examRecordId != null">
+				examRecord_id= VALUES(examRecord_id),
+			</if>
+			<if test="bean.isRight != null">
+				is_right= VALUES(is_right),
+			</if>
+			<if test="bean.userId != null">
+				user_id= VALUES(user_id),
+			</if>
+			<if test="bean.sort != null">
+				sort= VALUES(sort),
+			</if>
+			<if test="bean.score != null">
+				score= VALUES(score),
+			</if>
+			<if test="bean.answer != null">
+				answer= VALUES(answer),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.UserAnswer">
+		INSERT INTO user_answer(id,answered,qu_id,answer_id,examRecord_id,is_right,user_id,sort,score,answer)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.answered},#{item.quId},#{item.answerId},#{item.examRecordId},#{item.isRight},#{item.userId},#{item.sort},#{item.score},#{item.answer})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.UserAnswer">
+		INSERT INTO 
+		user_answer(id,answered,qu_id,answer_id,examRecord_id,is_right,user_id,sort,score,answer)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.answered},#{item.quId},#{item.answerId},#{item.examRecordId},#{item.isRight},#{item.userId},#{item.sort},#{item.score},#{item.answer})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),answered= VALUES(answered),qu_id= VALUES(qu_id),answer_id= VALUES(answer_id),examRecord_id= VALUES(examRecord_id),is_right= VALUES(is_right),user_id= VALUES(user_id),sort= VALUES(sort),score= VALUES(score),answer= VALUES(answer)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from user_answer where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.UserAnswer">
+		update user_answer
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.answered != null">
+				answered = #{bean.answered},
+			</if>
+			<if test="bean.quId != null">
+				qu_id = #{bean.quId},
+			</if>
+			<if test="bean.answerId != null">
+				answer_id = #{bean.answerId},
+			</if>
+			<if test="bean.examRecordId != null">
+				examRecord_id = #{bean.examRecordId},
+			</if>
+			<if test="bean.isRight != null">
+				is_right = #{bean.isRight},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.sort != null">
+				sort = #{bean.sort},
+			</if>
+			<if test="bean.score != null">
+				score = #{bean.score},
+			</if>
+			<if test="bean.answer != null">
+				answer = #{bean.answer},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from user_answer where id=#{id}
+	</delete>
+</mapper>
+

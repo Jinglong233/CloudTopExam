@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.PaperMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.Paper">
+		<!-- 试卷ID -->
+		<id column="id" property="id"/>
+		<!-- 关联学科ID -->
+		<result column="subject_id" property="subjectId"/>
+		<!-- 试卷标题 -->
+		<result column="title" property="title"/>
+		<!-- 所属部门（专业）编码 -->
+		<result column="dept_code" property="deptCode"/>
+		<!-- 组卷方式0:题库抽取1:指定选题 其余预留 -->
+		<result column="join_type" property="joinType"/>
+		<!-- 题目总数 -->
+		<result column="qu_count" property="quCount"/>
+		<!-- 试卷总分 -->
+		<result column="total_count" property="totalCount"/>
+		<!-- 创建时间 -->
+		<result column="create_time" property="createTime"/>
+		<!-- 创建者 -->
+		<result column="create_by" property="createBy"/>
+		<!-- 更新时间 -->
+		<result column="update_time" property="updateTime"/>
+		<!-- 更新者 -->
+		<result column="update_by" property="updateBy"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,subject_id,title,dept_code,join_type,qu_count,total_count,create_time,create_by,update_time,update_by
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.subjectId != null and query.subjectId!= ''">
+			and subject_id = #{query.subjectId}
+		</if>
+		<if test="query.title != null and query.title!= ''">
+			and title = #{query.title}
+		</if>
+		<if test="query.deptCode != null and query.deptCode!= ''">
+			and dept_code = #{query.deptCode}
+		</if>
+		<if test="query.joinType != null">
+			and join_type = #{query.joinType}
+		</if>
+		<if test="query.quCount != null">
+			and qu_count = #{query.quCount}
+		</if>
+		<if test="query.totalCount != null">
+			and total_count = #{query.totalCount}
+		</if>
+		<if test="query.createTime != null">
+			and create_time = #{query.createTime}
+		</if>
+		<if test="query.createBy != null and query.createBy!= ''">
+			and create_by = #{query.createBy}
+		</if>
+		<if test="query.updateTime != null">
+			and update_time = #{query.updateTime}
+		</if>
+		<if test="query.updateBy != null and query.updateBy!= ''">
+			and update_by = #{query.updateBy}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.subjectIdFuzzy != null and query.subjectIdFuzzy != '' ">
+			and subject_id like concat('%', #{query.subjectIdFuzzy}, '%')
+		</if>
+		<if test="query.titleFuzzy != null and query.titleFuzzy != '' ">
+			and title like concat('%', #{query.titleFuzzy}, '%')
+		</if>
+		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != '' ">
+			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != '' ">
+			<![CDATA[ and create_time < data_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.createByFuzzy != null and query.createByFuzzy != '' ">
+			and create_by like concat('%', #{query.createByFuzzy}, '%')
+		</if>
+		<if test="query.updateTimeStart != null and query.updateTimeStart != '' ">
+			<![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.updateTimeEnd != null and query.updateTimeEnd != '' ">
+			<![CDATA[ and update_time < data_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
+			and update_by like concat('%', #{query.updateByFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM paper
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM paper
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.Paper">
+
+		INSERT INTO paper
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.joinType != null">
+				join_type,
+			</if>
+			<if test="bean.quCount != null">
+				qu_count,
+			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.joinType != null">
+				#{bean.joinType},
+			</if>
+			<if test="bean.quCount != null">
+				#{bean.quCount},
+			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.Paper">
+		INSERT INTO paper
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id,
+			</if>
+			<if test="bean.title != null">
+				title,
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code,
+			</if>
+			<if test="bean.joinType != null">
+				join_type,
+			</if>
+			<if test="bean.quCount != null">
+				qu_count,
+			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createBy != null">
+				create_by,
+			</if>
+			<if test="bean.updateTime != null">
+				update_time,
+			</if>
+			<if test="bean.updateBy != null">
+				update_by,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.subjectId != null">
+				#{bean.subjectId},
+			</if>
+			<if test="bean.title != null">
+				#{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				#{bean.deptCode},
+			</if>
+			<if test="bean.joinType != null">
+				#{bean.joinType},
+			</if>
+			<if test="bean.quCount != null">
+				#{bean.quCount},
+			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				#{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				#{bean.updateBy},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.subjectId != null">
+				subject_id= VALUES(subject_id),
+			</if>
+			<if test="bean.title != null">
+				title= VALUES(title),
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code= VALUES(dept_code),
+			</if>
+			<if test="bean.joinType != null">
+				join_type= VALUES(join_type),
+			</if>
+			<if test="bean.quCount != null">
+				qu_count= VALUES(qu_count),
+			</if>
+			<if test="bean.totalCount != null">
+				total_count= VALUES(total_count),
+			</if>
+			<if test="bean.createTime != null">
+				create_time= VALUES(create_time),
+			</if>
+			<if test="bean.createBy != null">
+				create_by= VALUES(create_by),
+			</if>
+			<if test="bean.updateTime != null">
+				update_time= VALUES(update_time),
+			</if>
+			<if test="bean.updateBy != null">
+				update_by= VALUES(update_by),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Paper">
+		INSERT INTO paper(id,subject_id,title,dept_code,join_type,qu_count,total_count,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.subjectId},#{item.title},#{item.deptCode},#{item.joinType},#{item.quCount},#{item.totalCount},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Paper">
+		INSERT INTO 
+		paper(id,subject_id,title,dept_code,join_type,qu_count,total_count,create_time,create_by,update_time,update_by)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.subjectId},#{item.title},#{item.deptCode},#{item.joinType},#{item.quCount},#{item.totalCount},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),subject_id= VALUES(subject_id),title= VALUES(title),dept_code= VALUES(dept_code),join_type= VALUES(join_type),qu_count= VALUES(qu_count),total_count= VALUES(total_count),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from paper where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.Paper">
+		update paper
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.subjectId != null">
+				subject_id = #{bean.subjectId},
+			</if>
+			<if test="bean.title != null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.deptCode != null">
+				dept_code = #{bean.deptCode},
+			</if>
+			<if test="bean.joinType != null">
+				join_type = #{bean.joinType},
+			</if>
+			<if test="bean.quCount != null">
+				qu_count = #{bean.quCount},
+			</if>
+			<if test="bean.totalCount != null">
+				total_count = #{bean.totalCount},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createBy != null">
+				create_by = #{bean.createBy},
+			</if>
+			<if test="bean.updateTime != null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.updateBy != null">
+				update_by = #{bean.updateBy},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from paper where id=#{id}
+	</delete>
+</mapper>
+

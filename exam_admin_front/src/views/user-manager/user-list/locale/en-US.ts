@@ -1,0 +1,36 @@
+export default {
+  'menu.userManager.userList': 'User List',
+
+  'userList.form.status': 'Status',
+  'userList.form.status.online': 'Online',
+  'userList.form.status.offline': 'Offline',
+  'userList.form.search': 'Search',
+  'userList.form.reset': 'Reset',
+  'userList.form.selectDefault': 'All',
+  'userList.operation.create': 'Create',
+  'userList.operation.import': 'Import Batch',
+  'userList.operation.download': 'Download',
+  'userList.operation.refresh': 'Refresh',
+  'userList.operation.density': 'Density',
+  'userList.operation.derive': 'Export',
+
+  'userList.form.placeholder.userName': 'Enter Username',
+  'userList.form.placeholder.phone': 'Enter Phone',
+  'userList.form.placeholder.roles': 'Select Roles',
+  'userList.form.placeholder.state': 'Select Status',
+
+  // columns
+  'userList.columns.id': 'Id',
+  'userList.columns.userName': 'Username',
+  'userList.columns.avatar': 'Avatar',
+  'userList.columns.realName': 'Real Name',
+  'userList.columns.sex': 'Gender',
+  'userList.columns.deptText': 'Department',
+  'userList.columns.phone': 'Phone',
+  'userList.columns.option': 'Action',
+  'userList.columns.state': 'Status',
+  'userList.columns.status.0': 'Active',
+  'userList.columns.status.1': 'Hidden',
+  'userList.columns.view': 'View',
+  'userList.columns.delete': 'Delete',
+};

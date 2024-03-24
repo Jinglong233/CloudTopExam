@@ -1,0 +1,116 @@
+package com.jl.project.entity.dto;
+
+import com.jl.project.entity.po.QuAnswer;
+
+import java.util.List;
+
+/**
+ * 添加题目和选项DTO
+ */
+public class AddQuAndAnswerDTO {
+
+    /**
+     * 所属题库的ID
+     */
+    private String repoId;
+
+    /**
+     * 关联题库标题
+     */
+    private String repoText;
+
+    /**
+     * 题目内容
+     */
+    private String content;
+
+    /**
+     * 题目图片
+     */
+    private String image;
+
+    /**
+     * 题目难度0:简单1:困难
+     */
+    private Integer level;
+
+    /**
+     * 题目分析
+     */
+    private String analysis;
+
+
+    /**
+     * 题型
+     */
+    private Integer quType;
+
+    /**
+     * 选项列表
+     */
+    private List<QuAnswer> quAnswerList;
+
+    public String getRepoId() {
+        return repoId;
+    }
+
+    public void setRepoId(String repoId) {
+        this.repoId = repoId;
+    }
+
+    public String getRepoText() {
+        return repoText;
+    }
+
+    public void setRepoText(String repoText) {
+        this.repoText = repoText;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public String getAnalysis() {
+        return analysis;
+    }
+
+    public void setAnalysis(String analysis) {
+        this.analysis = analysis;
+    }
+
+    public Integer getQuType() {
+        return quType;
+    }
+
+    public void setQuType(Integer quType) {
+        this.quType = quType;
+    }
+
+    public List<QuAnswer> getQuAnswerList() {
+        return quAnswerList;
+    }
+
+    public void setQuAnswerList(List<QuAnswer> quAnswerList) {
+        this.quAnswerList = quAnswerList;
+    }
+}

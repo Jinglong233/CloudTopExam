@@ -1,0 +1,15 @@
+export default {
+  'menu.user.info': 'User Information',
+  'userInfo.editUserInfo': 'Edit Information',
+  'userInfo.tab.title.overview': 'Overview',
+  'userInfo.tab.title.project': 'Project',
+  'userSetting.label.class': 'My Class',
+  'userInfo.title.latestActivity': 'Latest Activity',
+  'userInfo.title.latestNotification': 'Latest Notifications',
+  'userSetting.label.myExam': 'My Published Exams',
+  'userInfo.showMore': 'Show More',
+  'userInfo.viewAll': 'View All',
+  'userInfo.nodata': 'No Data Available',
+  'userInfo.visits.unit': 'Visits',
+  'userInfo.visits.lastMonth': 'Last Month Visits',
+};

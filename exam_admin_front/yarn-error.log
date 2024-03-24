@@ -1,0 +1,136 @@
+Arguments: 
+  D:\node-v18.12.1-win-x64\node.exe D:\node-v18.12.1-win-x64\node_modules\yarn\bin\yarn.js install
+
+PATH: 
+  D:\python\Scripts\;D:\python\;D:\Xftp 6\;D:\Xshell 6\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;D:\Git\cmd;D:\JDK8\bin;D:\Xshell 7\;D:\Xftp 7\;D:\texlive\2021\bin\win32;D:\MinGW\x86_64-8.1.0-release-win32-seh-rt_v6-rev0\mingw64\bin;C:\Program Files\Azure Data Studio\bin;D:\nodejs\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\150\DTS\Binn\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\nodejs_16.20.1\;D:\TortoiseSVN\bin;D:\微信web开发者工具\dll;D:\MySQL\MySQL Server 8.0\bin;D:\MySQL\MySQL Server 5.7\bin;D:\node-v18.12.1-win-x64\node_modules\npm;C:\Users\huawei\AppData\Local\Microsoft;D:\CLion 2019.3.4\bin;C:\Program Files\Azure Data Studio\bin;D:\PyCharm Community Edition 2021.3.3\bin;D:\MyBlog\MyBlog\node_modules\.bin;D:\IDEA\IntelliJ IDEA 2022.3\bin;;D:\WebStorm 2022.3.4\bin;;C:\Users\huawei\AppData\Local\Microsoft\WindowsApps;D:\DETONG_DEV\JDK\bin;D:\node-v18.12.1-win-x64;C:\Users\huawei\AppData\Roaming\npm;D:\Microsoft VS Code\bin;D:\apache-maven-3.9.0-bin\apache-maven-3.9.0\bin;D:\ffmpeg-master-latest-win64-gpl\bin;D:\JDK8\bin;
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.12.1
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: connect ETIMEDOUT 163.181.81.95:443
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1300:16)
+
+npm manifest: 
+  {
+    "name": "arco-design-pro-vue",
+    "description": "Arco Design Pro for Vue",
+    "version": "1.0.0",
+    "private": true,
+    "author": "ArcoDesign Team",
+    "license": "MIT",
+    "scripts": {
+      "dev": "vite --config ./config/vite.config.dev.ts",
+      "build": "vue-tsc --noEmit && vite build --config ./config/vite.config.prod.ts",
+      "report": "cross-env REPORT=true npm run build",
+      "preview": "npm run build && vite preview --host",
+      "type:check": "vue-tsc --noEmit --skipLibCheck",
+      "lint-staged": "npx lint-staged",
+      "prepare": "husky install"
+    },
+    "lint-staged": {
+      "*.{js,ts,jsx,tsx}": [
+        "prettier --write",
+        "eslint --fix"
+      ],
+      "*.vue": [
+        "stylelint --fix",
+        "prettier --write",
+        "eslint --fix"
+      ],
+      "*.{less,css}": [
+        "stylelint --fix",
+        "prettier --write"
+      ]
+    },
+    "dependencies": {
+      "@arco-design/web-vue": "^2.44.7",
+      "@icon-park/vue-next": "^1.4.2",
+      "@umijs/openapi": "^1.9.1",
+      "@vueuse/core": "^9.3.0",
+      "@wangeditor/editor": "^5.1.23",
+      "@wangeditor/editor-for-vue": "^5.1.12",
+      "@wangeditor/plugin-formula": "^1.0.11",
+      "arco-design-pro-vue": "^2.7.2",
+      "axios": "^0.24.0",
+      "dayjs": "^1.11.5",
+      "echarts": "^5.4.0",
+      "katex": "^0.16.9",
+      "lodash": "^4.17.21",
+      "mitt": "^3.0.0",
+      "nprogress": "^0.2.0",
+      "pinia": "^2.0.23",
+      "query-string": "^8.0.3",
+      "sortablejs": "^1.15.0",
+      "vue": "^3.2.40",
+      "vue-echarts": "^6.2.3",
+      "vue-i18n": "^9.2.2",
+      "vue-image-crop-upload": "^3.0.3",
+      "vue-plugin-hiprint": "^0.0.56",
+      "vue-router": "^4.0.14"
+    },
+    "devDependencies": {
+      "@arco-plugins/vite-vue": "^1.4.5",
+      "@commitlint/cli": "^17.1.2",
+      "@commitlint/config-conventional": "^17.1.0",
+      "@types/lodash": "^4.14.186",
+      "@types/queryMyCreateExamListjs": "^1.0.7",
+      "@types/nprogress": "^0.2.0",
+      "@types/sortablejs": "^1.15.0",
+      "@typescript-eslint/eslint-plugin": "^5.40.0",
+      "@typescript-eslint/parser": "^5.40.0",
+      "@vitejs/plugin-vue": "^3.1.2",
+      "@vitejs/plugin-vue-jsx": "^2.0.1",
+      "@vue/babel-plugin-jsx": "^1.1.1",
+      "consola": "^2.15.3",
+      "cross-env": "^7.0.3",
+      "eslint": "^8.25.0",
+      "eslint-config-airbnb-base": "^15.0.0",
+      "eslint-config-prettier": "^8.5.0",
+      "eslint-import-resolver-typescript": "^3.5.1",
+      "eslint-plugin-import": "^2.26.0",
+      "eslint-plugin-prettier": "^4.2.1",
+      "eslint-plugin-vue": "^9.6.0",
+      "husky": "^8.0.1",
+      "less": "^4.1.3",
+      "lint-staged": "^13.0.3",
+      "postcss-html": "^1.5.0",
+      "prettier": "^2.7.1",
+      "rollup": "^3.9.1",
+      "rollup-plugin-visualizer": "^5.8.2",
+      "stylelint": "^14.13.0",
+      "stylelint-config-prettier": "^9.0.3",
+      "stylelint-config-rational-order": "^0.1.2",
+      "stylelint-config-recommended-vue": "^1.4.0",
+      "stylelint-config-standard": "^29.0.0",
+      "stylelint-order": "^5.0.0",
+      "typescript": "^4.8.4",
+      "unplugin-vue-components": "^0.24.1",
+      "vite": "^3.2.5",
+      "vite-plugin-compression": "^0.5.1",
+      "vite-plugin-eslint": "^1.8.1",
+      "vite-plugin-imagemin": "^0.6.1",
+      "vite-svg-loader": "^3.6.0",
+      "vue-tsc": "^1.0.14"
+    },
+    "engines": {
+      "node": ">=14.0.0"
+    },
+    "resolutions": {
+      "bin-wrapper": "npm:bin-wrapper-china",
+      "rollup": "^2.56.3",
+      "gifsicle": "5.2.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

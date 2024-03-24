@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.ExamRecordMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.ExamRecord">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 考试ID -->
+		<result column="exam_id" property="examId"/>
+		<!-- 用户ID -->
+		<result column="user_id" property="userId"/>
+		<!-- 是否通过0:否1:是 -->
+		<result column="passed" property="passed"/>
+		<!-- 得分 -->
+		<result column="total_score" property="totalScore"/>
+		<!-- 阅卷人 -->
+		<result column="review_user" property="reviewUser"/>
+		<!-- 阅卷评语 -->
+		<result column="review_msg" property="reviewMsg"/>
+		<!-- 异常状态 -->
+		<result column="ex_state" property="exState"/>
+		<!-- 异常信息 -->
+		<result column="ex_msg" property="exMsg"/>
+		<!-- 处理状态0:未处理1:已处理 -->
+		<result column="hand_state" property="handState"/>
+		<!-- 阅卷时间 -->
+		<result column="review_time" property="reviewTime"/>
+		<!-- 开始答卷时间 -->
+		<result column="start_time" property="startTime"/>
+		<!-- 结束答卷时间 -->
+		<result column="end_time" property="endTime"/>
+		<!-- 作答状态0:未作答1:未完成2:已交卷 -->
+		<result column="state" property="state"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,exam_id,user_id,passed,total_score,review_user,review_msg,ex_state,ex_msg,hand_state,review_time,start_time,end_time,state
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.examId != null and query.examId!= ''">
+			and exam_id = #{query.examId}
+		</if>
+		<if test="query.userId != null and query.userId!= ''">
+			and user_id = #{query.userId}
+		</if>
+		<if test="query.passed != null">
+			and passed = #{query.passed}
+		</if>
+		<if test="query.totalScore != null">
+			and total_score = #{query.totalScore}
+		</if>
+		<if test="query.reviewUser != null and query.reviewUser!= ''">
+			and review_user = #{query.reviewUser}
+		</if>
+		<if test="query.reviewMsg != null and query.reviewMsg!= ''">
+			and review_msg = #{query.reviewMsg}
+		</if>
+		<if test="query.exState != null">
+			and ex_state = #{query.exState}
+		</if>
+		<if test="query.exMsg != null and query.exMsg!= ''">
+			and ex_msg = #{query.exMsg}
+		</if>
+		<if test="query.handState != null">
+			and hand_state = #{query.handState}
+		</if>
+		<if test="query.reviewTime != null">
+			and review_time = #{query.reviewTime}
+		</if>
+		<if test="query.startTime != null">
+			and start_time = #{query.startTime}
+		</if>
+		<if test="query.endTime != null">
+			and end_time = #{query.endTime}
+		</if>
+		<if test="query.state != null">
+			and state = #{query.state}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.examIdFuzzy != null and query.examIdFuzzy != '' ">
+			and exam_id like concat('%', #{query.examIdFuzzy}, '%')
+		</if>
+		<if test="query.userIdFuzzy != null and query.userIdFuzzy != '' ">
+			and user_id like concat('%', #{query.userIdFuzzy}, '%')
+		</if>
+		<if test="query.reviewUserFuzzy != null and query.reviewUserFuzzy != '' ">
+			and review_user like concat('%', #{query.reviewUserFuzzy}, '%')
+		</if>
+		<if test="query.reviewMsgFuzzy != null and query.reviewMsgFuzzy != '' ">
+			and review_msg like concat('%', #{query.reviewMsgFuzzy}, '%')
+		</if>
+		<if test="query.exMsgFuzzy != null and query.exMsgFuzzy != '' ">
+			and ex_msg like concat('%', #{query.exMsgFuzzy}, '%')
+		</if>
+		<if test="query.reviewTimeStart != null and query.reviewTimeStart != '' ">
+			<![CDATA[ and review_time >= str_to_date(#{query.reviewTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.reviewTimeEnd != null and query.reviewTimeEnd != '' ">
+			<![CDATA[ and review_time < data_sub(str_to_date(#{query.reviewTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.startTimeStart != null and query.startTimeStart != '' ">
+			<![CDATA[ and start_time >= str_to_date(#{query.startTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.startTimeEnd != null and query.startTimeEnd != '' ">
+			<![CDATA[ and start_time < data_sub(str_to_date(#{query.startTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.endTimeStart != null and query.endTimeStart != '' ">
+			<![CDATA[ and end_time >= str_to_date(#{query.endTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.endTimeEnd != null and query.endTimeEnd != '' ">
+			<![CDATA[ and end_time < data_sub(str_to_date(#{query.endTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM exam_record
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM exam_record
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.ExamRecord">
+
+		INSERT INTO exam_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.examId != null">
+				exam_id,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.passed != null">
+				passed,
+			</if>
+			<if test="bean.totalScore != null">
+				total_score,
+			</if>
+			<if test="bean.reviewUser != null">
+				review_user,
+			</if>
+			<if test="bean.reviewMsg != null">
+				review_msg,
+			</if>
+			<if test="bean.exState != null">
+				ex_state,
+			</if>
+			<if test="bean.exMsg != null">
+				ex_msg,
+			</if>
+			<if test="bean.handState != null">
+				hand_state,
+			</if>
+			<if test="bean.reviewTime != null">
+				review_time,
+			</if>
+			<if test="bean.startTime != null">
+				start_time,
+			</if>
+			<if test="bean.endTime != null">
+				end_time,
+			</if>
+			<if test="bean.state != null">
+				state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.examId != null">
+				#{bean.examId},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.passed != null">
+				#{bean.passed},
+			</if>
+			<if test="bean.totalScore != null">
+				#{bean.totalScore},
+			</if>
+			<if test="bean.reviewUser != null">
+				#{bean.reviewUser},
+			</if>
+			<if test="bean.reviewMsg != null">
+				#{bean.reviewMsg},
+			</if>
+			<if test="bean.exState != null">
+				#{bean.exState},
+			</if>
+			<if test="bean.exMsg != null">
+				#{bean.exMsg},
+			</if>
+			<if test="bean.handState != null">
+				#{bean.handState},
+			</if>
+			<if test="bean.reviewTime != null">
+				#{bean.reviewTime},
+			</if>
+			<if test="bean.startTime != null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.state != null">
+				#{bean.state},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.ExamRecord">
+		INSERT INTO exam_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.examId != null">
+				exam_id,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.passed != null">
+				passed,
+			</if>
+			<if test="bean.totalScore != null">
+				total_score,
+			</if>
+			<if test="bean.reviewUser != null">
+				review_user,
+			</if>
+			<if test="bean.reviewMsg != null">
+				review_msg,
+			</if>
+			<if test="bean.exState != null">
+				ex_state,
+			</if>
+			<if test="bean.exMsg != null">
+				ex_msg,
+			</if>
+			<if test="bean.handState != null">
+				hand_state,
+			</if>
+			<if test="bean.reviewTime != null">
+				review_time,
+			</if>
+			<if test="bean.startTime != null">
+				start_time,
+			</if>
+			<if test="bean.endTime != null">
+				end_time,
+			</if>
+			<if test="bean.state != null">
+				state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.examId != null">
+				#{bean.examId},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.passed != null">
+				#{bean.passed},
+			</if>
+			<if test="bean.totalScore != null">
+				#{bean.totalScore},
+			</if>
+			<if test="bean.reviewUser != null">
+				#{bean.reviewUser},
+			</if>
+			<if test="bean.reviewMsg != null">
+				#{bean.reviewMsg},
+			</if>
+			<if test="bean.exState != null">
+				#{bean.exState},
+			</if>
+			<if test="bean.exMsg != null">
+				#{bean.exMsg},
+			</if>
+			<if test="bean.handState != null">
+				#{bean.handState},
+			</if>
+			<if test="bean.reviewTime != null">
+				#{bean.reviewTime},
+			</if>
+			<if test="bean.startTime != null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.state != null">
+				#{bean.state},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.examId != null">
+				exam_id= VALUES(exam_id),
+			</if>
+			<if test="bean.userId != null">
+				user_id= VALUES(user_id),
+			</if>
+			<if test="bean.passed != null">
+				passed= VALUES(passed),
+			</if>
+			<if test="bean.totalScore != null">
+				total_score= VALUES(total_score),
+			</if>
+			<if test="bean.reviewUser != null">
+				review_user= VALUES(review_user),
+			</if>
+			<if test="bean.reviewMsg != null">
+				review_msg= VALUES(review_msg),
+			</if>
+			<if test="bean.exState != null">
+				ex_state= VALUES(ex_state),
+			</if>
+			<if test="bean.exMsg != null">
+				ex_msg= VALUES(ex_msg),
+			</if>
+			<if test="bean.handState != null">
+				hand_state= VALUES(hand_state),
+			</if>
+			<if test="bean.reviewTime != null">
+				review_time= VALUES(review_time),
+			</if>
+			<if test="bean.startTime != null">
+				start_time= VALUES(start_time),
+			</if>
+			<if test="bean.endTime != null">
+				end_time= VALUES(end_time),
+			</if>
+			<if test="bean.state != null">
+				state= VALUES(state),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.ExamRecord">
+		INSERT INTO exam_record(id,exam_id,user_id,passed,total_score,review_user,review_msg,ex_state,ex_msg,hand_state,review_time,start_time,end_time,state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.examId},#{item.userId},#{item.passed},#{item.totalScore},#{item.reviewUser},#{item.reviewMsg},#{item.exState},#{item.exMsg},#{item.handState},#{item.reviewTime},#{item.startTime},#{item.endTime},#{item.state})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.ExamRecord">
+		INSERT INTO 
+		exam_record(id,exam_id,user_id,passed,total_score,review_user,review_msg,ex_state,ex_msg,hand_state,review_time,start_time,end_time,state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.examId},#{item.userId},#{item.passed},#{item.totalScore},#{item.reviewUser},#{item.reviewMsg},#{item.exState},#{item.exMsg},#{item.handState},#{item.reviewTime},#{item.startTime},#{item.endTime},#{item.state})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),exam_id= VALUES(exam_id),user_id= VALUES(user_id),passed= VALUES(passed),total_score= VALUES(total_score),review_user= VALUES(review_user),review_msg= VALUES(review_msg),ex_state= VALUES(ex_state),ex_msg= VALUES(ex_msg),hand_state= VALUES(hand_state),review_time= VALUES(review_time),start_time= VALUES(start_time),end_time= VALUES(end_time),state= VALUES(state)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from exam_record where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.ExamRecord">
+		update exam_record
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.examId != null">
+				exam_id = #{bean.examId},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.passed != null">
+				passed = #{bean.passed},
+			</if>
+			<if test="bean.totalScore != null">
+				total_score = #{bean.totalScore},
+			</if>
+			<if test="bean.reviewUser != null">
+				review_user = #{bean.reviewUser},
+			</if>
+			<if test="bean.reviewMsg != null">
+				review_msg = #{bean.reviewMsg},
+			</if>
+			<if test="bean.exState != null">
+				ex_state = #{bean.exState},
+			</if>
+			<if test="bean.exMsg != null">
+				ex_msg = #{bean.exMsg},
+			</if>
+			<if test="bean.handState != null">
+				hand_state = #{bean.handState},
+			</if>
+			<if test="bean.reviewTime != null">
+				review_time = #{bean.reviewTime},
+			</if>
+			<if test="bean.startTime != null">
+				start_time = #{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				end_time = #{bean.endTime},
+			</if>
+			<if test="bean.state != null">
+				state = #{bean.state},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from exam_record where id=#{id}
+	</delete>
+</mapper>
+

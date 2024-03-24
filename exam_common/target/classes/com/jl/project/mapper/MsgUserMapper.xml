@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.MsgUserMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.MsgUser">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 消息ID -->
+		<result column="msg_id" property="msgId"/>
+		<!-- 用户ID -->
+		<result column="user_id" property="userId"/>
+		<!-- 发送状态 -->
+		<result column="send_state" property="sendState"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,msg_id,user_id,send_state
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.msgId != null and query.msgId!= ''">
+			and msg_id = #{query.msgId}
+		</if>
+		<if test="query.userId != null and query.userId!= ''">
+			and user_id = #{query.userId}
+		</if>
+		<if test="query.sendState != null">
+			and send_state = #{query.sendState}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.msgIdFuzzy != null and query.msgIdFuzzy != '' ">
+			and msg_id like concat('%', #{query.msgIdFuzzy}, '%')
+		</if>
+		<if test="query.userIdFuzzy != null and query.userIdFuzzy != '' ">
+			and user_id like concat('%', #{query.userIdFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM msg_user
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM msg_user
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.MsgUser">
+
+		INSERT INTO msg_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.msgId != null">
+				msg_id,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.sendState != null">
+				send_state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.msgId != null">
+				#{bean.msgId},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.sendState != null">
+				#{bean.sendState},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.MsgUser">
+		INSERT INTO msg_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.msgId != null">
+				msg_id,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.sendState != null">
+				send_state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.msgId != null">
+				#{bean.msgId},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.sendState != null">
+				#{bean.sendState},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.msgId != null">
+				msg_id= VALUES(msg_id),
+			</if>
+			<if test="bean.userId != null">
+				user_id= VALUES(user_id),
+			</if>
+			<if test="bean.sendState != null">
+				send_state= VALUES(send_state),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.MsgUser">
+		INSERT INTO msg_user(id,msg_id,user_id,send_state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.msgId},#{item.userId},#{item.sendState})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.MsgUser">
+		INSERT INTO 
+		msg_user(id,msg_id,user_id,send_state)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.msgId},#{item.userId},#{item.sendState})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),msg_id= VALUES(msg_id),user_id= VALUES(user_id),send_state= VALUES(send_state)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from msg_user where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.MsgUser">
+		update msg_user
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.msgId != null">
+				msg_id = #{bean.msgId},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.sendState != null">
+				send_state = #{bean.sendState},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from msg_user where id=#{id}
+	</delete>
+</mapper>
+
