@@ -1,28 +1,35 @@
 package com.jl.project.entity.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * 题库中题型和难度分类
  */
+@Schema(description = "题库中题型和难度分类")
 public class ClassfiyByQuTypeVO {
 
     /**
      * 题库ID
      */
+    @Schema(description = "题库ID")
     private String repoId;
 
     /**
      * 题型
      */
+    @Schema(description = "题型")
     private Integer quType;
 
     /**
      * 简单题型数量
      */
+    @Schema(description = "简单题型数量")
     private Integer easyCount;
 
     /**
      * 困难题型数量
      */
+    @Schema(description = "困难题型数量")
     private Integer hardCount;
 
     public ClassfiyByQuTypeVO() {

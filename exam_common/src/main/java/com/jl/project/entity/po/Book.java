@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,25 +10,30 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "错题本")
 public class Book implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
 	/**
 	 * 题目ID
 	 */
+	@Schema(description = "题目ID")
 	private String quId;
 
 	/**
 	 * 答错次数
 	 */
+	@Schema(description = "答错次数")
 	private Integer wrongCount;
 
 	public void setId(String id) {

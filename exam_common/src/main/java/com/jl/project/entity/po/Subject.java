@@ -3,6 +3,7 @@ package com.jl.project.entity.po;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -15,40 +16,48 @@ import java.util.Date;
  * @author:jingLong
  * @date:2023/12/09
  */
+@Schema(description = "学科表")
 public class Subject implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 学科名称
 	 */
+	@Schema(description = "学科名称")
 	private String title;
 
 	/**
 	 * 描述/备注
 	 */
+	@Schema(description = "描述/备注")
 	private String description;
 
 	/**
 	 * 上层学科ID
 	 */
+	@Schema(description = "上层学科ID")
 	private String parentId;
 
 	/**
 	 * 所属部门（专业）
 	 */
+	@Schema(description = "所属部门（专业）")
 	private String deptCode;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -56,11 +65,13 @@ public class Subject implements Serializable{
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
@@ -68,6 +79,7 @@ public class Subject implements Serializable{
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
 	public void setId(String id) {

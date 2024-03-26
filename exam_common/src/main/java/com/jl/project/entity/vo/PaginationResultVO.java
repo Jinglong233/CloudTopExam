@@ -1,13 +1,38 @@
 package com.jl.project.entity.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 分页查询VO
+ *
+ * @param <T>
+ */
+@Schema(description = "分页查询VO")
 public class PaginationResultVO<T> {
+    /**
+     * 总数量
+     */
+    @Schema(description = "总数量")
     private Integer totalCount;
+    /**
+     * 页面大小
+     */
+    @Schema(description = "页面大小")
     private Integer pageSize;
+    /**
+     * 页码
+     */
+    @Schema(description = "页码")
     private Integer pageNo;
+    /**
+     * 总页数
+     */
+    @Schema(description = "总页数")
     private Integer pageTotal;
+    @Schema(hidden = true)
     private List<T> list = new ArrayList<T>();
 
     public PaginationResultVO(Integer totalCount, Integer pageSize, Integer pageNo, List<T> list) {

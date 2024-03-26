@@ -1,35 +1,45 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @Description:错题本查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "错题本查询对象")
 public class BookQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
+	@Schema(hidden = true)
 	private String userIdFuzzy;
 
 	/**
 	 * 题目ID
 	 */
+	@Schema(description = "题目ID")
 	private String quId;
 
+	@Schema(hidden = true)
 	private String quIdFuzzy;
 
 	/**
 	 * 答错次数
 	 */
+	@Schema(description = "答错次数")
 	private Integer wrongCount;
 
 	public void setId(String id) {

@@ -1,56 +1,72 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @Description:题目答案表查询对象
  * @author:jingLong
  * @date:2023/11/27
  */
+@Schema(description = "题目答案表查询对象")
 public class QuAnswerQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 题目ID
 	 */
+	@Schema(description = "题目ID")
 	private String quId;
 
+	@Schema(hidden = true)
 	private String quIdFuzzy;
 
 	/**
 	 * 题目内容
 	 */
+	@Schema(description = "题目内容")
 	private String content;
 
+	@Schema(hidden = true)
 	private String contentFuzzy;
 
 	/**
 	 * 是否是答案0:不是1:是
 	 */
+	@Schema(description = "是否是答案0:不是1:是")
 	private Integer isRight;
 
 	/**
 	 * 选项分析
 	 */
+	@Schema(description = "选项分析")
 	private String analysis;
 
+	@Schema(hidden = true)
 	private String analysisFuzzy;
 
 	/**
 	 * 选项图片
 	 */
+	@Schema(description = "选项图片")
 	private String image;
 
+	@Schema(hidden = true)
 	private String imageFuzzy;
 
 	/**
 	 * 选项标签
 	 */
+	@Schema(description = "选项标签")
 	private String tag;
 
+	@Schema(hidden = true)
 	private String tagFuzzy;
 
 	public void setId(String id) {

@@ -1,31 +1,37 @@
 package com.jl.project.entity.dto;
 
 import com.jl.project.entity.po.ClassfiySelect;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
 /**
  * 随机抽取题目DTO
  */
+@Schema(description = "随机抽取题目DTO")
 public class RandomSelectQuDTO {
 
     /**
      * 题目排除列表
      */
+    @Schema(description = "题目排除列表")
     private List<String> excludes;
 
     /**
      * 题库ID
      */
+    @Schema(description = "题库ID")
     private String repoId;
 
     /**
      * 分类列表
      */
+    @Schema(description = "分类列表")
     private List<ClassfiySelect> levels;
     /**
      * 题型
      */
+    @Schema(description = "题型")
     private Integer quType;
 
     public String getRepoId() {

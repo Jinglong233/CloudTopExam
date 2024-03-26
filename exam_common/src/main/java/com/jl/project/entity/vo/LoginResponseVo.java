@@ -1,81 +1,100 @@
 package com.jl.project.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
+/**
+ * 用户登录VO
+ */
+@Schema(description = "用户登录VO")
 public class LoginResponseVo {
     /**
      * ID
      */
+    @Schema(description = "ID")
     private String id;
 
     /**
      * 用户名
      */
+    @Schema(description = "用户名")
     private String userName;
 
     /**
      * 头像
      */
+    @Schema(description = "头像")
     private String avatar;
 
     /**
      * 邮箱
      */
+    @Schema(description = "邮箱")
     private String email;
 
     /**
      * 部门编号
      */
+    @Schema(description = "部门编号")
     private String deptCode;
 
     /**
      * 部门名称
      */
+    @Schema(description = "部门名称")
     private String deptText;
 
     /**
      * 状态0:正常1:禁用
      */
+    @Schema(description = "状态0:正常1:禁用")
     private Integer state;
 
     /**
      * 性别0:女1:男
      */
+    @Schema(description = "性别0:女1:男")
     private Integer sex;
 
     /**
      * 手机
      */
+    @Schema(description = "手机")
     private String phone;
 
     /**
      * 密码
      */
+    @Schema(description = "密码")
     private String password;
 
 
     /**
      * 真实姓名
      */
+    @Schema(description = "真实姓名")
     private String realName;
 
     /**
      * 角色
      */
+    @Schema(description = "角色")
     private String role;
 
     /**
      * 创建时间
      */
+    @Schema(description = "创建时间")
     private Date createTime;
 
 
     /**
      * token
      */
+    @Schema(description = "token")
     private String token;
 
     public String getId() {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
@@ -13,40 +14,48 @@ import com.jl.project.utils.DateUtils;
  * @author:jingLong
  * @date:2023/11/23
  */
+@Schema(description = "部门表")
 public class Department implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 上层部门code
 	 */
+	@Schema(description = "上层部门code")
 	private String parentCode;
 
 	/**
 	 * 部门编码
 	 */
+	@Schema(description = "部门编码")
 	private String deptCode;
 
 	/**
 	 * 部门层级
 	 */
+	@Schema(description = "部门层级")
 	private Integer deptLevel;
 
 	/**
 	 * 部门类型（预留）
 	 */
+	@Schema(description = "部门类型（预留）")
 	private String deptType;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptName;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -54,11 +63,13 @@ public class Department implements Serializable{
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
@@ -66,16 +77,19 @@ public class Department implements Serializable{
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
 	/**
 	 * 备注
 	 */
+	@Schema(description = "备注")
 	private String remark;
 
 	/**
 	 * 排序
 	 */
+	@Schema(description = "排序")
 	private Integer sort;
 
 	public void setId(String id) {

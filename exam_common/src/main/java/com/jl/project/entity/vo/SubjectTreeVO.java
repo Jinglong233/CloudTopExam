@@ -1,63 +1,81 @@
 package com.jl.project.entity.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 import java.util.List;
 
+
+/**
+ * 部门树
+ */
+@Schema(description = "部门树")
 public class SubjectTreeVO {
     /**
      * ID
      */
+    @Schema(description = "ID")
     private String id;
 
     /**
      * 父Id
      */
+    @Schema(description = "父Id")
     private String parentId;
 
 
     /**
      * 学科名称
      */
+    @Schema(description = "学科名称")
     private String title;
 
     /**
      * 所属部门
      */
+    @Schema(description = "所属部门")
     private String deptCode;
 
     /**
      * 所属名称
      */
+    @Schema(description = "所属名称")
     private String deptText;
 
     /**
      * 创建时间
      */
+    @Schema(description = "创建时间")
     private Date createTime;
 
     /**
      * 创建者
      */
+    @Schema(description = "创建者")
     private String createBy;
 
     /**
      * 更新时间
      */
+    @Schema(description = "更新时间")
     private Date updateTime;
 
     /**
      * 更新者
      */
+    @Schema(description = "更新者")
     private String updateBy;
 
     /**
      * 备注
      */
+    @Schema(description = "备注")
     private String description;
 
     /**
      * 子列表
      */
+    @Schema(description = "子列表")
     private List<SubjectTreeVO> children;
 
     public String getId() {

@@ -22,6 +22,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
     }
 
 
+    //定义排除swagger访问的路径配置
+    String[] swaggerExcludes = new String[]{"/swagger-ui.html", "/swagger-resources/**", "/webjars/**","/v3/api-docs/**"};
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // todo 拦截器有问题
@@ -29,7 +32,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**", "/api/student/login")
                 .excludePathPatterns("/user/register", "/user/login")
                 .excludePathPatterns("/**.html")
-                .excludePathPatterns("/v3/api-docs/**");
+                .excludePathPatterns(swaggerExcludes);
 
     }
 

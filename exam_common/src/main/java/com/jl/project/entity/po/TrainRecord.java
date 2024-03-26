@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,40 +10,48 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "训练详情记录表")
 public class TrainRecord implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 题目ID
 	 */
+	@Schema(description = "题目ID")
 	private String quId;
 
 	/**
 	 * 训练ID
 	 */
+	@Schema(description = "训练ID")
 	private String trainId;
 
 	/**
 	 * 回答是否正确
 	 */
+	@Schema(description = "回答是否正确")
 	private Integer isRight;
 
 	/**
 	 * 答案ID
 	 */
+	@Schema(description = "答案ID")
 	private String answerId;
 
 	/**
 	 * 是否回答0:未答1:已答
 	 */
+	@Schema(description = "是否回答0:未答1:已答")
 	private Integer answered;
 
 	/**
 	 * 主观题的答案
 	 */
+	@Schema(description = "主观题的答案")
 	private String answer;
 
 	public void setId(String id) {

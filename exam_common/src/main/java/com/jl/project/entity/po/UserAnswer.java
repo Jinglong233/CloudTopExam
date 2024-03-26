@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,55 +10,66 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2024/03/16
  */
+@Schema(description = "用户答案表")
 public class UserAnswer implements Serializable{
 	/**
 	 * id
 	 */
+	@Schema(description = "id")
 	private String id;
 
 	/**
 	 * 是否已答0:未答1:已答
 	 */
+	@Schema(description = "是否已答0:未答1:已答")
 	private Integer answered;
 
 	/**
 	 * 关联的题目Id
 	 */
+	@Schema(description = "关联的题目Id")
 	private String quId;
 
 	/**
 	 * 答案Id
 	 */
+	@Schema(description = "答案Id")
 	private String answerId;
 
 	/**
 	 * 所属记录Id
 	 */
+	@Schema(description = "所属记录Id")
 	private String examRecordId;
 
 	/**
 	 * 是否答对0:错1:对
 	 */
+	@Schema(description = "是否答对0:错1:对")
 	private Integer isRight;
 
 	/**
 	 * 用户id
 	 */
+	@Schema(description = "用户id")
 	private String userId;
 
 	/**
 	 * 题目排序（只在乱序的时候生效）
 	 */
+	@Schema(description = "题目排序（只在乱序的时候生效）")
 	private String sort;
 
 	/**
 	 * 得分
 	 */
+	@Schema(description = "得分")
 	private Integer score;
 
 	/**
 	 * 填空，主观题答案
 	 */
+	@Schema(description = "填空，主观题答案")
 	private String answer;
 
 	public void setId(String id) {

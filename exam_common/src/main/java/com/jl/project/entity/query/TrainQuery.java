@@ -1,57 +1,72 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @Description:训练表查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "训练表查询对象")
 public class TrainQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 题库ID
 	 */
+	@Schema(description = "题库ID")
 	private String repoId;
 
+	@Schema(hidden = true)
 	private String repoIdFuzzy;
 
 	/**
 	 * 回答数量
 	 */
+	@Schema(description = "回答数量")
 	private Integer answerCount;
 
 	/**
 	 * 正确数量
 	 */
+	@Schema(description = "正确数量")
 	private Integer rightCount;
 
 	/**
 	 * 训练者
 	 */
+	@Schema(description = "训练者")
 	private String userId;
 
+	@Schema(hidden = true)
 	private String userIdFuzzy;
 
 	/**
 	 * 训练模式
 	 */
+	@Schema(description = "训练模式")
 	private Integer mode;
 
 	/**
 	 * 训练进度
 	 */
+	@Schema(description = "训练进度")
 	private String percent;
 
+	@Schema(hidden = true)
 	private String percentFuzzy;
 
 	/**
 	 * 状态 0:未完成1:完成
 	 */
+	@Schema(description = "状态 0:未完成1:完成")
 	private Integer state;
 
 	public void setId(String id) {

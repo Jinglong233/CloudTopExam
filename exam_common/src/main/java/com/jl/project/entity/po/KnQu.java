@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,20 +10,24 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "题目知识点关联表")
 public class KnQu implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 知识点ID
 	 */
+	@Schema(description = "知识点ID")
 	private String knId;
 
 	/**
 	 * 题目ID
 	 */
+	@Schema(description = "题目ID")
 	private String quId;
 
 	public void setId(String id) {

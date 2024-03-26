@@ -1,35 +1,45 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @Description:用户消息关联表查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "用户消息关联表查询对象")
 public class MsgUserQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 消息ID
 	 */
+	@Schema(description = "消息ID")
 	private String msgId;
 
+	@Schema(hidden = true)
 	private String msgIdFuzzy;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
+	@Schema(hidden = true)
 	private String userIdFuzzy;
 
 	/**
 	 * 发送状态
 	 */
+	@Schema(description = "发送状态")
 	private Integer sendState;
 
 	public void setId(String id) {

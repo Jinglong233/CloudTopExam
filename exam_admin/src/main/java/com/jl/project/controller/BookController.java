@@ -4,6 +4,7 @@ import com.jl.project.entity.po.Book;
 import com.jl.project.entity.query.BookQuery;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.service.BookService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,12 +17,15 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Tag(name = "错题本Controller", description = "错题本Controller")
 @RestController
 @RequestMapping("/book")
 public class BookController extends ABaseController{
 
 	@Resource
 	private BookService bookService;
+
+
 
 	/**
 	 * 根据条件分页查询

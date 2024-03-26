@@ -1,84 +1,109 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:学科表查询对象
  * @author:jingLong
  * @date:2023/12/09
  */
+@Schema(description = "学科表查询对象")
 public class SubjectQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 学科名称
 	 */
+	@Schema(description = "学科名称")
 	private String title;
 
+	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 描述/备注
 	 */
+	@Schema(description = "描述/备注")
 	private String description;
 
+	@Schema(hidden = true)
 	private String descriptionFuzzy;
 
 	/**
 	 * 上层学科ID
 	 */
+	@Schema(description = "上层学科ID")
 	private String parentId;
 
+	@Schema(hidden = true)
 	private String parentIdFuzzy;
 
 	/**
 	 * 所属部门（专业）
 	 */
+	@Schema(description = "所属部门（专业）")
 	private String deptCode;
 
+	@Schema(hidden = true)
 	private String deptCodeFuzzy;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
+	@Schema(hidden = true)
 	private String deptTextFuzzy;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

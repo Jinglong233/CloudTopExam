@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,20 +10,24 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "消息模板表")
 public class Tmpl implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 模板标题
 	 */
+	@Schema(description = "模板标题")
 	private String title;
 
 	/**
 	 * 模板内容
 	 */
+	@Schema(description = "模板内容")
 	private String content;
 
 	public void setId(String id) {

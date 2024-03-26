@@ -1,14 +1,22 @@
 package com.jl.project.entity.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+/**
+ * 更新部门排序DTO
+ */
+@Schema(description = "更新部门排序DTO")
 public class UpdateDeptSortDTO {
     /**
      * 部门ID
      */
+    @Schema(description = "部门ID")
     String deptId;
 
     /**
      * 排序方式（1：上移 0：下移）
      */
+    @Schema(description = "排序方式（1：上移 0：下移）")
     Integer sort;
 
     public String getDeptId() {

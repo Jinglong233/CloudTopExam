@@ -1,142 +1,181 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:考试表查询对象
  * @author:jingLong
  * @date:2023/12/07
  */
+@Schema(description = "考试表查询对象")
 public class ExamQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 试卷ID
 	 */
+	@Schema(description = "试卷ID")
 	private String paperId;
 
+	@Schema(hidden = true)
 	private String paperIdFuzzy;
 
 	/**
 	 * 考试标题
 	 */
+	@Schema(description = "考试标题")
 	private String title;
 
+	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 考试部门编码
 	 */
+	@Schema(description = "考试部门编码")
 	private String deptCode;
 
+	@Schema(hidden = true)
 	private String deptCodeFuzzy;
 
 	/**
 	 * 考试部门名称
 	 */
+	@Schema(description = "考试部门名称")
 	private String deptText;
 
+	@Schema(hidden = true)
 	private String deptTextFuzzy;
 
 	/**
 	 * 考试开始时间
 	 */
+	@Schema(description = "考试开始时间")
 	private Date startTime;
 
+	@Schema(hidden = true)
 	private String startTimeStart;
 
+	@Schema(hidden = true)
 	private String startTimeEnd;
 
 	/**
 	 * 考试结束时间
 	 */
+	@Schema(description = "考试结束时间")
 	private Date endTime;
 
+	@Schema(hidden = true)
 	private String endTimeStart;
 
+	@Schema(hidden = true)
 	private String endTimeEnd;
 
 	/**
 	 * 考试状态 0:未开始1:已开始2:已结束
 	 */
+	@Schema(description = "考试状态 0:未开始1:已开始2:已结束")
 	private Integer statue;
 
 	/**
 	 * 开放权限 0:完全公开 1:指定学生
 	 */
+	@Schema(description = "开放权限 0:完全公开 1:指定学生")
 	private Integer openType;
 
 	/**
 	 * 考试时长
 	 */
+	@Schema(description = "考试时长")
 	private Integer duration;
 
 	/**
 	 * 感谢语
 	 */
+	@Schema(description = "感谢语")
 	private String thanks;
 
+	@Schema(hidden = true)
 	private String thanksFuzzy;
 
 	/**
 	 * 允许迟到时间
 	 */
+	@Schema(description = "允许迟到时间")
 	private Integer lateMax;
 
 	/**
 	 * 最少答题时间
 	 */
+	@Schema(description = "最少答题时间")
 	private Integer handMin;
 
 	/**
 	 * 结果显示类型（只显示分数/显示分数+答题详情/展示答题详情）
 	 */
+	@Schema(description = "结果显示类型（只显示分数/显示分数+答题详情/展示答题详情）")
 	private Integer resultType;
 
 	/**
 	 * 及格分数
 	 */
+	@Schema(description = "及格分数")
 	private Integer qualifyScore;
 
 	/**
 	 * 是否需要阅卷0:不需要1:需要
 	 */
+	@Schema(description = "是否需要阅卷0:不需要1:需要")
 	private Integer reviewQuire;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

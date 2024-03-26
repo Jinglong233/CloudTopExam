@@ -1,63 +1,82 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:知识点表查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "知识点表查询对象")
 public class KnQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 知识点内容
 	 */
+	@Schema(description = "知识点内容")
 	private String content;
 
+	@Schema(hidden = true)
 	private String contentFuzzy;
 
 	/**
 	 * 关联的学科的ID
 	 */
+	@Schema(description = "关联的学科的ID")
 	private String subjectId;
 
+	@Schema(hidden = true)
 	private String subjectIdFuzzy;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

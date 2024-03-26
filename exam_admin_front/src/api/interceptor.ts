@@ -2,6 +2,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 import { Message } from '@arco-design/web-vue';
 import { getToken } from '@/utils/auth';
+import router from '@/router';
 
 export interface HttpResponse<T = unknown> {
   status: string;
@@ -40,6 +41,11 @@ axios.interceptors.response.use(
       //   duration: 5 * 1000,
       // });
       return res;
+    }
+
+    if (res.code === 401) {
+      router.push({ name: 'login' });
+      return null;
     }
     Message.error({
       content: res.info || '请求出错',

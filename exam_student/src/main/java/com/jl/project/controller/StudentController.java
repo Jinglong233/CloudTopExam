@@ -7,6 +7,8 @@ import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.StudentService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,10 +16,11 @@ import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
- * @Description:管理用户Controller
+ * @Description:学生Controller
  * @author:jingLong
  * @date:2023/11/12
  */
+@Api(tags = "学生登录、登出相关")
 @RestController
 @RequestMapping("/student")
 public class StudentController extends ABaseController {
@@ -31,6 +34,7 @@ public class StudentController extends ABaseController {
      * @param user
      * @return
      */
+    @ApiOperation(value = "学生登录")
     @RequestMapping("login")
     public ResponseVO login(@RequestBody LoginQuery user) throws BusinessException {
         LoginResponseVo result = studentService.login(user);
@@ -42,6 +46,7 @@ public class StudentController extends ABaseController {
      *
      * @return
      */
+    @ApiOperation(value = "学生退出登录")
     @RequestMapping("logout")
     public ResponseVO logout() {
         Boolean result = studentService.logout();
@@ -53,6 +58,7 @@ public class StudentController extends ABaseController {
      *
      * @return
      */
+    @ApiOperation(value = "学生获取个人信息")
     @RequestMapping("info")
     public ResponseVO getLoginUserInfo() {
         User result = null;
@@ -67,6 +73,7 @@ public class StudentController extends ABaseController {
     /**
      * 新增（注册）
      */
+    @ApiOperation(value = "学生注册（预留）")
     @RequestMapping("register")
     public ResponseVO register(@RequestBody User bean) throws BusinessException {
         Boolean result = this.studentService.register(bean);
@@ -76,6 +83,7 @@ public class StudentController extends ABaseController {
     /**
      * 根据Id更新
      */
+    @ApiOperation(value = "学生更新个人信息")
     @RequestMapping("updateUserById")
     public ResponseVO updateUserById(@RequestBody UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = studentService.updateUserById(updateUserDTO);
@@ -85,6 +93,7 @@ public class StudentController extends ABaseController {
     /**
      * 根据Id删除
      */
+    @ApiOperation(value = "学生注销账户")
     @RequestMapping("deleteUserById")
     public ResponseVO deleteUserById(@RequestBody String id) throws BusinessException {
         Boolean result = studentService.deleteUserById(id);
@@ -96,6 +105,7 @@ public class StudentController extends ABaseController {
      *
      * @param file
      */
+    @ApiOperation(value = "学生头像上传")
     @PostMapping("/upload/avatar")
     public ResponseVO uploadAvatar(@RequestParam("file") MultipartFile file) {
         String result = null;
@@ -107,14 +117,6 @@ public class StudentController extends ABaseController {
         return getSuccessResponseVO(result);
     }
 
-    /**
-     * 根据Id查询
-     */
-
-    @RequestMapping("getUserById")
-    public ResponseVO getUserById(String id) {
-        return getSuccessResponseVO(this.studentService.getUserById(id));
-    }
 
 
 }

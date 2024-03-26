@@ -1,129 +1,166 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:用户表查询对象
  * @author:jingLong
  * @date:2023/12/04
  */
+@Schema(description = "用户表查询对象")
 public class UserQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 用户名
 	 */
+	@Schema(description = "用户名")
 	private String userName;
 
+	@Schema(hidden = true)
 	private String userNameFuzzy;
 
 	/**
 	 * 头像
 	 */
+	@Schema(description = "头像")
 	private String avatar;
 
+	@Schema(hidden = true)
 	private String avatarFuzzy;
 
 	/**
 	 * 邮箱
 	 */
+	@Schema(description = "邮箱")
 	private String email;
 
+	@Schema(hidden = true)
 	private String emailFuzzy;
 
 	/**
 	 * 部门编号
 	 */
+	@Schema(description = "部门编号")
 	private String deptCode;
 
+	@Schema(hidden = true)
 	private String deptCodeFuzzy;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
+	@Schema(hidden = true)
 	private String deptTextFuzzy;
 
 	/**
 	 * 状态0:正常1:禁用
 	 */
+	@Schema(description = "状态0:正常1:禁用")
 	private Integer state;
 
 	/**
 	 * 性别0:女1:男
 	 */
+	@Schema(description = "性别0:女1:男")
 	private Integer sex;
 
 	/**
 	 * 手机
 	 */
+	@Schema(description = "手机")
 	private String phone;
 
+	@Schema(hidden = true)
 	private String phoneFuzzy;
 
 	/**
 	 * 密码
 	 */
+	@Schema(description = "密码")
 	private String password;
 
+	@Schema(hidden = true)
 	private String passwordFuzzy;
 
 	/**
 	 * 盐值
 	 */
+	@Schema(description = "盐值")
 	private String salt;
 
+	@Schema(hidden = true)
 	private String saltFuzzy;
 
 	/**
 	 * 真实姓名
 	 */
+	@Schema(description = "真实姓名")
 	private String realName;
 
+	@Schema(hidden = true)
 	private String realNameFuzzy;
 
 	/**
 	 * 角色
 	 */
+	@Schema(description = "角色")
 	private String role;
 
+	@Schema(hidden = true)
 	private String roleFuzzy;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

@@ -1,116 +1,148 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:题库查询对象
  * @author:jingLong
  * @date:2023/12/04
  */
+@Schema(description = "题库查询对象")
 public class RepoQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 部门编码（专业）
 	 */
+	@Schema(description = "部门编码（专业）")
 	private String deptCode;
 
+	@Schema(hidden = true)
 	private String deptCodeFuzzy;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
+	@Schema(hidden = true)
 	private String deptTextFuzzy;
 
 	/**
 	 * 学科ID
 	 */
+	@Schema(description = "学科ID")
 	private String subjectId;
 
+	@Schema(hidden = true)
 	private String subjectIdFuzzy;
 
 	/**
 	 * 学科名称
 	 */
+	@Schema(description = "学科名称")
 	private String subjectText;
 
+	@Schema(hidden = true)
 	private String subjectTextFuzzy;
 
 	/**
 	 * 总题数
 	 */
+	@Schema(description = "总题数")
 	private Integer totalCount;
 
 	/**
 	 * 主观题数
 	 */
+	@Schema(description = "主观题数")
 	private Integer subCount;
 
 	/**
 	 * 客观题数
 	 */
+	@Schema(description = "客观题数")
 	private Integer objCount;
 
 	/**
 	 * 题库标题
 	 */
+	@Schema(description = "题库标题")
 	private String title;
 
+	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 是否用于考试
 	 */
+	@Schema(description = "是否用于考试")
 	private Integer isExam;
 
 	/**
 	 * 是否用于训练
 	 */
+	@Schema(description = "是否用于训练")
 	private Integer isTrain;
 
 	/**
 	 * 备注
 	 */
+	@Schema(description = "备注")
 	private String remark;
 
+	@Schema(hidden = true)
 	private String remarkFuzzy;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

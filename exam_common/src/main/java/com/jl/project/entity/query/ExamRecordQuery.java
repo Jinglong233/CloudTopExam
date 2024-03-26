@@ -1,104 +1,133 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:考试记录表查询对象
  * @author:jingLong
  * @date:2023/12/29
  */
+@Schema(description = "考试记录表查询对象")
 public class ExamRecordQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 考试ID
 	 */
+	@Schema(description = "考试ID")
 	private String examId;
 
+	@Schema(hidden = true)
 	private String examIdFuzzy;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
+	@Schema(hidden = true)
 	private String userIdFuzzy;
 
 	/**
 	 * 是否通过0:否1:是
 	 */
+	@Schema(description = "是否通过0:否1:是")
 	private Integer passed;
 
 	/**
 	 * 得分
 	 */
+	@Schema(description = "得分")
 	private Integer totalScore;
 
 	/**
 	 * 阅卷人
 	 */
+	@Schema(description = "阅卷人")
 	private String reviewUser;
 
+	@Schema(hidden = true)
 	private String reviewUserFuzzy;
 
 	/**
 	 * 阅卷评语
 	 */
+	@Schema(description = "阅卷评语")
 	private String reviewMsg;
 
+	@Schema(hidden = true)
 	private String reviewMsgFuzzy;
 
 	/**
 	 * 异常状态
 	 */
+	@Schema(description = "异常状态")
 	private Integer exState;
 
 	/**
 	 * 异常信息
 	 */
+	@Schema(description = "异常信息")
 	private String exMsg;
 
+	@Schema(hidden = true)
 	private String exMsgFuzzy;
 
 	/**
 	 * 处理状态0:未处理1:已处理
 	 */
+	@Schema(description = "处理状态0:未处理1:已处理")
 	private Integer handState;
 
 	/**
 	 * 阅卷时间
 	 */
+	@Schema(description = "阅卷时间")
 	private Date reviewTime;
 
+	@Schema(hidden = true)
 	private String reviewTimeStart;
 
+	@Schema(hidden = true)
 	private String reviewTimeEnd;
 
 	/**
 	 * 开始答卷时间
 	 */
+	@Schema(description = "开始答卷时间")
 	private Date startTime;
 
+	@Schema(hidden = true)
 	private String startTimeStart;
 
+	@Schema(hidden = true)
 	private String startTimeEnd;
 
 	/**
 	 * 结束答卷时间
 	 */
+	@Schema(description = "结束答卷时间")
 	private Date endTime;
 
+	@Schema(hidden = true)
 	private String endTimeStart;
 
+	@Schema(hidden = true)
 	private String endTimeEnd;
 
 	/**
 	 * 作答状态0:未作答1:未完成2:已交卷
 	 */
+	@Schema(description = "作答状态0:未作答1:未完成2:已交卷")
 	private Integer state;
 
 	public void setId(String id) {

@@ -1,13 +1,42 @@
 package com.jl.project.entity.query;
 
 import com.jl.project.enums.PageSize;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * 简单分页对象
+ */
+@Schema(description = "简单分页对象")
 public class SimplePage {
+    /**
+     * 页码
+     */
+    @Schema(description = "页码")
     private Integer pageNo;
+    /**
+     * 总数据量
+     */
+    @Schema(description = "总数据量")
     private Integer countTotal;
+    /**
+     * 页码大小
+     */
+    @Schema(description = "页码大小")
     private Integer pageSize;
+    /**
+     * 总页数
+     */
+    @Schema(description = "总页数")
     private Integer pageTotal;
+    /**
+     * 起始页
+     */
+    @Schema(description = "起始页")
     private Integer start;
+    /**
+     * 结束页
+     */
+    @Schema(description = "结束页")
     private Integer end;
 
     public SimplePage() {

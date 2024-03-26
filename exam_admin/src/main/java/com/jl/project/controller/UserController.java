@@ -8,6 +8,8 @@ import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +22,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/12
  */
+@Api(tags = "管理员管理用户")
 @RestController
 @RequestMapping("/user")
 public class UserController extends ABaseController {
@@ -33,6 +36,7 @@ public class UserController extends ABaseController {
      * @param user
      * @return
      */
+    @ApiOperation(value = "管理员/教师登录")
     @RequestMapping("login")
     public ResponseVO login(@RequestBody LoginQuery user) throws BusinessException {
         LoginResponseVo result = userService.login(user);
@@ -44,6 +48,7 @@ public class UserController extends ABaseController {
      *
      * @return
      */
+    @ApiOperation(value = "管理员/教师退出登录")
     @RequestMapping("logout")
     public ResponseVO logout() {
         Boolean result = userService.logout();
@@ -55,6 +60,7 @@ public class UserController extends ABaseController {
      *
      * @return
      */
+    @ApiOperation(value = "管理员/教师获取个人信息")
     @RequestMapping("info")
     public ResponseVO getLoginUserInfo() {
         User result = null;
@@ -69,6 +75,7 @@ public class UserController extends ABaseController {
     /**
      * 新增（注册）
      */
+    @ApiOperation(value = "管理员添加用户")
     @RequestMapping("register")
     public ResponseVO register(@RequestBody User bean) throws BusinessException {
         Boolean result = this.userService.register(bean);
@@ -81,6 +88,7 @@ public class UserController extends ABaseController {
      * @param query
      * @return
      */
+    @ApiOperation(value = "管理员获取部分人员列表")
     @RequestMapping("loadDeptUserList")
     public ResponseVO loadDeptUserList(@RequestBody UserQuery query) throws BusinessException {
         List<User> result = userService.loadDeptUserList(query);
@@ -90,6 +98,7 @@ public class UserController extends ABaseController {
     /**
      * 根据Id更新
      */
+    @ApiOperation(value = "管理员更新用户信息")
     @RequestMapping("updateUserById")
     public ResponseVO updateUserById(@RequestBody UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = userService.updateUserById(updateUserDTO);
@@ -99,6 +108,7 @@ public class UserController extends ABaseController {
     /**
      * 根据Id删除
      */
+    @ApiOperation(value = "管理员删除用户")
     @RequestMapping("deleteUserById")
     public ResponseVO deleteUserById(@RequestBody String id) throws BusinessException {
         Boolean result = userService.deleteUserById(id);
@@ -111,6 +121,7 @@ public class UserController extends ABaseController {
      *
      * @param file
      */
+    @ApiOperation(value = "管理员/教师上传头像")
     @PostMapping("/upload/avatar")
     public ResponseVO uploadAvatar(@RequestParam("file") MultipartFile file) throws BusinessException, IOException {
         String result = userService.uploadAvatar(file);
@@ -129,6 +140,7 @@ public class UserController extends ABaseController {
     /**
      * 批量新增
      */
+    @ApiOperation(value = "批量导入用户信息接口（预留）")
     @RequestMapping("addBatch")
     public ResponseVO addBatch(@RequestBody List<User> listBean) {
         return getSuccessResponseVO(this.userService.addBatch(listBean));
@@ -145,7 +157,7 @@ public class UserController extends ABaseController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation(value = "根据用户Id查询用户信息")
     @RequestMapping("getUserById")
     public ResponseVO getUserById(String id) {
         return getSuccessResponseVO(this.userService.getUserById(id));
@@ -154,10 +166,12 @@ public class UserController extends ABaseController {
 
     /**
      * 获取用户总数
+     *
      * @return
      */
+    @ApiOperation(value = "获取用户总数")
     @RequestMapping("userCount")
-    public ResponseVO getUserCount(@RequestBody UserQuery userQuery)throws BusinessException {
+    public ResponseVO getUserCount(@RequestBody UserQuery userQuery) throws BusinessException {
         Integer result = userService.getUserCount(userQuery);
         return getSuccessResponseVO(result);
     }

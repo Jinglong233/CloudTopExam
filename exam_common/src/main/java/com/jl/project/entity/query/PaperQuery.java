@@ -1,85 +1,109 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:试卷表查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "试卷表查询对象")
 public class PaperQuery extends BaseQuery{
 	/**
 	 * 试卷ID
 	 */
+	@Schema(description = "试卷ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 关联学科ID
 	 */
+	@Schema(description = "关联学科ID")
 	private String subjectId;
 
+	@Schema(hidden = true)
 	private String subjectIdFuzzy;
 
 	/**
 	 * 试卷标题
 	 */
+	@Schema(description = "试卷标题")
 	private String title;
 
+	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 所属部门（专业）编码
 	 */
+	@Schema(description = "所属部门（专业）编码")
 	private String deptCode;
 
+	@Schema(hidden = true)
 	private String deptCodeFuzzy;
 
 	/**
 	 * 组卷方式0:题库抽取1:指定选题 其余预留
 	 */
+	@Schema(description = "组卷方式0:题库抽取1:指定选题 其余预留")
 	private Integer joinType;
 
 	/**
 	 * 题目总数
 	 */
+	@Schema(description = "题目总数")
 	private Integer quCount;
 
 	/**
 	 * 试卷总分
 	 */
+	@Schema(description = "试卷总分")
 	private Integer totalCount;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	private Date createTime;
 
+	@Schema(hidden = true)
 	private String createTimeStart;
 
+	@Schema(hidden = true)
 	private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
+	@Schema(hidden = true)
 	private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	private Date updateTime;
 
+	@Schema(hidden = true)
 	private String updateTimeStart;
 
+	@Schema(hidden = true)
 	private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
+	@Schema(hidden = true)
 	private String updateByFuzzy;
 
 	public void setId(String id) {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
@@ -13,40 +14,48 @@ import com.jl.project.utils.DateUtils;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "日志表")
 public class Log implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
 	/**
 	 * 用户请求数据
 	 */
+	@Schema(description = "用户请求数据")
 	private String data;
 
 	/**
 	 * 请求地址
 	 */
+	@Schema(description = "请求地址")
 	private String url;
 
 	/**
 	 * 用户IP
 	 */
+	@Schema(description = "用户IP")
 	private String ip;
 
 	/**
 	 * 是否成功
 	 */
+	@Schema(description = "是否成功")
 	private Integer success;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -54,6 +63,7 @@ public class Log implements Serializable{
 	/**
 	 * 日志类型
 	 */
+	@Schema(description = "日志类型")
 	private String logType;
 
 	public void setId(String id) {

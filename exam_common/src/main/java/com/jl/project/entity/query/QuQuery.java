@@ -1,95 +1,122 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 /**
  * @Description:题目表查询对象
  * @author:jingLong
  * @date:2023/11/27
  */
+@Schema(description = "题目表查询对象")
 public class QuQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
-	private String id;
+	@Schema(description = "ID")
+    private String id;
 
-	private String idFuzzy;
+	@Schema(hidden = true)
+    private String idFuzzy;
 
 	/**
 	 * 所属题库的ID
 	 */
-	private String repoId;
+	@Schema(description = "所属题库的ID")
+    private String repoId;
 
-	private String repoIdFuzzy;
+	@Schema(hidden = true)
+    private String repoIdFuzzy;
 
 	/**
 	 * 关联题库标题
 	 */
-	private String repoText;
+	@Schema(description = "关联题库标题")
+    private String repoText;
 
-	private String repoTextFuzzy;
+	@Schema(hidden = true)
+    private String repoTextFuzzy;
 
 	/**
 	 * 题目内容
 	 */
-	private String content;
+	@Schema(description = "题目内容")
+    private String content;
 
-	private String contentFuzzy;
+	@Schema(hidden = true)
+    private String contentFuzzy;
 
 	/**
 	 * 题目图片
 	 */
-	private String image;
+	@Schema(description = "题目图片")
+    private String image;
 
-	private String imageFuzzy;
+	@Schema(hidden = true)
+    private String imageFuzzy;
 
 	/**
 	 * 题目难度0:简单1:困难
 	 */
-	private Integer level;
+	@Schema(description = "题目难度0:简单1:困难")
+    private Integer level;
 
 	/**
 	 * 题目分析
 	 */
-	private String analysis;
+	@Schema(description = "题目分析")
+    private String analysis;
 
-	private String analysisFuzzy;
+	@Schema(hidden = true)
+    private String analysisFuzzy;
 
 	/**
 	 * 创建时间
 	 */
-	private Date createTime;
+	@Schema(description = "创建时间")
+    private Date createTime;
 
-	private String createTimeStart;
+	@Schema(hidden = true)
+    private String createTimeStart;
 
-	private String createTimeEnd;
+	@Schema(hidden = true)
+    private String createTimeEnd;
 
 	/**
 	 * 创建者
 	 */
-	private String createBy;
+	@Schema(description = "创建者")
+    private String createBy;
 
-	private String createByFuzzy;
+	@Schema(hidden = true)
+    private String createByFuzzy;
 
 	/**
 	 * 更新时间
 	 */
-	private Date updateTime;
+	@Schema(description = "更新时间")
+    private Date updateTime;
 
-	private String updateTimeStart;
+	@Schema(hidden = true)
+    private String updateTimeStart;
 
-	private String updateTimeEnd;
+	@Schema(hidden = true)
+    private String updateTimeEnd;
 
 	/**
 	 * 更新者
 	 */
-	private String updateBy;
+	@Schema(description = "更新者")
+    private String updateBy;
 
-	private String updateByFuzzy;
+	@Schema(hidden = true)
+    private String updateByFuzzy;
 
 	/**
 	 * 题型
 	 */
-	private Integer quType;
+	@Schema(description = "题型")
+    private Integer quType;
 
 	public void setId(String id) {
 		this.id = id;

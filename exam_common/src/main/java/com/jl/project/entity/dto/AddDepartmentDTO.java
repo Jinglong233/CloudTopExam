@@ -1,20 +1,29 @@
 package com.jl.project.entity.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+/**
+ * 添加部门DTO
+ */
+@Schema(description = "添加部门DTO")
 public class AddDepartmentDTO {
     /**
      * 上层部门code
      */
+    @Schema(description = "上层部门code")
     private String parentCode;
 
     /**
      * 部门层级
      */
+    @Schema(description = "部门层级")
     private Integer deptLevel;
 
 
     /**
      * 部门名称
      */
+    @Schema(description = "部门名称")
     private String deptName;
 
     public String getParentCode() {

@@ -1,6 +1,7 @@
 package com.jl.project.interceptor;
 
 import com.jl.project.constant.Constant;
+import com.jl.project.enums.ResponseCodeEnum;
 import com.jl.project.exception.BusinessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -37,12 +38,12 @@ public class TokenInterceptor implements HandlerInterceptor {
         // 1. 获取token
         String token = request.getHeader("Authorization");
         if (token == null) {
-            throw new BusinessException("未登录");
+            throw new BusinessException(ResponseCodeEnum.CODE_401);
         }
         // 2. 判断是否有效
         String result = stringRedisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
         if (result == null) {
-            throw new BusinessException("登录过期");
+            throw new BusinessException(ResponseCodeEnum.CODE_401);
         }
         // 3. token续期
         stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, result, Constant.EXPIRED_30, TimeUnit.MINUTES);

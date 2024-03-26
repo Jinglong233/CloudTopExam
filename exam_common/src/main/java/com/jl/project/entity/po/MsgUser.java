@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,25 +10,30 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "用户消息关联表")
 public class MsgUser implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 消息ID
 	 */
+	@Schema(description = "消息ID")
 	private String msgId;
 
 	/**
 	 * 用户ID
 	 */
+	@Schema(description = "用户ID")
 	private String userId;
 
 	/**
 	 * 发送状态
 	 */
+	@Schema(description = "发送状态")
 	private Integer sendState;
 
 	public void setId(String id) {

@@ -1,53 +1,63 @@
 package com.jl.project.entity.dto;
 
 import com.jl.project.entity.po.QuAnswer;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
 /**
  * 添加题目和选项DTO
  */
+@Schema(description = "添加题目和选项DTO")
 public class AddQuAndAnswerDTO {
 
     /**
      * 所属题库的ID
      */
+    @Schema(description = "所属题库的ID")
     private String repoId;
 
     /**
      * 关联题库标题
      */
+    @Schema(description = "关联题库标题")
     private String repoText;
 
     /**
      * 题目内容
      */
+    @Schema(description = "题目内容")
     private String content;
 
     /**
      * 题目图片
      */
+    @Schema(description = "题目图片")
     private String image;
 
     /**
      * 题目难度0:简单1:困难
      */
+    @Schema(description = "题目难度0:简单1:困难")
     private Integer level;
 
     /**
      * 题目分析
      */
+    @Schema(description = "题目分析")
     private String analysis;
 
 
     /**
      * 题型
      */
+    @Schema(description = "题型")
     private Integer quType;
 
     /**
      * 选项列表
      */
+    @Schema(description = "选项列表")
     private List<QuAnswer> quAnswerList;
 
     public String getRepoId() {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
@@ -13,25 +14,30 @@ import com.jl.project.utils.DateUtils;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "知识点表")
 public class Kn implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 知识点内容
 	 */
+	@Schema(description = "知识点内容")
 	private String content;
 
 	/**
 	 * 关联的学科的ID
 	 */
+	@Schema(description = "关联的学科的ID")
 	private String subjectId;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -39,11 +45,13 @@ public class Kn implements Serializable{
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
@@ -51,6 +59,7 @@ public class Kn implements Serializable{
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
 	public void setId(String id) {

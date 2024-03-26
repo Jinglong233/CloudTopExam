@@ -1,5 +1,7 @@
 package com.jl.project.entity.po;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 
 
@@ -8,45 +10,54 @@ import java.io.Serializable;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "训练表")
 public class Train implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 题库ID
 	 */
+	@Schema(description = "题库ID")
 	private String repoId;
 
 	/**
 	 * 回答数量
 	 */
+	@Schema(description = "回答数量")
 	private Integer answerCount;
 
 	/**
 	 * 正确数量
 	 */
+	@Schema(description = "正确数量")
 	private Integer rightCount;
 
 	/**
 	 * 训练者
 	 */
+	@Schema(description = "训练者")
 	private String userId;
 
 	/**
 	 * 训练模式
 	 */
+	@Schema(description = "训练模式")
 	private Integer mode;
 
 	/**
 	 * 训练进度
 	 */
+	@Schema(description = "训练进度")
 	private String percent;
 
 	/**
 	 * 状态 0:未完成1:完成
 	 */
+	@Schema(description = "状态 0:未完成1:完成")
 	private Integer state;
 
 	public void setId(String id) {

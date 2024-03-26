@@ -1,6 +1,7 @@
 package com.jl.project.entity.po;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -13,45 +14,54 @@ import java.util.Date;
  * @author:jingLong
  * @date:2023/11/27
  */
+@Schema(description = "题目表")
 public class Qu implements Serializable {
     /**
      * ID
      */
+    @Schema(description = "ID")
     private String id;
 
     /**
      * 所属题库的ID
      */
+    @Schema(description = "所属题库的ID")
     private String repoId;
 
     /**
      * 关联题库标题
      */
+    @Schema(description = "关联题库标题")
     private String repoText;
 
     /**
      * 题目内容
      */
+    @Schema(description = "题目内容")
     private String content;
 
     /**
      * 题目图片
      */
+    @Schema(description = "题目图片")
     private String image;
 
     /**
      * 题目难度0:简单1:困难
      */
+    @Schema(description = "题目难度0:简单1:困难")
     private Integer level;
 
     /**
      * 题目分析
      */
+    @Schema(description = "题目分析")
     private String analysis;
 
     /**
      * 创建时间
      */
+    @Schema(description = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -59,11 +69,13 @@ public class Qu implements Serializable {
     /**
      * 创建者
      */
+    @Schema(description = "创建者")
     private String createBy;
 
     /**
      * 更新时间
      */
+    @Schema(description = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
@@ -71,21 +83,25 @@ public class Qu implements Serializable {
     /**
      * 更新者
      */
+    @Schema(description = "更新者")
     private String updateBy;
 
     /**
      * 题型
      */
+    @Schema(description = "题型")
     private Integer quType;
 
     /**
      * 分值（从其他表获取）
      */
+    @Schema(description = "分值（从其他表获取）")
     private Integer score;
 
     /**
      * 排序（从其他表获取）
      */
+    @Schema(description = "排序（从其他表获取）")
     private Integer sort;
 
     public void setId(String id) {

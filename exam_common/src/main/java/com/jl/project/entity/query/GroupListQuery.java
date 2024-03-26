@@ -1,60 +1,75 @@
 package com.jl.project.entity.query;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @Description:大题表查询对象
  * @author:jingLong
  * @date:2023/11/22
  */
+@Schema(description = "大题表查询对象")
 public class GroupListQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
+	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 所属试卷ID
 	 */
+	@Schema(description = "所属试卷ID")
 	private String paperId;
 
+	@Schema(hidden = true)
 	private String paperIdFuzzy;
 
 	/**
 	 * 题型
 	 */
+	@Schema(description = "题型")
 	private Integer quType;
 
 	/**
 	 * 标题
 	 */
+	@Schema(description = "标题")
 	private String title;
 
+	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 总分
 	 */
+	@Schema(description = "总分")
 	private Integer totalScore;
 
 	/**
 	 * 每个小题的分数
 	 */
+	@Schema(description = "每个小题的分数")
 	private Integer perScore;
 
 	/**
 	 * 选项是否乱序0:否1:是
 	 */
+	@Schema(description = "选项是否乱序0:否1:是")
 	private Integer itemRand;
 
 	/**
 	 * 题目是否乱序0:否1:是
 	 */
+	@Schema(description = "题目是否乱序0:否1:是")
 	private Integer quRand;
 
 	/**
 	 * 题目总数
 	 */
+	@Schema(description = "题目总数")
 	private Integer quCount;
 
 	public void setId(String id) {

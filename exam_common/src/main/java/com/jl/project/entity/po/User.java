@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
@@ -13,75 +14,90 @@ import com.jl.project.utils.DateUtils;
  * @author:jingLong
  * @date:2023/12/04
  */
+@Schema(description = "用户表")
 public class User implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 用户名
 	 */
+	@Schema(description = "用户名")
 	private String userName;
 
 	/**
 	 * 头像
 	 */
+	@Schema(description = "头像")
 	private String avatar;
 
 	/**
 	 * 邮箱
 	 */
+	@Schema(description = "邮箱")
 	private String email;
 
 	/**
 	 * 部门编号
 	 */
+	@Schema(description = "部门编号")
 	private String deptCode;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
 	/**
 	 * 状态0:正常1:禁用
 	 */
+	@Schema(description = "状态0:正常1:禁用")
 	private Integer state;
 
 	/**
 	 * 性别0:女1:男
 	 */
+	@Schema(description = "性别0:女1:男")
 	private Integer sex;
 
 	/**
 	 * 手机
 	 */
+	@Schema(description = "手机")
 	private String phone;
 
 	/**
 	 * 密码
 	 */
+	@Schema(description = "密码")
 	private String password;
 
 	/**
 	 * 盐值
 	 */
+	@Schema(description = "盐值")
 	private String salt;
 
 	/**
 	 * 真实姓名
 	 */
+	@Schema(description = "真实姓名")
 	private String realName;
 
 	/**
 	 * 角色
 	 */
+	@Schema(description = "角色")
 	private String role;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -89,11 +105,13 @@ public class User implements Serializable{
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
@@ -101,6 +119,7 @@ public class User implements Serializable{
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
 	public void setId(String id) {

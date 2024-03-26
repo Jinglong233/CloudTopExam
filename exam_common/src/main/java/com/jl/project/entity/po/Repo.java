@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
@@ -13,70 +14,84 @@ import com.jl.project.utils.DateUtils;
  * @author:jingLong
  * @date:2023/12/04
  */
+@Schema(description = "题库")
 public class Repo implements Serializable{
 	/**
 	 * ID
 	 */
+	@Schema(description = "ID")
 	private String id;
 
 	/**
 	 * 部门编码（专业）
 	 */
+	@Schema(description = "部门编码（专业）")
 	private String deptCode;
 
 	/**
 	 * 部门名称
 	 */
+	@Schema(description = "部门名称")
 	private String deptText;
 
 	/**
 	 * 学科ID
 	 */
+	@Schema(description = "学科ID")
 	private String subjectId;
 
 	/**
 	 * 学科名称
 	 */
+	@Schema(description = "学科名称")
 	private String subjectText;
 
 	/**
 	 * 总题数
 	 */
+	@Schema(description = "总题数")
 	private Integer totalCount;
 
 	/**
 	 * 主观题数
 	 */
+	@Schema(description = "主观题数")
 	private Integer subCount;
 
 	/**
 	 * 客观题数
 	 */
+	@Schema(description = "客观题数")
 	private Integer objCount;
 
 	/**
 	 * 题库标题
 	 */
+	@Schema(description = "题库标题")
 	private String title;
 
 	/**
 	 * 是否用于考试
 	 */
+	@Schema(description = "是否用于考试")
 	private Integer isExam;
 
 	/**
 	 * 是否用于训练
 	 */
+	@Schema(description = "是否用于训练")
 	private Integer isTrain;
 
 	/**
 	 * 备注
 	 */
+	@Schema(description = "备注")
 	private String remark;
 
 	/**
 	 * 创建时间
 	 */
+	@Schema(description = "创建时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
@@ -84,11 +99,13 @@ public class Repo implements Serializable{
 	/**
 	 * 创建者
 	 */
+	@Schema(description = "创建者")
 	private String createBy;
 
 	/**
 	 * 更新时间
 	 */
+	@Schema(description = "更新时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
@@ -96,6 +113,7 @@ public class Repo implements Serializable{
 	/**
 	 * 更新者
 	 */
+	@Schema(description = "更新者")
 	private String updateBy;
 
 	public void setId(String id) {
