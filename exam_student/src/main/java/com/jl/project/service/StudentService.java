@@ -24,8 +24,6 @@ public interface StudentService {
     List<User> findListByParam(UserQuery query);
 
 
-
-
     /**
      * 新增（注册）
      */

@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.UpdateUserDTO;
 import com.jl.project.entity.po.Department;
+import com.jl.project.entity.po.Repo;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.DepartmentQuery;
 import com.jl.project.entity.query.LoginQuery;
