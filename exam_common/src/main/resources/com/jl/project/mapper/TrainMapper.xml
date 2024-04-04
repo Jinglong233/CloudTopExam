@@ -12,6 +12,8 @@
 		<result column="answer_count" property="answerCount"/>
 		<!-- 正确数量 -->
 		<result column="right_count" property="rightCount"/>
+		<!-- 总题目数量 -->
+		<result column="total_count" property="totalCount"/>
 		<!-- 训练者 -->
 		<result column="user_id" property="userId"/>
 		<!-- 训练模式 -->
@@ -20,10 +22,14 @@
 		<result column="percent" property="percent"/>
 		<!-- 状态 0:未完成1:完成 -->
 		<result column="state" property="state"/>
+		<!-- 最近训练时间 -->
+		<result column="train_time" property="trainTime"/>
+		<!-- 题型（mode为3的时候需要） -->
+		<result column="quType" property="quType"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,repo_id,answer_count,right_count,user_id,mode,percent,state
+		id,repo_id,answer_count,right_count,total_count,user_id,mode,percent,state,train_time,quType
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -39,6 +45,9 @@
 		<if test="query.rightCount != null">
 			and right_count = #{query.rightCount}
 		</if>
+		<if test="query.totalCount != null">
+			and total_count = #{query.totalCount}
+		</if>
 		<if test="query.userId != null and query.userId!= ''">
 			and user_id = #{query.userId}
 		</if>
@@ -50,6 +59,12 @@
 		</if>
 		<if test="query.state != null">
 			and state = #{query.state}
+		</if>
+		<if test="query.trainTime != null">
+			and train_time = #{query.trainTime}
+		</if>
+		<if test="query.quType != null">
+			and quType = #{query.quType}
 		</if>
 	</sql>
 	<!--扩展查询条件-->
@@ -65,6 +80,12 @@
 		</if>
 		<if test="query.percentFuzzy != null and query.percentFuzzy != '' ">
 			and percent like concat('%', #{query.percentFuzzy}, '%')
+		</if>
+		<if test="query.trainTimeStart != null and query.trainTimeStart != '' ">
+			<![CDATA[ and train_time >= str_to_date(#{query.trainTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.trainTimeEnd != null and query.trainTimeEnd != '' ">
+			<![CDATA[ and train_time < data_sub(str_to_date(#{query.trainTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 	</sql>
 	<!--通用查询条件-->
@@ -110,6 +131,9 @@
 			<if test="bean.rightCount != null">
 				right_count,
 			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
 			<if test="bean.userId != null">
 				user_id,
 			</if>
@@ -121,6 +145,12 @@
 			</if>
 			<if test="bean.state != null">
 				state,
+			</if>
+			<if test="bean.trainTime != null">
+				train_time,
+			</if>
+			<if test="bean.quType != null">
+				quType,
 			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -136,6 +166,9 @@
 			<if test="bean.rightCount != null">
 				#{bean.rightCount},
 			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
 			<if test="bean.userId != null">
 				#{bean.userId},
 			</if>
@@ -147,6 +180,12 @@
 			</if>
 			<if test="bean.state != null">
 				#{bean.state},
+			</if>
+			<if test="bean.trainTime != null">
+				#{bean.trainTime},
+			</if>
+			<if test="bean.quType != null">
+				#{bean.quType},
 			</if>
 		</trim>
 	</insert>
@@ -167,6 +206,9 @@
 			<if test="bean.rightCount != null">
 				right_count,
 			</if>
+			<if test="bean.totalCount != null">
+				total_count,
+			</if>
 			<if test="bean.userId != null">
 				user_id,
 			</if>
@@ -178,6 +220,12 @@
 			</if>
 			<if test="bean.state != null">
 				state,
+			</if>
+			<if test="bean.trainTime != null">
+				train_time,
+			</if>
+			<if test="bean.quType != null">
+				quType,
 			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -193,6 +241,9 @@
 			<if test="bean.rightCount != null">
 				#{bean.rightCount},
 			</if>
+			<if test="bean.totalCount != null">
+				#{bean.totalCount},
+			</if>
 			<if test="bean.userId != null">
 				#{bean.userId},
 			</if>
@@ -204,6 +255,12 @@
 			</if>
 			<if test="bean.state != null">
 				#{bean.state},
+			</if>
+			<if test="bean.trainTime != null">
+				#{bean.trainTime},
+			</if>
+			<if test="bean.quType != null">
+				#{bean.quType},
 			</if>
 		</trim>
 		on DUPLICATE key update
@@ -217,6 +274,9 @@
 			<if test="bean.rightCount != null">
 				right_count= VALUES(right_count),
 			</if>
+			<if test="bean.totalCount != null">
+				total_count= VALUES(total_count),
+			</if>
 			<if test="bean.userId != null">
 				user_id= VALUES(user_id),
 			</if>
@@ -229,25 +289,31 @@
 			<if test="bean.state != null">
 				state= VALUES(state),
 			</if>
+			<if test="bean.trainTime != null">
+				train_time= VALUES(train_time),
+			</if>
+			<if test="bean.quType != null">
+				quType= VALUES(quType),
+			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Train">
-		INSERT INTO train(id,repo_id,answer_count,right_count,user_id,mode,percent,state)values
+		INSERT INTO train(id,repo_id,answer_count,right_count,total_count,user_id,mode,percent,state,train_time,quType)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.userId},#{item.mode},#{item.percent},#{item.state})
+			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.totalCount},#{item.userId},#{item.mode},#{item.percent},#{item.state},#{item.trainTime},#{item.quType})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Train">
 		INSERT INTO 
-		train(id,repo_id,answer_count,right_count,user_id,mode,percent,state)values
+		train(id,repo_id,answer_count,right_count,total_count,user_id,mode,percent,state,train_time,quType)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.userId},#{item.mode},#{item.percent},#{item.state})
+			(#{item.id},#{item.repoId},#{item.answerCount},#{item.rightCount},#{item.totalCount},#{item.userId},#{item.mode},#{item.percent},#{item.state},#{item.trainTime},#{item.quType})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),repo_id= VALUES(repo_id),answer_count= VALUES(answer_count),right_count= VALUES(right_count),user_id= VALUES(user_id),mode= VALUES(mode),percent= VALUES(percent),state= VALUES(state)
+			on DUPLICATE key update id= VALUES(id),repo_id= VALUES(repo_id),answer_count= VALUES(answer_count),right_count= VALUES(right_count),total_count= VALUES(total_count),user_id= VALUES(user_id),mode= VALUES(mode),percent= VALUES(percent),state= VALUES(state),train_time= VALUES(train_time),quType= VALUES(quType)
 	</insert>
 
 
@@ -274,6 +340,9 @@
 			<if test="bean.rightCount != null">
 				right_count = #{bean.rightCount},
 			</if>
+			<if test="bean.totalCount != null">
+				total_count = #{bean.totalCount},
+			</if>
 			<if test="bean.userId != null">
 				user_id = #{bean.userId},
 			</if>
@@ -285,6 +354,12 @@
 			</if>
 			<if test="bean.state != null">
 				state = #{bean.state},
+			</if>
+			<if test="bean.trainTime != null">
+				train_time = #{bean.trainTime},
+			</if>
+			<if test="bean.quType != null">
+				quType = #{bean.quType},
 			</if>
 		</set>
 		where id=#{id}

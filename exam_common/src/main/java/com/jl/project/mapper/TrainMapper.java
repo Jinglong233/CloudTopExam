@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 /**
  * @Description:训练表商品Mapper
  * @author:jingLong
- * @date:2023/11/22
+ * @date:2024/03/31
  */
 public interface TrainMapper<T, P> extends BaseMapper {
 	/**

@@ -2,10 +2,11 @@ package com.jl.project.entity.query;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Date;
 /**
  * @Description:训练表查询对象
  * @author:jingLong
- * @date:2023/11/22
+ * @date:2024/04/03
  */
 @Schema(description = "训练表查询对象")
 public class TrainQuery extends BaseQuery{
@@ -40,6 +41,12 @@ public class TrainQuery extends BaseQuery{
 	private Integer rightCount;
 
 	/**
+	 * 总题目数量
+	 */
+	@Schema(description = "总题目数量")
+	private Integer totalCount;
+
+	/**
 	 * 训练者
 	 */
 	@Schema(description = "训练者")
@@ -68,6 +75,24 @@ public class TrainQuery extends BaseQuery{
 	 */
 	@Schema(description = "状态 0:未完成1:完成")
 	private Integer state;
+
+	/**
+	 * 最近训练时间
+	 */
+	@Schema(description = "最近训练时间")
+	private Date trainTime;
+
+	@Schema(hidden = true)
+	private String trainTimeStart;
+
+	@Schema(hidden = true)
+	private String trainTimeEnd;
+
+	/**
+	 * 题型（mode为3的时候需要）
+	 */
+	@Schema(description = "题型（mode为3的时候需要）")
+	private Integer quType;
 
 	public void setId(String id) {
 		this.id = id;
@@ -99,6 +124,14 @@ public class TrainQuery extends BaseQuery{
 
 	public Integer getRightCount() {
 		return this.rightCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public Integer getTotalCount() {
+		return this.totalCount;
 	}
 
 	public void setUserId(String userId) {
@@ -133,6 +166,22 @@ public class TrainQuery extends BaseQuery{
 		return this.state;
 	}
 
+	public void setTrainTime(Date trainTime) {
+		this.trainTime = trainTime;
+	}
+
+	public Date getTrainTime() {
+		return this.trainTime;
+	}
+
+	public void setQuType(Integer quType) {
+		this.quType = quType;
+	}
+
+	public Integer getQuType() {
+		return this.quType;
+	}
+
 	public void setIdFuzzy(String idFuzzy) {
 		this.idFuzzy = idFuzzy;
 	}
@@ -163,6 +212,22 @@ public class TrainQuery extends BaseQuery{
 
 	public String getPercentFuzzy() {
 		return this.percentFuzzy;
+	}
+
+	public void setTrainTimeStart(String trainTimeStart) {
+		this.trainTimeStart = trainTimeStart;
+	}
+
+	public String getTrainTimeStart() {
+		return this.trainTimeStart;
+	}
+
+	public void setTrainTimeEnd(String trainTimeEnd) {
+		this.trainTimeEnd = trainTimeEnd;
+	}
+
+	public String getTrainTimeEnd() {
+		return this.trainTimeEnd;
 	}
 
 }

@@ -23,17 +23,18 @@ const TRAIN: AppRouteRecordRaw = {
       },
     },
     {
-      path: 'train-record',
+      path: 'train-record/:trainId',
       name: 'TrainRecord',
       component: () => import('@/views/train/train-record/index.vue'),
       meta: {
         locale: 'menu.train.trainRecord',
         requiresAuth: true,
         roles: ['*'],
+        hideInMenu: true,
       },
     },
     {
-      path: 'repo-detail',
+      path: 'repo-detail/:repoId',
       name: 'RepoDetail',
       component: () => import('@/views/train/repo-detail/index.vue'),
       meta: {

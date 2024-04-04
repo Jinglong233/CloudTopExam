@@ -16,12 +16,14 @@
 		<result column="answer_id" property="answerId"/>
 		<!-- 是否回答0:未答1:已答 -->
 		<result column="answered" property="answered"/>
-		<!-- 主观题的答案 -->
+		<!-- 主观题的答案（预留） -->
 		<result column="answer" property="answer"/>
+		<!-- 题目的排序 -->
+		<result column="sort" property="sort"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,qu_id,train_id,is_right,answer_id,answered,answer
+		id,qu_id,train_id,is_right,answer_id,answered,answer,sort
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -45,6 +47,9 @@
 		</if>
 		<if test="query.answer != null and query.answer!= ''">
 			and answer = #{query.answer}
+		</if>
+		<if test="query.sort != null">
+			and sort = #{query.sort}
 		</if>
 	</sql>
 	<!--扩展查询条件-->
@@ -117,6 +122,9 @@
 			<if test="bean.answer != null">
 				answer,
 			</if>
+			<if test="bean.sort != null">
+				sort,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -139,6 +147,9 @@
 			</if>
 			<if test="bean.answer != null">
 				#{bean.answer},
+			</if>
+			<if test="bean.sort != null">
+				#{bean.sort},
 			</if>
 		</trim>
 	</insert>
@@ -168,6 +179,9 @@
 			<if test="bean.answer != null">
 				answer,
 			</if>
+			<if test="bean.sort != null">
+				sort,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -191,6 +205,9 @@
 			<if test="bean.answer != null">
 				#{bean.answer},
 			</if>
+			<if test="bean.sort != null">
+				#{bean.sort},
+			</if>
 		</trim>
 		on DUPLICATE key update
 		<trim prefix="" suffix="" suffixOverrides=",">
@@ -212,25 +229,28 @@
 			<if test="bean.answer != null">
 				answer= VALUES(answer),
 			</if>
+			<if test="bean.sort != null">
+				sort= VALUES(sort),
+			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.TrainRecord">
-		INSERT INTO train_record(id,qu_id,train_id,is_right,answer_id,answered,answer)values
+		INSERT INTO train_record(id,qu_id,train_id,is_right,answer_id,answered,answer,sort)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.quId},#{item.trainId},#{item.isRight},#{item.answerId},#{item.answered},#{item.answer})
+			(#{item.id},#{item.quId},#{item.trainId},#{item.isRight},#{item.answerId},#{item.answered},#{item.answer},#{item.sort})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.TrainRecord">
 		INSERT INTO 
-		train_record(id,qu_id,train_id,is_right,answer_id,answered,answer)values
+		train_record(id,qu_id,train_id,is_right,answer_id,answered,answer,sort)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.quId},#{item.trainId},#{item.isRight},#{item.answerId},#{item.answered},#{item.answer})
+			(#{item.id},#{item.quId},#{item.trainId},#{item.isRight},#{item.answerId},#{item.answered},#{item.answer},#{item.sort})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),qu_id= VALUES(qu_id),train_id= VALUES(train_id),is_right= VALUES(is_right),answer_id= VALUES(answer_id),answered= VALUES(answered),answer= VALUES(answer)
+			on DUPLICATE key update id= VALUES(id),qu_id= VALUES(qu_id),train_id= VALUES(train_id),is_right= VALUES(is_right),answer_id= VALUES(answer_id),answered= VALUES(answered),answer= VALUES(answer),sort= VALUES(sort)
 	</insert>
 
 
@@ -265,6 +285,9 @@
 			</if>
 			<if test="bean.answer != null">
 				answer = #{bean.answer},
+			</if>
+			<if test="bean.sort != null">
+				sort = #{bean.sort},
 			</if>
 		</set>
 		where id=#{id}
