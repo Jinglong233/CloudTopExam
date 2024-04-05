@@ -141,7 +141,6 @@ public class StudentTrainController extends ABaseController {
         }
         return getSuccessResponseVO(result);
     }
-// todo 未完成多选题的训练逻辑
 
 
 }
