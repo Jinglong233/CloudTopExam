@@ -63,14 +63,24 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         QuQuery quQuery = new QuQuery();
         quQuery.setRepoId(repoId);
 
-        List<Qu> quList = quMapper.selectList(quQuery);
-        if (quList == null || quList.isEmpty()) {
-            return new HashMap<>();
-        }
 
-        Map<Integer, Long> result = null;
-        result = quList.stream().collect(
-                Collectors.groupingBy(Qu::getQuType, Collectors.counting()));
+        Map<Integer, Long> result = new HashMap<>();
+
+        // 单选
+        quQuery.setQuType(QuType.RADIO.getValue());
+        Integer radioCount = quMapper.selectCount(quQuery);
+        result.put(QuType.RADIO.getValue(),Long.valueOf(radioCount));
+
+        // 多选
+        quQuery.setQuType(QuType.MULTI.getValue());
+        Integer multiCount = quMapper.selectCount(quQuery);
+        result.put(QuType.MULTI.getValue(),Long.valueOf(multiCount));
+
+        // 判断
+        quQuery.setQuType(QuType.JUDGE.getValue());
+        Integer judgeCount = quMapper.selectCount(quQuery);
+        result.put(QuType.JUDGE.getValue(),Long.valueOf(judgeCount));
+
         return result;
     }
 
@@ -189,6 +199,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         }
 
         // 创建题目训练记录
+        List<TrainRecord> trainRecords = new ArrayList<>();
         int sort = 1;
         for (Qu qu : quList) {
             String trainRecordId = CommonUtil.getRandomId();
@@ -198,12 +209,15 @@ public class StudentTrainServiceImpl implements StudentTrainService {
             trainRecord.setId(trainRecordId);
             trainRecord.setSort(sort++);
             trainRecord.setAnswered(0);
+            trainRecords.add(trainRecord);
+        }
 
-            // 新增用户答题训练记录
-            Integer insert = trainRecordMapper.insert(trainRecord);
-            if (insert <= 0) {
-                throw new BusinessException("新增用户答题记录失败");
-            }
+        // 批量擦插入
+        Integer insert = trainRecordMapper.insertBatch(trainRecords);
+
+        // 新增用户答题训练记录
+        if (insert <= 0) {
+            throw new BusinessException("新增用户答题记录失败");
         }
         return trainId;
     }
@@ -266,8 +280,11 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         QuAnswerQuery quAnswerQuery = new QuAnswerQuery();
         quAnswerQuery.setQuId(quId);
         List<QuAnswer> quAnswerList = quAnswerMapper.selectList(quAnswerQuery);
-        // 对选项排序
-        quAnswerList = quAnswerList.stream().sorted(Comparator.comparing(QuAnswer::getTag)).collect(Collectors.toList());
+        // 非选择题不用排序
+        if (qu.getQuType().equals(QuType.MULTI.getValue()) || qu.getQuType().equals(QuType.RADIO.getValue())) {
+            // 对选项排序
+            quAnswerList = quAnswerList.stream().sorted(Comparator.comparing(QuAnswer::getTag)).collect(Collectors.toList());
+        }
 
         // 创建返回视图对象
         TrainRecordQuVO trainRecordQuVO = new TrainRecordQuVO();
@@ -280,6 +297,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         return trainRecordQuVO;
     }
 
+    @Transactional
     @Override
     public Boolean updateTrainRecord(TrainRecord trainRecord) throws BusinessException {
         if (trainRecord == null) {
@@ -325,6 +343,107 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         trainRecord.setIsRight(isEqual ? 1 : 0);
         // 更新
         Integer result = trainRecordMapper.updateById(trainRecord, trainRecord.getId());
+
+        if (result <= 0) {
+            throw new BusinessException("更新作答记录失败");
+        }
+
+        // 更新关联训练信息
+        String trainId = trainRecord.getTrainId();
+        if (trainId == null) {
+            throw new BusinessException("未关联训练记录");
+        }
+        Train train = trainMapper.selectById(trainId);
+        if (train == null) {
+            throw new BusinessException("关联训练记录不存在");
+        }
+
+        // 更新答题数量
+        Integer answerCount = train.getAnswerCount();
+        answerCount += 1;
+        train.setAnswerCount(answerCount);
+
+        // 更新正确数量
+        if (isEqual) {
+            Integer rightCount = train.getRightCount();
+            rightCount += 1;
+            train.setRightCount(rightCount);
+        }
+
+        // 更新训练进度
+        Integer count = train.getAnswerCount();
+        Integer totalCount = train.getTotalCount();
+        train.setPercent(String.valueOf(count / totalCount));
+
+        // 更新最近训练时间
+        train.setTrainTime(new Date());
+
+        // 进行更新操作
+        result = trainMapper.updateById(train, trainId);
         return result > 0;
+    }
+
+    @Override
+    public Boolean stopTrain(String trainId) throws BusinessException {
+        if (trainId == null || "".equals(trainId)) {
+            throw new BusinessException("缺少参数");
+        }
+
+        // 更新训练状态
+        Train train = trainMapper.selectById(trainId);
+        if (train == null) {
+            throw new BusinessException("训练记录不存在");
+        }
+
+        train.setState(1);
+
+        // 更新
+        Integer result = trainMapper.updateById(train, trainId);
+        if (result <= 0) {
+            throw new BusinessException("更新训练记录失败");
+        }
+
+        // 压缩作答记录节省空间（删除未作答的记录，该部分内容没用）
+
+        // 获取关联记录
+        TrainRecordQuery trainRecordQuery = new TrainRecordQuery();
+        trainRecordQuery.setTrainId(trainId);
+
+        List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
+        if (trainRecords != null && !trainRecords.isEmpty()) {
+            Boolean delete = clearNoAnswerRecord();
+            if(delete == false){
+                throw new BusinessException("提交失败");
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Train getTrainById(String trainId) throws BusinessException {
+        if (trainId == null || "".equals(trainId)) {
+            throw new BusinessException("缺少参数");
+        }
+        Train train = trainMapper.selectById(trainId);
+        if (train == null) {
+            throw new BusinessException("训练记录不存在");
+        }
+        return train;
+    }
+
+    @Override
+    public List<Train> getTrain(TrainQuery trainQuery) throws BusinessException {
+
+        if (trainQuery == null) {
+            throw new BusinessException("缺少参数");
+        }
+
+        List<Train> trains = trainMapper.selectList(trainQuery);
+        return trains;
+    }
+
+    private Boolean clearNoAnswerRecord(){
+        Integer integer = trainRecordMapper.deleteNoAnswerRecord();
+        return integer > 0;
     }
 }

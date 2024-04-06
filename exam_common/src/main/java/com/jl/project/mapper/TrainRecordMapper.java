@@ -23,4 +23,10 @@ public interface TrainRecordMapper<T, P> extends BaseMapper {
 	 */
 	Integer deleteById(@Param("id") String id);
 
+	/**
+	 * 批量删除未作答的记录
+	 */
+	Integer deleteNoAnswerRecord();
+
+
 }

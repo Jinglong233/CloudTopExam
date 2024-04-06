@@ -2,8 +2,10 @@ package com.jl.project.controller;
 
 import com.jl.project.entity.dto.StartTrainDTO;
 import com.jl.project.entity.po.Repo;
+import com.jl.project.entity.po.Train;
 import com.jl.project.entity.po.TrainRecord;
 import com.jl.project.entity.query.RepoQuery;
+import com.jl.project.entity.query.TrainQuery;
 import com.jl.project.entity.query.TrainRecordQuQuery;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.entity.vo.TrainRecordQuVO;
@@ -30,6 +32,44 @@ import java.util.Map;
 public class StudentTrainController extends ABaseController {
     @Resource
     private StudentTrainService studentTrainService;
+
+
+    /**
+     * 条件查询训练记录
+     *
+     * @param trainQuery
+     * @return
+     */
+    @ApiOperation(value = "条件查询训练记录")
+    @RequestMapping("getTrain")
+    public ResponseVO getTrain(@RequestBody TrainQuery trainQuery) throws BusinessException {
+        List<Train> result = null;
+        try {
+            result = studentTrainService.getTrain(trainQuery);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 通过Id获取训练记录
+     *
+     * @param trainId
+     * @return
+     */
+    @ApiOperation(value = "通过Id获取训练记录")
+    @RequestMapping("getTrainById")
+    public ResponseVO getTrainById(@RequestBody String trainId) throws BusinessException {
+        Train result = null;
+        try {
+            result = studentTrainService.getTrainById(trainId);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
 
 
     /**
@@ -111,7 +151,7 @@ public class StudentTrainController extends ABaseController {
      * @param trainRecordQuQuery
      * @return
      */
-    @ApiOperation(value = "根据Id获取训练记录")
+    @ApiOperation(value = "根据sort+获取训练记录Id 获取题目信息")
     @RequestMapping("getTrainRecordQu")
     public ResponseVO getTrainRecordQu(@RequestBody TrainRecordQuQuery trainRecordQuQuery) throws BusinessException {
         TrainRecordQuVO result = null;
@@ -130,7 +170,7 @@ public class StudentTrainController extends ABaseController {
      * @param trainRecord
      * @return
      */
-    @ApiOperation(value = "根据Id获取训练记录")
+    @ApiOperation(value = "更新作答记录")
     @RequestMapping("updateTrainRecord")
     public ResponseVO updateTrainRecord(@RequestBody TrainRecord trainRecord) throws BusinessException {
         Boolean result = null;
@@ -142,5 +182,24 @@ public class StudentTrainController extends ABaseController {
         return getSuccessResponseVO(result);
     }
 
+
+
+    /**
+     * 结束训练
+     *
+     * @param trainId
+     * @return
+     */
+    @ApiOperation(value = "结束训练")
+    @RequestMapping("stopTrain")
+    public ResponseVO stopTrain(@RequestBody String trainId) throws BusinessException {
+        Boolean result = null;
+        try {
+            result = studentTrainService.stopTrain(trainId);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
 
 }
