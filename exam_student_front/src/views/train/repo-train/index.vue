@@ -1,5 +1,5 @@
 <template>
-  <a-card :title="$t('menu.exam.myExam')">
+  <a-card :title="$t('menu.train.repoTrain')">
     <a-table :columns="columns" :data="data">
       <template #options="{ record }">
         <a-button type="primary" @click="confirmGoExam(record)"

@@ -3,6 +3,7 @@ export default {
   'menu.train.repoTrain': '题库训练',
   'menu.train.trainRecord': '训练记录',
   'menu.train.repoDetail': '题库详情',
+  'menu.train.trainResult': '训练结果',
 
   'train.columns.title': '题库名称',
   'train.columns.objCount': '客观题数量',

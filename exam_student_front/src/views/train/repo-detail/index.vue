@@ -8,19 +8,28 @@
 
         <a-space>
           <a-card
-            style="height: 100px; width: 120px; line-height: 70px"
+            style="
+              height: 100px;
+              width: 120px;
+              line-height: 70px;
+              cursor: pointer;
+            "
+            hoverable
             @click="start(1)"
           >
             顺序训练
           </a-card>
           <a-card
-            style="height: 100px; width: 120px; line-height: 70px"
+            style="
+              height: 100px;
+              width: 120px;
+              line-height: 70px;
+              cursor: pointer;
+            "
+            hoverable
             @click="start(2)"
           >
             随机训练
-          </a-card>
-          <a-card style="height: 100px; width: 120px; line-height: 70px">
-            背题模式
           </a-card>
         </a-space>
 
@@ -51,7 +60,6 @@
         <a-divider />
       </a-card>
     </a-layout-content>
-    <a-layout-sider style="margin: 20px">Sider</a-layout-sider>
   </a-layout>
 </template>
 

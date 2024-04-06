@@ -1,196 +1,199 @@
 <template>
-  <a-row>
-    <a-col :span="6" style="margin-top: 20px">
-      <a-card style="width: 300px; margin-left: 20px">
-        <a-scrollbar style="height: 650px; overflow: auto">
-          <a-col :span="16">共{{ quCount }}题</a-col>
-          <a-row :gutter="50">
-            <a-col
+  <a-spin style="width: 100%; height: 100%" :loading="loading" tip="加载中" dot>
+    <a-row>
+      <a-col :span="6" style="margin-top: 20px">
+        <a-card style="width: 270px; margin-left: 20px">
+          <a-scrollbar style="height: 650px; overflow: auto">
+            <div>共{{ quCount }}题</div>
+            <a-button
               v-for="index in quCount"
               :key="index.id"
-              style="margin-top: 10px"
-              :span="4"
+              style="margin: 7px; height: 30px; width: 40px"
+              :type="isNowNumber(index) ? 'primary' : 'outline'"
+              @click="jumpQuestion(index)"
+              >{{ index }}</a-button
             >
-              <a-button
-                :type="isNowNumber(index) ? 'primary' : 'outline'"
-                @click="jumpQuestion(index)"
-                >{{ index }}</a-button
-              >
+          </a-scrollbar>
+        </a-card>
+      </a-col>
+      <a-col :span="18">
+        <a-card style="height: 680px; margin: 10px; margin-top: 20px">
+          <template #extra>
+            <a-button type="primary" :loading="stopLoading" @click="stop()"
+              >结束训练</a-button
+            >
+          </template>
+          <!--问题部分-->
+          <a-row :gutter="20">
+            <a-col :span="2">
+              <BookMark :number="nowQuestion.trainRecord.sort" />
+            </a-col>
+            <a-col :span="17">
+              <div v-html="nowQuestion.quAndAnswerVo.content" />
             </a-col>
           </a-row>
-        </a-scrollbar>
-      </a-card>
-    </a-col>
-    <a-col :span="18">
-      <a-card style="height: 680px; margin: 10px; margin-top: 20px">
-        <!--问题部分-->
-        <a-row :gutter="20">
-          <a-col :span="2">
-            <BookMark :number="nowQuestion.trainRecord.sort" />
-          </a-col>
-          <a-col :span="17">
-            <div v-html="nowQuestion.quAndAnswerVo.content" />
-          </a-col>
-        </a-row>
 
-        <template
-          v-for="(quAnswer, index) in nowQuestion.quAndAnswerVo.quAnswerList"
-          :key="index"
-        >
-          <!--如果不是多选题-->
-          <a-card
-            v-if="
-              nowQuestion.quAndAnswerVo.quType !== QuestionType.MULTIPLECHOICE
-            "
-            hoverable
-            :style="{
-              width: '100%',
-              marginBottom: '20px',
-              cursor: 'pointer',
-              borderColor: isContainCurrentAnswer(
-                nowQuestion.trainRecord,
-                quAnswer.id
-              )
-                ? '#0085f2'
-                : '',
-            }"
-            @click="
-              sendSelectAnswerId(
-                nowQuestion.trainRecord,
-                quAnswer.id,
-                nowQuestion.quAndAnswerVo.quType
-              )
-            "
+          <template
+            v-for="(quAnswer, index) in nowQuestion.quAndAnswerVo.quAnswerList"
+            :key="index"
           >
-            <div
+            <!--如果不是多选题-->
+            <a-card
+              v-if="
+                nowQuestion.quAndAnswerVo.quType !== QuestionType.MULTIPLECHOICE
+              "
+              hoverable
               :style="{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                width: '100%',
+                marginBottom: '20px',
+                cursor: 'pointer',
+                borderColor: isContainCurrentAnswer(
+                  nowQuestion.trainRecord,
+                  quAnswer.id
+                )
+                  ? '#0085f2'
+                  : '',
               }"
+              @click="
+                sendSelectAnswerId(
+                  nowQuestion.trainRecord,
+                  quAnswer.id,
+                  nowQuestion.quAndAnswerVo.quType
+                )
+              "
             >
-              <a-space
+              <div
                 :style="{
                   display: 'flex',
                   alignItems: 'center',
-                  color: '#1D2129',
+                  justifyContent: 'space-between',
                 }"
               >
-                <a-typography-text type="primary">
-                  {{ quAnswer.tag }}
-                </a-typography-text>
-                <a-typography-text>
-                  <div v-html="quAnswer.content" />
-                </a-typography-text>
-              </a-space>
-              <!--判断是否答案-->
-              <a-space
-                v-if="
-                  nowQuestion.trainRecord.answered === 1 &&
-                  quAnswer.isRight === 1
-                "
-              >
-                <a-badge style="float: right">
-                  <template #content>
-                    <icon-check-circle-fill
-                      :style="{
-                        verticalAlign: 'text-top',
-                        color: '#00B42A',
-                      }"
-                    />
-                  </template>
-                </a-badge>
-                <span> 答案 </span>
-              </a-space>
-            </div>
-          </a-card>
+                <a-space
+                  :style="{
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#1D2129',
+                  }"
+                >
+                  <a-typography-text type="primary">
+                    {{ quAnswer.tag }}
+                  </a-typography-text>
+                  <a-typography-text>
+                    <div v-html="quAnswer.content" />
+                  </a-typography-text>
+                </a-space>
+                <!--判断是否答案-->
+                <a-space
+                  v-if="
+                    nowQuestion.trainRecord.answered === 1 &&
+                    quAnswer.isRight === 1
+                  "
+                >
+                  <a-badge style="float: right">
+                    <template #content>
+                      <icon-check-circle-fill
+                        :style="{
+                          verticalAlign: 'text-top',
+                          color: '#00B42A',
+                        }"
+                      />
+                    </template>
+                  </a-badge>
+                  <span> 答案 </span>
+                </a-space>
+              </div>
+            </a-card>
 
-          <!--如果是多选题-->
-          <a-card
+            <!--如果是多选题-->
+            <a-card
+              v-if="
+                nowQuestion.quAndAnswerVo.quType === QuestionType.MULTIPLECHOICE
+              "
+              hoverable
+              :style="{
+                width: '100%',
+                marginBottom: '20px',
+                cursor: 'pointer',
+                borderColor: isContainCurrentAnswer(
+                  nowQuestion.trainRecord,
+                  quAnswer.id
+                )
+                  ? '#0085f2'
+                  : '',
+              }"
+              @click="
+                answerTrain(quAnswer.id, nowQuestion.quAndAnswerVo.quType)
+              "
+            >
+              <div
+                :style="{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }"
+              >
+                <a-space
+                  :style="{
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#1D2129',
+                  }"
+                >
+                  <a-typography-text type="primary">
+                    {{ quAnswer.tag }}
+                  </a-typography-text>
+                  <a-typography-text>
+                    <div v-html="quAnswer.content" />
+                  </a-typography-text>
+                </a-space>
+                <!--判断是否答案-->
+                <a-space
+                  v-if="
+                    nowQuestion.trainRecord.answered === 1 &&
+                    quAnswer.isRight === 1
+                  "
+                >
+                  <a-badge style="float: right">
+                    <template #content>
+                      <icon-check-circle-fill
+                        :style="{
+                          verticalAlign: 'text-top',
+                          color: '#00B42A',
+                        }"
+                      />
+                    </template>
+                  </a-badge>
+                  <span> 答案 </span>
+                </a-space>
+              </div>
+            </a-card>
+          </template>
+          <div
             v-if="
               nowQuestion.quAndAnswerVo.quType === QuestionType.MULTIPLECHOICE
             "
-            hoverable
-            :style="{
-              width: '100%',
-              marginBottom: '20px',
-              cursor: 'pointer',
-              borderColor: isContainCurrentAnswer(
-                nowQuestion.trainRecord,
-                quAnswer.id
-              )
-                ? '#0085f2'
-                : '',
-            }"
-            @click="answerTrain(quAnswer.id, nowQuestion.quAndAnswerVo.quType)"
           >
-            <div
-              :style="{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }"
+            <!--  如果是多选题就得有确认按钮-->
+            <a-button
+              type="primary"
+              :disabled="nowQuestion.trainRecord.answered === 1"
+              @click="multSelectAnswerId()"
+              >确认答案</a-button
             >
-              <a-space
-                :style="{
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: '#1D2129',
-                }"
-              >
-                <a-typography-text type="primary">
-                  {{ quAnswer.tag }}
-                </a-typography-text>
-                <a-typography-text>
-                  <div v-html="quAnswer.content" />
-                </a-typography-text>
-              </a-space>
-              <!--判断是否答案-->
-              <a-space
-                v-if="
-                  nowQuestion.trainRecord.answered === 1 &&
-                  quAnswer.isRight === 1
-                "
-              >
-                <a-badge style="float: right">
-                  <template #content>
-                    <icon-check-circle-fill
-                      :style="{
-                        verticalAlign: 'text-top',
-                        color: '#00B42A',
-                      }"
-                    />
-                  </template>
-                </a-badge>
-                <span> 答案 </span>
-              </a-space>
-            </div>
-          </a-card>
-        </template>
-        <div
-          v-if="
-            nowQuestion.quAndAnswerVo.quType === QuestionType.MULTIPLECHOICE
-          "
-        >
-          <!--  如果是多选题就得有确认按钮-->
-          <a-button
-            type="primary"
-            :disabled="nowQuestion.trainRecord.answered === 1"
-            @click="multSelectAnswerId()"
-            >确认答案</a-button
-          >
-        </div>
-        <div
-          v-if="nowQuestion.trainRecord.answered === 1"
-          v-html="
-            nowQuestion.quAndAnswerVo.analysis === null
-              ? '无解析'
-              : nowQuestion.quAndAnswerVo.analysis
-          "
-        />
-      </a-card>
-    </a-col>
-  </a-row>
+          </div>
+          <div
+            v-if="nowQuestion.trainRecord.answered === 1"
+            v-html="
+              nowQuestion.quAndAnswerVo.analysis === null
+                ? '无解析'
+                : nowQuestion.quAndAnswerVo.analysis
+            "
+          />
+        </a-card>
+      </a-col>
+    </a-row>
+  </a-spin>
 </template>
 
 <script lang="ts" setup>
@@ -200,6 +203,7 @@
   import {
     getTrainRecordById,
     getTrainRecordQu,
+    stopTrain,
     updateTrainRecord,
   } from '@/api/train';
   import { Message } from '@arco-design/web-vue';
@@ -213,7 +217,10 @@
 
   const router = useRouter();
   const route = useRoute();
+
+  const loading = ref<boolean>(false);
   const trainId = ref<string>('');
+  const stopLoading = ref(false);
 
   // 题目总数
   const quCount = ref();
@@ -230,6 +237,7 @@
   });
 
   onMounted(async () => {
+    loading.value = true;
     // 获取路由参数
     trainId.value = route.params.trainId as string;
 
@@ -254,6 +262,7 @@
         nowQuestion.value = res.data;
       });
     }
+    loading.value = false;
   });
 
   const isNowNumber = (index: number) => {
@@ -265,11 +274,15 @@
   };
 
   const jumpQuestion = async (index: number) => {
+    // 开启加载
+    loading.value = true;
+
     nowQuIndex.value = index;
     await getTrainRecordQu({
       sort: nowQuIndex.value,
       trainId: trainId.value,
     }).then((res) => {
+      loading.value = false;
       nowQuestion.value = res.data;
     });
   };
@@ -419,7 +432,31 @@
     });
   };
 
-  const stopTrain = () => {};
+  const stop = async () => {
+    // 开始结束训练按钮加载状态
+    stopLoading.value = true;
+    await stopTrain(trainId.value).then((res: any) => {
+      stopLoading.value = false;
+      if (res.data === true) {
+        Message.success({
+          content: '结束训练',
+          duration: 2000,
+        });
+        // 跳转结果页
+        router.replace({
+          name: 'TrainResult',
+          params: {
+            trainId: trainId.value,
+          },
+        });
+      } else {
+        Message.warning({
+          content: res.info,
+          duration: 2000,
+        });
+      }
+    });
+  };
 </script>
 
 <style scoped></style>

@@ -44,6 +44,17 @@ const TRAIN: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
+    {
+      path: 'train-result/:trainId',
+      name: 'TrainResult',
+      component: () => import('@/views/train/train-result/index.vue'),
+      meta: {
+        locale: 'menu.train.trainResult',
+        requiresAuth: true,
+        hideInMenu: true,
+        roles: ['*'],
+      },
+    },
   ],
 };
 

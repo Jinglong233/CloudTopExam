@@ -19,6 +19,7 @@ export default {
   'menu.user': 'User Center',
   'menu.arcoWebsite': 'Arco Design',
   'menu.faq': 'FAQ',
+  'menu.GitHub': 'GitHub',
   'navbar.docs': 'Docs',
   'navbar.action.locale': 'Switch to English',
   ...localeSettings,

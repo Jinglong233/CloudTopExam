@@ -3,6 +3,7 @@ export default {
   'menu.train.repoTrain': 'repoTrain',
   'menu.train.trainRecord': 'TrainRecord',
   'menu.train.repoDetail': 'RepoDetail',
+  'menu.train.trainResult': 'TrainResult',
 
   'train.columns.title': 'Title',
   'train.columns.objCount': 'ObjCount',
