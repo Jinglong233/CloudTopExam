@@ -7,48 +7,30 @@
       :title="$t('menu.exam.correctList')"
     >
       <!--查询栏-->
-      <a-space align="center">
-        <!--考试标题-->
-        <a-input
-          v-model="examSearch.titleFuzzy"
-          :placeholder="$t('correctManager.placeholder.title')"
-          style="width: 320px"
-          @input="handleChange"
-        />
-
-        <!--开放类型-->
+      <a-space align="center" style="margin-bottom: 10px">
+        <!--作答状态-->
         <a-select
-          v-model="examSearch.openType"
-          :placeholder="$t('correctManager.placeholder.openType')"
+          v-model="correctSearch.state"
+          placeholder="请选择作答状态"
           style="width: 250px"
           allow-clear
-          @change="handleChange"
         >
-          <a-option value="0">完全公开</a-option>
-          <a-option value="1">指定学生</a-option>
-          <a-option value="2">指定部门</a-option>
+          <a-option value="0">未作答</a-option>
+          <a-option value="1">未完成</a-option>
+          <a-option value="2">已交卷</a-option>
         </a-select>
 
-        <!--考试时间-->
-        <a-space>
-          <a-date-picker
-            v-model="examSearch.startTimeStart"
-            style="width: 220px; margin: 0 24px 24px 0"
-            show-time
-            :time-picker-props="{ defaultValue: '09:09:06' }"
-            :placeholder="t('correctManager.placeholder.startTime')"
-            format="YYYY-MM-DD HH:mm:ss"
-            @ok="handleChange"
-          />
-          <a-date-picker
-            v-model="examSearch.endTimeEnd"
-            style="width: 220px; margin: 0 24px 24px 0"
-            show-time
-            :placeholder="t('correctManager.placeholder.endTime')"
-            format="YYYY-MM-DD hh:mm"
-            @ok="handleChange"
-          />
-        </a-space>
+        <!--阅卷状态-->
+        <a-select
+          v-model="correctSearch.handState"
+          placeholder="请选择阅卷状态"
+          style="width: 250px"
+          allow-clear
+        >
+          <a-option value="0">未作答</a-option>
+          <a-option value="1">未完成</a-option>
+          <a-option value="2">已交卷</a-option>
+        </a-select>
       </a-space>
       <a-divider style="margin-top: 0" />
       <a-table
@@ -57,6 +39,17 @@
         :columns="columns"
         :data="ExamList"
         :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
       >
         <template #openType="{ record }">
           <template v-if="record.exam.openType === 0">完全公开</template>
@@ -116,23 +109,28 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useRoute, useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import {
-    getCorrectExamByParam,
-    getExamList,
-    getExamRecordByExamId,
-  } from '@/api/exam';
-  import { ExamQuery } from '@/types/model/query/ExamQuery';
+  import { getCorrectExamByParam, getExamRecordByExamId } from '@/api/exam';
   import { useUserStore } from '@/store';
   import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
   import { Message } from '@arco-design/web-vue';
+  import { SimplePage } from '@/types/model/po/SimplePage';
+  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   const router = useRouter();
   const route = useRoute();
@@ -143,18 +141,33 @@
   const ExamList = ref<CorrectUserExamUserVO[]>();
 
   // 查询表单
-  const examSearch = ref<ExamQuery>({});
+  const correctSearch = ref<ExamRecordQuery>({});
 
-  onMounted(async () => {
-    examId.value = route.params.examId;
-
+  const reloadCorrectList = async (examRecordQuery: ExamRecordQuery) => {
     // 获取该考试对应的考试人员记录
-    await getExamRecordByExamId(examId.value as string).then((res: any) => {
+    await getExamRecordByExamId({
+      examId: examId.value,
+      ...examRecordQuery,
+    }).then((res: any) => {
       setLoading(true);
       ExamList.value = res.data;
       setLoading(false);
     });
+  };
+
+  onMounted(async () => {
+    examId.value = route.params.examId;
+    await reloadCorrectList(pageInfo.value);
   });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
@@ -223,15 +236,6 @@
     },
   ]);
 
-  // 查询考试
-  const handleChange = async () => {
-    examSearch.value.endTimeStart = '';
-    examSearch.value.startTimeEnd = '';
-    await getCorrectExamByParam(examSearch.value).then((res: any) => {
-      ExamList.value = res.data;
-    });
-  };
-
   // 前往该用户作答的详情页
   const goCorrect = (examRecord: any) => {
     if (examRecord.state === 2 || examRecord.handState === 1) {
@@ -253,6 +257,18 @@
       });
     }
   };
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, correctSearch.value],
+    async (
+      [newPageInfo, oldPageInfo],
+      [newCorrectSearch, oldCorrectSearch]
+    ) => {
+      // await reloadPaperList({ ...pageInfo.value, ...correctSearch.value });
+    },
+    { deep: true }
+  );
 </script>
 
 <style scoped lang="less">

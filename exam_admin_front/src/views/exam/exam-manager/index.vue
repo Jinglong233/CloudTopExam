@@ -1,104 +1,115 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['menu.exam', 'menu.exam.examManager']" />
-    <a-scrollbar type="track" style="height: 600px; overflow: auto">
-      <a-card class="general-card" :title="$t('menu.exam.examManager')">
-        <!--查询栏-->
-        <a-space align="center">
-          <!--考试标题-->
-          <a-input
-            v-model="examSearch.titleFuzzy"
-            :placeholder="$t('examManager.placeholder.title')"
-            style="width: 320px"
-            @input="handleChange"
-          />
+    <a-card
+      class="general-card"
+      :title="$t('menu.exam.examManager')"
+      style="height: 680px"
+    >
+      <!--查询栏-->
+      <a-space align="center" style="margin-bottom: 10px">
+        <!--考试标题-->
+        <a-input
+          v-model="examSearch.titleFuzzy"
+          :placeholder="$t('examManager.placeholder.title')"
+          style="width: 320px"
+          @input="handleChange"
+        />
 
-          <!--开放类型-->
-          <a-select
-            v-model="examSearch.openType"
-            :placeholder="$t('examManager.placeholder.openType')"
-            style="width: 250px"
-            allow-clear
-            @change="handleChange"
-          >
-            <a-option value="0">完全公开</a-option>
-            <a-option value="1">指定学生</a-option>
-            <a-option value="2">指定部门</a-option>
-          </a-select>
-
-          <!--考试时间-->
-          <a-space>
-            <a-date-picker
-              v-model="examSearch.startTimeStart"
-              style="width: 220px; margin: 0 24px 24px 0"
-              show-time
-              :time-picker-props="{ defaultValue: '09:09:06' }"
-              :placeholder="t('examManager.placeholder.startTime')"
-              format="YYYY-MM-DD HH:mm:ss"
-              @ok="handleChange"
-            />
-            <a-date-picker
-              v-model="examSearch.endTimeEnd"
-              style="width: 220px; margin: 0 24px 24px 0"
-              show-time
-              :placeholder="t('examManager.placeholder.endTime')"
-              format="YYYY-MM-DD hh:mm"
-              @ok="handleChange"
-            />
-          </a-space>
-        </a-space>
-        <a-divider style="margin-top: 0" />
-        <a-row style="margin-bottom: 16px">
-          <a-col :span="12">
-            <a-space>
-              <a-button type="primary" @click="goAddExam">
-                <template #icon>
-                  <icon-plus />
-                </template>
-                {{ $t('examManager.operation.create') }}
-              </a-button>
-            </a-space>
-          </a-col>
-        </a-row>
-
-        <a-table
-          row-key="id"
-          :loading="loading"
-          :columns="columns"
-          :data="ExamList"
-          :bordered="false"
+        <!--开放类型-->
+        <a-select
+          v-model="examSearch.openType"
+          :placeholder="$t('examManager.placeholder.openType')"
+          style="width: 250px"
+          allow-clear
+          @change="handleChange"
         >
-          <template #openType="{ record }">
-            <template v-if="record.openType === 0">完全公开</template>
-            <template v-if="record.openType === 1">指定学生</template>
-          </template>
+          <a-option value="0">完全公开</a-option>
+          <a-option value="1">指定学生</a-option>
+          <a-option value="2">指定部门</a-option>
+        </a-select>
 
-          <template #examTime="{ record }">
-            {{ record.startTime }} ~ {{ record.endTime }}
-          </template>
+        <!--考试时间-->
+        <a-date-picker
+          v-model="examSearch.startTimeStart"
+          style="width: 220px"
+          show-time
+          :time-picker-props="{ defaultValue: '09:09:06' }"
+          :placeholder="t('examManager.placeholder.startTime')"
+          format="YYYY-MM-DD HH:mm:ss"
+          @ok="handleChange"
+        />
+        <a-date-picker
+          v-model="examSearch.endTimeEnd"
+          style="width: 220px"
+          show-time
+          :placeholder="t('examManager.placeholder.endTime')"
+          format="YYYY-MM-DD hh:mm"
+          @ok="handleChange"
+        />
+      </a-space>
+      <a-divider style="margin-top: 0" />
+      <a-row style="margin-bottom: 16px">
+        <a-col :span="12">
+          <a-space>
+            <a-button type="primary" @click="goAddExam">
+              <template #icon>
+                <icon-plus />
+              </template>
+              {{ $t('examManager.operation.create') }}
+            </a-button>
+          </a-space>
+        </a-col>
+      </a-row>
 
-          <template #option="{ record }">
-            <a-space>
-              <a-button type="primary" @click="handleModify(record)">
-                {{ $t('examManager.columns.options.detail') }}
-              </a-button>
-              <a-button
-                type="primary"
-                status="danger"
-                @click="handleDelete(record.id)"
-              >
-                {{ $t('examManager.columns.options.delete') }}
-              </a-button>
-            </a-space>
-          </template>
-        </a-table>
-      </a-card>
-    </a-scrollbar>
+      <a-table
+        row-key="id"
+        :loading="loading"
+        :columns="columns"
+        :data="ExamList"
+        :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
+      >
+        <template #openType="{ record }">
+          <template v-if="record.openType === 0">完全公开</template>
+          <template v-if="record.openType === 1">指定学生</template>
+        </template>
+
+        <template #examTime="{ record }">
+          {{ record.startTime }} ~ {{ record.endTime }}
+        </template>
+
+        <template #option="{ record }">
+          <a-space>
+            <a-button type="primary" @click="handleModify(record)">
+              {{ $t('examManager.columns.options.detail') }}
+            </a-button>
+            <a-button
+              type="primary"
+              status="danger"
+              @click="handleDelete(record.id)"
+            >
+              {{ $t('examManager.columns.options.delete') }}
+            </a-button>
+          </a-space>
+        </template>
+      </a-table>
+    </a-card>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref, toRaw } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
@@ -107,9 +118,18 @@
   import { deleteExamById, getExamList } from '@/api/exam';
   import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { ExamVO } from '@/types/model/vo/ExamVO';
+  import { SimplePage } from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   const router = useRouter();
   // 添加考试表单
@@ -128,16 +148,29 @@
   const examSearch = ref<ExamQuery>({});
 
   // 获取考试列表
-  const reloadExamList = async () => {
+  const reloadExamList = async (examQuery: ExamQuery) => {
     setLoading(true);
-    await getExamList({}).then((res: any) => {
-      ExamList.value = res.data;
+    await getExamList(examQuery).then((res: any) => {
+      ExamList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
     });
     setLoading(false);
   };
   onMounted(async () => {
-    await reloadExamList();
+    await reloadExamList(pageInfo.value);
   });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
@@ -242,7 +275,7 @@
               content: '考试删除失败',
             });
           }
-          await reloadExamList();
+          await reloadExamList(pageInfo.value);
         });
       },
     });
@@ -254,6 +287,15 @@
       path: 'select-exam-paper',
     });
   };
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, examSearch.value],
+    async ([newPageInfo, oldPageInfo], [newExamSearch, oldExamSearch]) => {
+      await reloadExamList({ ...pageInfo.value, ...examSearch.value });
+    },
+    { deep: true }
+  );
 </script>
 
 <style scoped lang="less">

@@ -7,6 +7,7 @@ import { ExamVO } from '@/types/model/vo/ExamVO';
 import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
 import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
 import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
+import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 
 /**
  * 获取考试列表
@@ -60,26 +61,17 @@ export function deleteExamById(examId: string) {
 /**
  * 获取阅卷信息
  */
-export function getCorrectExam(userId: string) {
-  return axios.post<CorrectExamVO[]>('/api/exam/getCorrectExam', userId, {
-    headers: {
-      'Content-Type': 'text/plain',
-    },
-  });
+export function getCorrectExam(examQuery: ExamQuery) {
+  return axios.post<CorrectExamVO[]>('/api/exam/getCorrectExam', examQuery);
 }
 
 /**
  * 获取阅卷信息
  */
-export function getExamRecordByExamId(examId: string) {
+export function getExamRecordByExamId(examRecordQuery: ExamRecordQuery) {
   return axios.post<CorrectUserExamUserVO[]>(
     '/api/examRecord/getExamRecordByExamId',
-    examId,
-    {
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    }
+    examRecordQuery
   );
 }
 

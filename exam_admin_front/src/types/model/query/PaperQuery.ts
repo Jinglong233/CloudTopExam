@@ -1,4 +1,6 @@
-export interface PaperQuery {
+import { SimplePage } from '@/types/model/po/SimplePage';
+
+export interface PaperQuery extends SimplePage {
   /**
    * 试卷ID
    */

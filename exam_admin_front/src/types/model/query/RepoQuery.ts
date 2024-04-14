@@ -1,4 +1,6 @@
-export interface RepoQuery {
+import { SimplePage } from '@/types/model/po/SimplePage';
+
+export interface RepoQuery extends SimplePage {
   /**
    * ID
    */

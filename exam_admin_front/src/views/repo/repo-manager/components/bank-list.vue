@@ -80,7 +80,7 @@
               showTooltip: true,
             }"
           >
-            {{ `备注：${repo.remark}` }}
+            {{ `备注：${repo.remark === null ? '空' : repo.remark}` }}
           </a-typography-paragraph>
           <template #skeleton>
             <a-skeleton :animation="true">

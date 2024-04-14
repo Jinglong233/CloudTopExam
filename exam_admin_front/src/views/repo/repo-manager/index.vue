@@ -22,7 +22,7 @@
               />
               <!--部门搜索-->
               <a-tree-select
-                v-model="searchForm.deptCode"
+                v-model="searchForm.deptCodeFuzzy"
                 placeholder="选择题库所属部门"
                 :data="deptTree"
                 :field-names="{
@@ -32,12 +32,12 @@
                 }"
                 :style="{ width: '250px' }"
                 :allow-clear="true"
-                @change="handleChange"
+                @change="handleSelectChange"
               />
-              <a-checkbox v-model="searchForm.isExam" @change="handleChange"
+              <a-checkbox :value="1" @change="handleExamChange"
                 >是否用于考试</a-checkbox
               >
-              <a-checkbox v-model="searchForm.isTrain" @change="handleChange"
+              <a-checkbox :value="1" @change="handleTrainChange"
                 >是否用于训练</a-checkbox
               >
 
@@ -52,12 +52,26 @@
           </a-row>
           <a-divider />
           <a-row>
-            <BankList
-              :repo-list="repoList"
-              :loading="loading"
-              style="margin-top: 20px"
-              @reload-repo-list="reloadRepoList"
-            />
+            <a-scrollbar style="height: 450px; overflow: auto">
+              <BankList
+                :repo-list="repoList"
+                :loading="loading"
+                style="margin-top: 20px"
+                @reload-repo-list="reloadRepoList"
+              />
+            </a-scrollbar>
+            <div style="margin-top: 10px; flex: auto">
+              <a-pagination
+                style="float: right"
+                :show-total="true"
+                :show-page-size="true"
+                :total="pageInfo.total"
+                :page-size="pageInfo.pageSize"
+                :current="pageInfo.pageNo"
+                @change="pageChange"
+                @page-size-change="pageSizeChange"
+              />
+            </div>
           </a-row>
         </a-card>
       </a-col>
@@ -67,15 +81,25 @@
 
 <script lang="ts" setup>
   import { RepoQuery } from '@/types/model/query/RepoQuery';
-  import { onMounted, ref, toRaw } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import BankList from '@/views/repo/repo-manager/components/bank-list.vue';
   import { getDeptTree } from '@/api/department';
   import { getRepoList } from '@/api/repo';
   import { Repo } from '@/types/model/po/Repo';
   import { SubjectTreeVO } from '@/types/model/vo/SubjectTreeVO';
   import { getSubjectTree } from '@/api/subject';
+  import { SimplePage } from '@/types/model/po/SimplePage';
 
   const loading = ref<boolean>(false);
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
+
   // 部门树列表
   const deptTree = ref<[]>();
   const subjectTree = ref<SubjectTreeVO[]>([]);
@@ -84,11 +108,14 @@
   const repoList = ref<Repo[]>();
   // 查询表单
   const searchForm = ref<RepoQuery>({});
-  const reloadRepoList = async () => {
+  const reloadRepoList = async (repoQuery: RepoQuery) => {
     loading.value = true;
-    searchForm.value = {};
-    await getRepoList(searchForm.value).then((res: any) => {
-      repoList.value = res.data;
+    await getRepoList(repoQuery).then((res: any) => {
+      repoList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
     });
     loading.value = false;
   };
@@ -97,24 +124,51 @@
     await getDeptTree().then((res: any) => {
       deptTree.value = res.data;
     });
-    await reloadRepoList();
+    await reloadRepoList({ ...pageInfo.value } as RepoQuery);
     await getSubjectTree().then((res: any) => {
       subjectTree.value = res.data;
     });
   });
 
-  // 查询
-  const handleChange = async () => {
-    // 拷贝一份searchForm，防止Boolean和int转换，解决复选框出现的问题
-    const copySearchFrom = {
-      ...toRaw(searchForm.value),
-      isExam: searchForm.value.isExam ? 1 : null,
-      isTrain: searchForm.value.isTrain ? 1 : null,
-    } as RepoQuery;
-    await getRepoList(copySearchFrom).then((res: any) => {
-      repoList.value = res.data;
-    });
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
   };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
+
+  // 处理下拉框变化
+  const handleSelectChange = (deptCode: string) => {
+    searchForm.value.deptCodeFuzzy = deptCode;
+  };
+
+  // 处理
+  const handleTrainChange = async (isTrain: number) => {
+    if (isTrain) {
+      searchForm.value.isTrain = Number(isTrain);
+    } else {
+      delete searchForm.value.isTrain;
+    }
+  };
+  const handleExamChange = async (isExam: number) => {
+    if (isExam) {
+      searchForm.value.isExam = Number(isExam);
+    } else {
+      delete searchForm.value.isExam;
+    }
+  };
+
+  watch(
+    [pageInfo.value, searchForm.value],
+    async ([newPageInfo, oldPageInfo], [newSearchForm, oldSearchForm]) => {
+      await reloadRepoList({ ...pageInfo.value, ...searchForm.value });
+    },
+    {
+      deep: true,
+    }
+  );
 </script>
 
 <style scoped lang="less">

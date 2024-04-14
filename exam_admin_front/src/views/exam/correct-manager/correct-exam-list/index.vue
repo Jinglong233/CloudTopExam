@@ -7,13 +7,12 @@
       :title="$t('menu.exam.correctExam')"
     >
       <!--查询栏-->
-      <a-space align="center">
+      <a-space align="center" style="margin-bottom: 10px">
         <!--考试标题-->
         <a-input
           v-model="examSearch.titleFuzzy"
           :placeholder="$t('examManager.placeholder.title')"
           style="width: 320px"
-          @input="handleChange"
         />
 
         <!--开放类型-->
@@ -22,7 +21,6 @@
           :placeholder="$t('examManager.placeholder.openType')"
           style="width: 250px"
           allow-clear
-          @change="handleChange"
         >
           <a-option value="0">完全公开</a-option>
           <a-option value="1">指定学生</a-option>
@@ -30,27 +28,21 @@
         </a-select>
 
         <!--考试时间-->
-        <a-space>
-          <a-date-picker
-            v-model="examSearch.startTimeStart"
-            style="width: 220px; margin: 0 24px 24px 0"
-            show-time
-            :time-picker-props="{ defaultValue: '09:09:06' }"
-            :placeholder="t('examManager.placeholder.startTime')"
-            format="YYYY-MM-DD HH:mm:ss"
-            @cancel="handleChange"
-            @ok="handleChange"
-          />
-          <a-date-picker
-            v-model="examSearch.endTimeEnd"
-            style="width: 220px; margin: 0 24px 24px 0"
-            show-time
-            :placeholder="t('examManager.placeholder.endTime')"
-            format="YYYY-MM-DD hh:mm"
-            @cancel="handleChange"
-            @ok="handleChange"
-          />
-        </a-space>
+        <a-date-picker
+          v-model="examSearch.startTimeStart"
+          style="width: 220px"
+          show-time
+          :time-picker-props="{ defaultValue: '09:09:06' }"
+          :placeholder="t('examManager.placeholder.startTime')"
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+        <a-date-picker
+          v-model="examSearch.endTimeEnd"
+          style="width: 220px"
+          show-time
+          :placeholder="t('examManager.placeholder.endTime')"
+          format="YYYY-MM-DD HH:mm:ss"
+        />
       </a-space>
       <a-divider style="margin-top: 0" />
       <a-table
@@ -59,6 +51,17 @@
         :columns="columns"
         :data="ExamList"
         :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
       >
         <template #openType="{ record }">
           <template v-if="record.exam.openType === 0">完全公开</template>
@@ -88,22 +91,27 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import {
-    getCorrectExam,
-    getCorrectExamByParam,
-    getExamList,
-  } from '@/api/exam';
+  import { getCorrectExam, getCorrectExamByParam } from '@/api/exam';
   import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { useUserStore } from '@/store';
   import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
+  import { SimplePage } from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   const router = useRouter();
   const userStore = useUserStore();
@@ -117,15 +125,22 @@
   // 查询表单
   const examSearch = ref<ExamQuery>({});
 
-  // 获取考试列表
-  const reloadExamList = async (examQuery: ExamQuery) => {
-    setLoading(true);
-    await getExamList(examQuery).then((res: any) => {
-      ExamList.value = res.data;
-    });
-    setLoading(false);
+  const reloadCorrectExam = async (examQuery: ExamQuery) => {
+    await getCorrectExam({ ...examQuery, createBy: userStore.id }).then(
+      (res: any) => {
+        setLoading(true);
+        ExamList.value = res.data.list;
+        pageInfo.value.total = res.data.totalCount;
+        pageInfo.value.pageSize = res.data.pageSize;
+        pageInfo.value.pageNo = res.data.pageNo;
+        pageInfo.value.pageTotal = res.data.pageTotal;
+        setLoading(false);
+      }
+    );
   };
+
   onMounted(async () => {
+    // todo
     // if (userStore.role === 'admin') {
     //   // 1. 如果是管理员可以查看所有阅卷
     //   await reloadExamList({});
@@ -133,13 +148,17 @@
     //   // 2. 教师只能获取自己创建的考试
     //   await reloadExamList({ createBy: userStore.id });
     // }
-
-    await getCorrectExam(userStore.id as string).then((res: any) => {
-      setLoading(true);
-      ExamList.value = res.data;
-      setLoading(false);
-    });
+    await reloadCorrectExam(pageInfo.value);
   });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
@@ -200,15 +219,6 @@
     },
   ]);
 
-  // 查询考试
-  const handleChange = async () => {
-    examSearch.value.endTimeStart = '';
-    examSearch.value.startTimeEnd = '';
-    await getCorrectExamByParam(examSearch.value).then((res: any) => {
-      ExamList.value = res.data;
-    });
-  };
-
   // 前往考试对应的批阅列表
   const goCorrectList = (examId: string) => {
     router.resolve({
@@ -219,6 +229,15 @@
     });
     window.open(`/exam/correct-user-list/${examId}`, '_black');
   };
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, examSearch.value],
+    async ([newPageInfo, oldPageInfo], [newExamSearch, oldExamSearch]) => {
+      await reloadCorrectExam({ ...pageInfo.value, ...examSearch.value });
+    },
+    { deep: true }
+  );
 </script>
 
 <style scoped lang="less">
