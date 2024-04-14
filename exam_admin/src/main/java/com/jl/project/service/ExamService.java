@@ -72,7 +72,7 @@ public interface ExamService {
      * @param query
      * @return
      */
-    List<ExamVO> loadDatalist(ExamQuery query);
+    PaginationResultVO<ExamVO> loadDatalist(ExamQuery query);
 
     /**
      * 获取服务端时间
@@ -90,7 +90,7 @@ public interface ExamService {
      * @param examId
      * @return
      */
-    List<CorrectExamVO> getCorrectExam(String userId);
+    PaginationResultVO<CorrectExamVO> getCorrectExam(ExamQuery examQuery);
 
     List<CorrectExamVO> getCorrectExamByParam(ExamQuery query);
 }

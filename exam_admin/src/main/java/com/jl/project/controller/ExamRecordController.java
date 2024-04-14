@@ -4,6 +4,7 @@ import com.jl.project.entity.dto.UpdateExamRecordDTO;
 import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.query.ExamRecordQuery;
 import com.jl.project.entity.vo.CorrectUserExamUserVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.ExamRecordService;
@@ -38,10 +39,10 @@ public class ExamRecordController extends ABaseController {
      * 根据考试Id获取考试记录
      */
     @RequestMapping("getExamRecordByExamId")
-    public ResponseVO getExamRecordByExamId(@RequestBody String examId) {
-        List<CorrectUserExamUserVO> result = null;
+    public ResponseVO getExamRecordByExamId(@RequestBody ExamRecordQuery examRecordQuery) {
+        PaginationResultVO<CorrectUserExamUserVO> result = null;
         try {
-            result = examRecordService.getExamRecordByExamId(examId);
+            result = examRecordService.getExamRecordByExamId(examRecordQuery);
         } catch (BusinessException e) {
             return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }

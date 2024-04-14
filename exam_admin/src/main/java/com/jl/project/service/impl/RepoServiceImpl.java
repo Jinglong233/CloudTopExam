@@ -160,29 +160,11 @@ public class RepoServiceImpl implements RepoService {
      * @return
      */
     @Override
-    public List<Repo> loadDatalist(RepoQuery query) throws BusinessException {
+    public PaginationResultVO<Repo> loadDatalist(RepoQuery query) throws BusinessException {
         if (query == null) {
             throw new BusinessException("缺少参数");
         }
-        List<Repo> repos = new ArrayList<>();
-        // 1. 看是否有部门编码
-        String deptCode = query.getDeptCode();
-        if (deptCode != null && !"".equals(deptCode)) {
-            // 2. 查询所有的子部门
-            List<String> codeList = new ArrayList<>();
-            codeList.add(deptCode);
-            departmentService.getChildrenDeptCode(codeList, deptCode);
-            if (codeList != null && codeList.size() != 0) {
-                for (String code : codeList) {
-                    query.setDeptCode(code);
-                    List<Repo> list = repoMapper.selectList(query);
-                    repos.addAll(list);
-                }
-            }
-        } else {
-            repos = repoMapper.selectList(query);
-        }
-
+        PaginationResultVO<Repo> repos = findListByPage(query);
         return repos;
     }
 

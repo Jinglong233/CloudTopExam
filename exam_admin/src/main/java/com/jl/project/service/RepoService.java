@@ -70,5 +70,5 @@ public interface RepoService {
 	 */
     ClassfiyByQuTypeVO classifyByQuType(String repoId, Integer quType) throws BusinessException;
 
-	List<Repo> loadDatalist(RepoQuery query);
+	PaginationResultVO<Repo> loadDatalist(RepoQuery query);
 }

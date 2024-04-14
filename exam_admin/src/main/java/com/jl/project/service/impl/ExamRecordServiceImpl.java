@@ -119,7 +119,7 @@ public class ExamRecordServiceImpl implements ExamRecordService {
         String id = updateExamRecordDTO.getId();
         ExamRecord examRecord = updateExamRecordDTO.getExamRecord();
         Integer handState = examRecord.getHandState();
-        if(handState == 1){
+        if (handState == 1) {
             examRecord.setReviewTime(new Date());
         }
 
@@ -137,20 +137,29 @@ public class ExamRecordServiceImpl implements ExamRecordService {
     /**
      * 根据考试Id获取考试记录
      *
-     * @param examId
+     * @param examRecordQuery
      * @return
      */
     @Override
-    public List<CorrectUserExamUserVO> getExamRecordByExamId(String examId) throws BusinessException {
-        if (examId == null) {
+    public PaginationResultVO<CorrectUserExamUserVO> getExamRecordByExamId(ExamRecordQuery examRecordQuery) throws BusinessException {
+        if (examRecordQuery == null) {
             throw new BusinessException("缺少参数");
         }
+
+        String examId = examRecordQuery.getExamId();
+        if (examId == null || "".equals(examId)) {
+            throw new BusinessException("缺少参数");
+        }
+
+
+        PaginationResultVO<CorrectUserExamUserVO> resultVO = new PaginationResultVO<>();
         // 1. 获取考试对应的考试记录
-        ExamRecordQuery examRecordQuery = new ExamRecordQuery();
-        examRecordQuery.setExamId(examId);
-        List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
+
+        PaginationResultVO<ExamRecord> paginationResultVO = findListByPage(examRecordQuery);
+        List<ExamRecord> examRecords = paginationResultVO.getList();
         if (examRecords == null) {
-            return Collections.emptyList();
+            resultVO.setList(Collections.emptyList());
+            return resultVO;
         }
 
 
@@ -174,7 +183,9 @@ public class ExamRecordServiceImpl implements ExamRecordService {
             examUserVO.setExamRecord(examRecord);
             correctUserExamUserVOS.add(examUserVO);
         }
-        return correctUserExamUserVOS;
+
+        resultVO.setList(correctUserExamUserVOS);
+        return resultVO;
     }
 
 }

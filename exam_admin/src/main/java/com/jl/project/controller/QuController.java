@@ -151,10 +151,10 @@ public class QuController extends ABaseController {
      * 导入题库
      */
     @RequestMapping("importQu")
-    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file) throws BusinessException, IOException {
+    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file,@RequestPart("repoId") String repoId) throws BusinessException, IOException {
         Boolean result = null;
         try {
-            result = quService.importQuestions(file);
+            result = quService.importQuestions(file,repoId);
         } catch (BusinessException e) {
             return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }

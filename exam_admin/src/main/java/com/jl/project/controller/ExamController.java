@@ -6,6 +6,7 @@ import com.jl.project.entity.po.Exam;
 import com.jl.project.entity.query.ExamQuery;
 import com.jl.project.entity.vo.CorrectExamVO;
 import com.jl.project.entity.vo.ExamVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.ExamService;
@@ -34,7 +35,7 @@ public class ExamController extends ABaseController {
      */
     @RequestMapping("loadDataList")
     public ResponseVO loadDatalist(@RequestBody ExamQuery query) throws BusinessException {
-        List<ExamVO> result = examService.loadDatalist(query);
+        PaginationResultVO<ExamVO> result = examService.loadDatalist(query);
         return getSuccessResponseVO(result);
     }
 
@@ -56,11 +57,11 @@ public class ExamController extends ABaseController {
      * 获取批阅试卷
      */
     @RequestMapping("getCorrectExam")
-    public ResponseVO getCorrectExam(@RequestBody String userId) {
+    public ResponseVO getCorrectExam(@RequestBody ExamQuery examQuery) {
 
-        List<CorrectExamVO> result = null;
+        PaginationResultVO<CorrectExamVO> result = null;
         try {
-            result = examService.getCorrectExam(userId);
+            result = examService.getCorrectExam(examQuery);
         } catch (BusinessException e) {
             return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }

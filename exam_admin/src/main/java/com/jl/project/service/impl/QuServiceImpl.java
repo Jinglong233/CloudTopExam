@@ -571,11 +571,15 @@ public class QuServiceImpl implements QuService {
 
     @Override
     @Transactional
-    public Boolean importQuestions(MultipartFile file) {
+    public Boolean importQuestions(MultipartFile file,String repoId) throws BusinessException{
         String filename = file.getOriginalFilename();
 
         if (!(filename.endsWith(".xls") || filename.endsWith(".xlsx"))) {
             throw new BusinessException("文件上传格式错误，请重新上传");
+        }
+
+        if(repoId == null || "".equals(repoId.trim())){
+            throw new BusinessException("请选择需要导入的题库");
         }
 
 
@@ -607,12 +611,20 @@ public class QuServiceImpl implements QuService {
         int subCount = 0;
         // 客观题数
         int objCount = 0;
+
+        // 题目集合
+        List<Qu> quList = new ArrayList<>();
+
+        // 题目选项集合
+        List<QuAnswer> quAnswerList = new ArrayList<>();
+
         // 遍历行
         for (int i = 2; i < totalRow; i++) {
             Row row = sheet.getRow(i);
             Qu qu = new Qu();
-            // 设置所属题库(默认导入系统题库)
-            qu.setRepoId("ff86d60d27c943a0a16e2d7a04b9d2d4");
+            // 设置所属题库
+            qu.setRepoId(repoId);
+
             qu.setRepoText("系统题库");
             // 设置创建时间
             qu.setCreateTime(new Date());
@@ -702,11 +714,7 @@ public class QuServiceImpl implements QuService {
                             // 填空题的选项都是答案
                             quAnswer.setIsRight(1);
                         }
-
-                        Integer insert = quAnswerMapper.insert(quAnswer);
-                        if (insert <= 0) {
-                            throw new BusinessException("更新出错");
-                        }
+                        quAnswerList.add(quAnswer);
                     }
                 }
             } else {
@@ -730,25 +738,32 @@ public class QuServiceImpl implements QuService {
                     rightAnswer.setIsRight(0);
                     errorAnswer.setIsRight(1);
                 }
-                // 直接更新两个
-                Integer insert = quAnswerMapper.insert(rightAnswer);
-                if (insert <= 0) {
-                    throw new BusinessException("更新出错");
-                }
-                insert = quAnswerMapper.insert(errorAnswer);
-                if (insert <= 0) {
-                    throw new BusinessException("更新出错");
-                }
+
+                quAnswerList.add(rightAnswer);
+                quAnswerList.add(errorAnswer);
             }
-            Integer insert = quMapper.insert(qu);
-            if (insert <= 0) {
-                throw new BusinessException("更新出错");
-            }
+
+            quList.add(qu);
             // 题数累加
             totalCount++;
         }
+        // 批量插入题目
+        Integer insert = quMapper.insertBatch(quList);
+        if (insert <= 0) {
+            throw new BusinessException("题目插入出错");
+        }
+
+        // 批量插入选项
+        Integer quAnswerInsert = quAnswerMapper.insertBatch(quAnswerList);
+        if (quAnswerInsert <= 0) {
+            throw new BusinessException("选项插入出错");
+        }
+
         // 更新关联题库
-        Repo repo = repoMapper.selectById("ff86d60d27c943a0a16e2d7a04b9d2d4");
+        Repo repo = repoMapper.selectById(repoId);
+        if(repo==null){
+            throw new BusinessException("请选择题库");
+        }
         repo.setSubCount(subCount);
         repo.setObjCount(objCount);
         repo.setTotalCount(totalCount);

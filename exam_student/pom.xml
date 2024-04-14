@@ -15,12 +15,22 @@
     <name>exam_student</name>
     <description>exam_student</description>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.jl.project</groupId>
             <artifactId>exam_common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+
+
     </dependencies>
 
 

@@ -5,6 +5,7 @@ import com.jl.project.entity.dto.UpdateRepoDTO;
 import com.jl.project.entity.po.Repo;
 import com.jl.project.entity.query.RepoQuery;
 import com.jl.project.entity.vo.ClassfiyByQuTypeVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.RepoService;
@@ -69,11 +70,11 @@ public class RepoController extends ABaseController {
     }
 
     /**
-     * 根据条件分页查询
+     * 根据条件查询（因为涉及到递归遍历子目录，所以这里不涉及分页查询）
      */
     @RequestMapping("loadDataList")
     public ResponseVO loadDatalist(@RequestBody RepoQuery query) throws BusinessException{
-        List<Repo> result = repoService.loadDatalist(query);
+        PaginationResultVO<Repo> result = repoService.loadDatalist(query);
         return getSuccessResponseVO(result);
     }
 

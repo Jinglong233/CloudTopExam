@@ -481,16 +481,22 @@ public class ExamServiceImpl implements ExamService {
      * @return
      */
     @Override
-    public List<ExamVO> loadDatalist(ExamQuery query) throws BusinessException {
+    public PaginationResultVO<ExamVO> loadDatalist(ExamQuery query) throws BusinessException {
         if (query == null) {
             throw new BusinessException("缺少参数");
         }
 
 
         // 1. 查询相关考试
-        List<Exam> list = examMapper.selectList(query);
+        PaginationResultVO<Exam> pageList = findListByPage(query);
+
+        PaginationResultVO<ExamVO> examVoList = new PaginationResultVO<>();
+
+        List<Exam> list = pageList.getList();
         if (list == null || list.size() == 0) {
-            return Collections.emptyList();
+            BeanUtil.copyProperties(pageList, examVoList);
+            examVoList.setList(new ArrayList<ExamVO>());
+            return examVoList;
         }
         List<ExamVO> examVOS = new ArrayList<>();
         for (Exam exam : list) {
@@ -508,7 +514,10 @@ public class ExamServiceImpl implements ExamService {
             examVO.setTotalCount(paper.getTotalCount());
             examVOS.add(examVO);
         }
-        return examVOS;
+
+        BeanUtil.copyProperties(pageList, examVoList);
+        examVoList.setList(examVOS);
+        return examVoList;
     }
 
 
@@ -541,7 +550,8 @@ public class ExamServiceImpl implements ExamService {
             String examId = examRecord.getExamId();
             ExamQuery examQuery = new ExamQuery();
             examQuery.setId(examId);
-            List<ExamVO> examVOS = loadDatalist(examQuery);
+            PaginationResultVO<ExamVO> examVOPaginationResultVO = loadDatalist(examQuery);
+            List<ExamVO> examVOS = examVOPaginationResultVO.getList();
             examVOList.addAll(examVOS);
         }
         return examVOList;
@@ -550,20 +560,26 @@ public class ExamServiceImpl implements ExamService {
     /**
      * 获取批阅试卷列表
      *
-     * @param userId
+     * @param examQuery
      * @return
      */
     @Override
-    public List<CorrectExamVO> getCorrectExam(String userId) {
-        if (userId == null) {
+    public PaginationResultVO<CorrectExamVO> getCorrectExam(ExamQuery examQuery) {
+        if (examQuery == null) {
             throw new BusinessException("缺少参数");
         }
 
+        String createBy = examQuery.getCreateBy();
+        if (createBy == null || "".equals(createBy)) {
+            throw new BusinessException("缺少参数");
+        }
+
+        PaginationResultVO<CorrectExamVO> resultVO = new PaginationResultVO<>();
+
 
         // 1. 查询该管理员或教师发布的考试
-        ExamQuery examQuery = new ExamQuery();
-        examQuery.setCreateBy(userId);
-        List<Exam> examList = examMapper.selectList(examQuery);
+        PaginationResultVO<Exam> paginationResultVO = findListByPage(examQuery);
+        List<Exam> examList = paginationResultVO.getList();
 
         List<CorrectExamVO> correctExamVOS = new ArrayList<>();
         // 2. 查看有多少人应该考试
@@ -596,9 +612,10 @@ public class ExamServiceImpl implements ExamService {
                 }
                 correctExamVOS.add(correctExamVO);
             }
-
         }
-        return correctExamVOS;
+        BeanUtil.copyProperties(paginationResultVO, resultVO);
+        resultVO.setList(correctExamVOS);
+        return resultVO;
     }
 
     @Override
@@ -707,7 +724,7 @@ public class ExamServiceImpl implements ExamService {
                         examRecord.setTotalScore(0);
                         // 更新
                         Integer result = examRecordMapper.updateById(examRecord, examRecord.getId());
-                        if(result <= 0){
+                        if (result <= 0) {
                             throw new BusinessException("更新考试记录失败");
                         }
 

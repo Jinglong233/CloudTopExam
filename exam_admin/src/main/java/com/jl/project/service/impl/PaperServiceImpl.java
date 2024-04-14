@@ -397,27 +397,11 @@ public class PaperServiceImpl implements PaperService {
      * @return
      */
     @Override
-    public List<Paper> loadDatalist(PaperQuery query) throws BusinessException {
+    public PaginationResultVO<Paper> loadDatalist(PaperQuery query) throws BusinessException {
         if (query == null) {
             throw new BusinessException("缺少参数");
         }
-        // 1. 查询部门信息（获取子部门）
-        String deptCode = query.getDeptCode();
-        if (deptCode != null && !"".equals(deptCode)) {
-            List<Paper> paperList = new ArrayList<>();
-            List<String> deptCodeList = new ArrayList<>();
-            deptCodeList.add(deptCode);
-            departmentService.getChildrenDeptCode(deptCodeList, deptCode);
-            if (deptCodeList != null && deptCodeList.size() != 0) {
-                for (String code : deptCodeList) {
-                    query.setDeptCode(code);
-                    List<Paper> list = paperMapper.selectList(query);
-                    paperList.addAll(list);
-                }
-            }
-            return paperList;
-        }
-        return paperMapper.selectList(query);
+        return findListByPage(query);
     }
 
 

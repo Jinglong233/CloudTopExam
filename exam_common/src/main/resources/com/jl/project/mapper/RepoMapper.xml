@@ -98,7 +98,7 @@
 			and id like concat('%', #{query.idFuzzy}, '%')
 		</if>
 		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
-			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
+			and dept_code like concat(#{query.deptCodeFuzzy}, '%')
 		</if>
 		<if test="query.deptTextFuzzy != null and query.deptTextFuzzy != '' ">
 			and dept_Text like concat('%', #{query.deptTextFuzzy}, '%')

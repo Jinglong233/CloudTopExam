@@ -16,7 +16,14 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>exam_common</name>
     <description>exam_common</description>
-
+    <dependencies>
+        <dependency>
+            <groupId>com.github.shibing624</groupId>
+            <artifactId>similarity</artifactId>
+            <version>1.1.6</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 
 </project>

@@ -65,5 +65,5 @@ public interface ExamRecordService {
 	 * @param examId
 	 * @return
 	 */
-    List<CorrectUserExamUserVO> getExamRecordByExamId(String examId);
+    PaginationResultVO<CorrectUserExamUserVO> getExamRecordByExamId(ExamRecordQuery examRecordQuery);
 }

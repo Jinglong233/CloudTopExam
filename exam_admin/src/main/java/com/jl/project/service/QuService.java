@@ -106,5 +106,5 @@ public interface QuService {
 	 * 导入题目
 	 * @param file
 	 */
-	Boolean importQuestions(MultipartFile file);
+	Boolean importQuestions(MultipartFile file,String repoId);
 }

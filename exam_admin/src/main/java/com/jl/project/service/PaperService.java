@@ -83,6 +83,6 @@ public interface PaperService {
      * @param query
      * @return
      */
-    List<Paper> loadDatalist(PaperQuery query);
+    PaginationResultVO<Paper> loadDatalist(PaperQuery query);
 
 }

@@ -13,7 +13,8 @@
           v-model="quSearch.contentFuzzy"
           :placeholder="$t('quManager.placeholder.content')"
           style="width: 250px"
-          @input="handleChange"
+          :allow-clear="true"
+          @change="handleChange"
         />
         <!--题型-->
         <a-select
@@ -52,21 +53,53 @@
               </template>
               添加
             </a-button>
-            <a-upload
-              action="http://localhost:8088/api/qu/importQu"
-              :headers="{
-                Authorization: userStore.token,
-              }"
-              name="file"
-              :show-file-list="false"
-              @success="handleSuccess"
-              @error="handleError"
-            >
-              <template #icon>
-                <icon-download />
-              </template>
-              {{ $t('quManager.operation.import') }}
-            </a-upload>
+            <!--批量导入题目对话框-->
+            <a-button type="primary" @click="handleClick()"> 导入 </a-button>
+            <a-modal v-model:visible="importVisible" :footer="false">
+              <template #title> 批量导入 </template>
+              <div>
+                <a-select
+                  :style="{ width: '320px' }"
+                  placeholder="请选择题库"
+                  @change="uploadRepoChange"
+                >
+                  <a-option
+                    v-for="repo in repoList"
+                    :key="repo.id"
+                    :value="repo.id"
+                  >
+                    {{ repo.title }}
+                  </a-option>
+                </a-select>
+              </div>
+              <div>
+                <!--文件上传组件-->
+                <a-upload
+                  ref="uploadRef"
+                  action="http://localhost:8088/api/qu/importQu"
+                  :auto-upload="false"
+                  accept="pdf"
+                  :headers="{
+                    Authorization: userStore.token,
+                  }"
+                  :data="{ repoId: uploadRepo }"
+                  name="file"
+                  @success="handleSuccess"
+                  @error="handleError"
+                >
+                  <template #icon>
+                    <icon-download />
+                  </template>
+                  <template #upload-button>
+                    <a-space>
+                      <a-button> 选择文件</a-button>
+                    </a-space>
+                  </template>
+                  {{ $t('quManager.operation.import') }}
+                </a-upload>
+              </div>
+            </a-modal>
+
             <a-upload action="/">
               <template #upload-button>
                 <a-button>
@@ -83,6 +116,17 @@
         :columns="columns"
         :data="quList"
         :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
       >
         <template #quType="{ record }">
           {{ getQuestionTypeName(Number(record.quType)) }}
@@ -111,7 +155,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref, toRaw } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
@@ -124,13 +168,25 @@
   import { Message, Modal } from '@arco-design/web-vue';
   import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
   import { useUserStore } from '@/store';
+  import { SimplePage } from '@/types/model/po/SimplePage';
   import { getQuestionTypeName } from '../../../api/common';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
 
+  // 批量导入题目对话框
+  const importVisible = ref(false);
+
   const userStore = useUserStore();
   const token = ref();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   // 题目列表
   const quList = ref<Qu[]>([]);
@@ -140,6 +196,11 @@
 
   // 查询表单
   const quSearch = ref<QuQuery>({});
+
+  // 选择的上传题库
+  const uploadRepo = ref<string>('');
+
+  const uploadRef = ref();
 
   const router = useRouter();
 
@@ -152,21 +213,41 @@
     });
   };
   // 获取题目列表
-  const reloadQuList = async () => {
+  const reloadQuList = async (arg: QuQuery) => {
     setLoading(true);
     // 获取题目列表
-    await getQuList({}).then((res: any) => {
+    await getQuList(arg).then((res: any) => {
       quList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
       setLoading(false);
     });
   };
   onMounted(async () => {
-    await reloadQuList();
+    await reloadQuList(pageInfo.value);
     await reloadRepoList();
     token.value = userStore.token;
-    console.log('userStore', toRaw(userStore.token));
+    // 上传题目默认是第一个题库
+    if (repoList.value && repoList.value.length !== 0) {
+      uploadRepo.value = repoList.value[0] as string;
+    }
   });
 
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
+
+  const handleClick = () => {
+    uploadRef.value = null;
+    importVisible.value = true;
+  };
   // 表头列名
   const columns = ref<TableColumnData[]>([
     {
@@ -203,13 +284,6 @@
     },
   ]);
 
-  // 查询题目
-  const handleChange = async () => {
-    await getQuList(quSearch.value).then((res: any) => {
-      quList.value = res.data.list;
-    });
-  };
-
   // 添加题目
   const goAdd = () => {
     router.push({
@@ -244,7 +318,7 @@
               content: '删除失败',
             });
           }
-          await reloadQuList();
+          await reloadQuList(pageInfo.value);
         });
       },
     });
@@ -252,12 +326,43 @@
 
   // 文件上传成功回调函数
   const handleSuccess = (item: FileItem) => {
+    Message.success({
+      content: '上传成功',
+      duration: 2000,
+    });
     console.log('success', item);
   };
   // 文件上传失败回调函数
   const handleError = (item: FileItem) => {
+    Message.error({
+      content: '上传失败',
+      duration: 2000,
+    });
     console.log('error', item);
   };
+
+  // 题目批量导入选择的题库改变的时候触发
+  const uploadRepoChange = (repo: any) => {
+    uploadRepo.value = repo;
+  };
+
+  // 监视查询数据及其页码变化
+  /* watch(
+    [pageInfo.value, quSearch.value],
+    async ([newPageInfo, oldPageInfo], [newQuSearch, oldQuSearch]) => {
+      await reloadQuList({ ...pageInfo.value, ...quSearch.value });
+    }
+  ); */
+
+  watch(pageInfo.value, async (newValue, oldValue) => {
+    console.log('pageInfo');
+    await reloadQuList({ ...pageInfo.value, ...quSearch.value });
+  });
+
+  watch(quSearch.value, async (newValue, oldValue) => {
+    console.log('quSearch');
+    await reloadQuList({ ...pageInfo.value, ...quSearch.value });
+  });
 </script>
 
 <style scoped lang="less">

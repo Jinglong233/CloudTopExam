@@ -31,7 +31,7 @@ public class TokenInterceptor implements HandlerInterceptor {
 
 
         String path = request.getServletPath();
-        if (path.matches("/student/login")) {
+        if (path.matches("/student/login") || path.matches("api/user/login")) {
             //不需要的拦截直接过
             return true;
         }

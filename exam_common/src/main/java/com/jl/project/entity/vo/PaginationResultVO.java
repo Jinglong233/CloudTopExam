@@ -32,7 +32,7 @@ public class PaginationResultVO<T> {
      */
     @Schema(description = "总页数")
     private Integer pageTotal;
-    @Schema(hidden = true)
+    @Schema
     private List<T> list = new ArrayList<T>();
 
     public PaginationResultVO(Integer totalCount, Integer pageSize, Integer pageNo, List<T> list) {
