@@ -16,7 +16,7 @@
               type="primary"
               shape="round"
               status="danger"
-              @click="reloadUserList()"
+              @click="clearUserSearch"
             >
               <template #icon>
                 <icon-refresh />
@@ -24,7 +24,7 @@
             </a-button>
           </a-space>
           <a-tree
-            v-model:selected-keys="userSearch.deptCode"
+            v-model:selected-keys="userSearch.deptCodeFuzzy"
             :field-names="{
               key: 'deptCode',
               title: 'deptName',
@@ -55,6 +55,8 @@
             <a-select
               v-if="userStore.role === 'admin'"
               v-model="userSearch.role"
+              :allow-clear="true"
+              style="width: 200px"
               :placeholder="$t('userList.form.placeholder.roles')"
             >
               <a-option value="student">学生</a-option>
@@ -64,6 +66,8 @@
             <!--状态-->
             <a-select
               v-model="userSearch.state"
+              :allow-clear="true"
+              style="width: 200px"
               :placeholder="$t('userList.form.placeholder.state')"
             >
               <a-option value="0">正常</a-option>
@@ -105,12 +109,20 @@
           <a-table
             row-key="id"
             :loading="loading"
-            :pagination="pagination"
             :columns="columns"
             :data="userList"
             :bordered="false"
-            :size="size"
-            @page-change="onPageChange"
+            :scrollbar="true"
+            :pagination="{
+              showTotal: true,
+              showPageSize: true,
+              total: pageInfo.total,
+              pageSize: pageInfo.pageSize,
+              current: pageInfo.pageNo,
+            }"
+            :scroll="{ x: 100, y: 400 }"
+            @page-change="pageChange"
+            @page-size-change="pageSizeChange"
           >
             <template #avatar="{ record }">
               <a-avatar :image-url="record.avatar"> </a-avatar>
@@ -568,7 +580,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref, watch } from 'vue';
+  import { onMounted, ref, toRaw, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import {
@@ -587,9 +599,18 @@
   import { Message } from '@arco-design/web-vue';
   import usePermission from '@/hooks/permission';
   import { useUserStore } from '@/store';
+  import { SimplePage } from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   // 部门树列表
   const deptTree = ref<[]>();
@@ -627,20 +648,39 @@
   const userStore = useUserStore();
 
   // 加载用户列表
-  const reloadUserList = async () => {
-    userSearch.value = {};
-    permission.addRoleToQuery(userSearch.value);
-    await getUserList(userSearch.value).then((res: any) => {
+  const reloadUserList = async (userQuery: UserQuery) => {
+    setLoading(true);
+    permission.addRoleToQuery(userQuery);
+    await getUserList(userQuery).then((res: any) => {
       userList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
     });
+    setLoading(false);
   };
 
   onMounted(async () => {
     await getDeptTree().then((res: any) => {
       deptTree.value = res.data;
     });
-    await reloadUserList();
+    await reloadUserList(pageInfo.value);
   });
+
+  // 清空查询表单
+  const clearUserSearch = () => {
+    userSearch.value.deptCodeFuzzy = '';
+  };
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
@@ -722,7 +762,7 @@
         }).then(async (res: any) => {
           if (res.data === true) {
             checkUserInfoVisible.value = false;
-            await reloadUserList();
+            await reloadUserList({ ...pageInfo.value, ...userSearch.value });
           }
         });
       } else {
@@ -740,7 +780,7 @@
   const deleteOk = async (id: string) => {
     await deleteUserByIb(id).then(async (res: any) => {
       deleteUserVisible.value = false;
-      await reloadUserList();
+      await reloadUserList({ ...pageInfo.value, ...userSearch.value });
     });
   };
 
@@ -766,7 +806,7 @@
             Message.success({
               content: '添加成功',
             });
-            await reloadUserList();
+            await reloadUserList({ ...pageInfo.value, ...userSearch.value });
             addUserVisible.value = false;
           }
         });
@@ -782,18 +822,27 @@
   };
 
   watch(
-    userSearch,
+    userSearch.value,
     async () => {
-      if (Array.isArray(userSearch.value.deptCode)) {
-        const code = userSearch.value.deptCode?.[0];
-        userSearch.value.deptCode = code;
+      if (Array.isArray(userSearch.value.deptCodeFuzzy)) {
+        const code = userSearch.value.deptCodeFuzzy?.[0];
+        userSearch.value.deptCodeFuzzy = code;
       }
-      await getDeptUserList(userSearch.value).then((res: any) => {
+      /* await getDeptUserList(userSearch.value).then((res: any) => {
         userList.value = res.data;
       });
-      setLoading(false);
+      setLoading(false); */
     },
     { deep: true, immediate: true }
+  );
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, userSearch.value],
+    async ([newPageInfo, oldPageInfo], [newUserSearch, oldUserSearch]) => {
+      await reloadUserList({ ...pageInfo.value, ...userSearch.value });
+    },
+    { deep: true }
   );
 </script>
 

@@ -73,6 +73,8 @@
         :hide-expand-button-on-empty="true"
         show-empty-tree
         style="margin-top: 20px"
+        :pagination="false"
+        :scroll="{ x: 100, y: 400 }"
       >
         <!--排序插槽-->
         <template #sort="{ record }">
@@ -165,9 +167,9 @@
             placeholder="请选择角色"
             @change="searchUserList"
           >
-            <a-option :value="1">1</a-option>
-            <a-option :value="2">2</a-option>
-            <a-option :value="3">3</a-option>
+            <a-option value="student">学生</a-option>
+            <a-option value="teacher">教师</a-option>
+            <a-option value="admin">管理员</a-option>
           </a-select>
           <a-tree-select
             v-model="userSearch.deptCode"
@@ -198,6 +200,17 @@
           row-key="deptCode"
           show-empty-tree
           style="margin-top: 20px"
+          :scrollbar="true"
+          :pagination="{
+            showTotal: true,
+            showPageSize: true,
+            total: pageInfo.total,
+            pageSize: pageInfo.pageSize,
+            current: pageInfo.pageNo,
+          }"
+          :scroll="{ x: 100, y: 400 }"
+          @page-change="pageChange"
+          @page-size-change="pageSizeChange"
         >
           <template #role="{ record }">
             <a-tag v-if="record.role === 'student'" color="red">学生</a-tag>
@@ -217,7 +230,7 @@
 
 <script lang="ts" setup>
   import { useI18n } from 'vue-i18n';
-  import { onMounted, ref, toRaw } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { AddDepartmentDTO } from '@/types/model/dto/AddDepartmentDTO';
   import { useRouter } from 'vue-router';
   import {
@@ -231,9 +244,19 @@
   import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
   import { UpdateDeptDTO } from '@/types/model/dto/UpdateDeptDTO';
   import { UserQuery } from '@/types/model/query/UserQuery';
-  import { getDeptUserList } from '@/api/user';
+  import { getDeptUserList, getUserList } from '@/api/user';
+  import { SimplePage } from '@/types/model/po/SimplePage';
+  import permission from '@/directive/permission';
 
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   // 部门列配置
   const columns = [
@@ -299,6 +322,18 @@
   // 用户筛选表单
   const userSearch = ref<UserQuery>({});
 
+  // 加载用户列表
+  const reloadUserList = async (userQuery: UserQuery) => {
+    // permission.addRoleToQuery(userQuery);
+    await getUserList(userQuery).then((res: any) => {
+      userList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
+    });
+  };
+
   const reloadData = async () => {
     await getDeptTree().then((res: any) => {
       data.value = res.data;
@@ -308,6 +343,15 @@
   onMounted(async () => {
     await reloadData();
   });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   const router = useRouter();
 
@@ -454,21 +498,19 @@
 
   // 打开抽屉的时候加载当前部门下的所有用户列表
   const loadUserList = async (deptCode: string) => {
-    userSearch.value.deptCode = deptCode;
-    userSearch.value.userNameFuzzy = '';
-    userSearch.value.role = '';
-    await getDeptUserList(userSearch.value).then((res: any) => {
-      userList.value = res.data;
-    });
+    userSearch.value.deptCodeFuzzy = deptCode;
+
     userVisible.value = true;
   };
 
-  // 搜索用户
-  const searchUserList = async () => {
-    await getDeptUserList(userSearch.value).then((res: any) => {
-      userList.value = res.data;
-    });
-  };
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, userSearch.value],
+    async ([newPageInfo, oldPageInfo], [newUserSearch, oldUserSearch]) => {
+      await reloadUserList({ ...pageInfo.value, ...userSearch.value });
+    },
+    { deep: true }
+  );
 </script>
 
 <style scoped lang="less">

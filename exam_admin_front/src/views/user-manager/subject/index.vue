@@ -129,6 +129,8 @@
         row-key="deptCode"
         :hide-expand-button-on-empty="true"
         show-empty-tree
+        :pagination="false"
+        :scroll="{ x: 100, y: 400 }"
         style="margin-top: 20px"
       >
         <!--操作插槽-->

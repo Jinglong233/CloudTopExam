@@ -27,9 +27,19 @@
           style="width: 250px"
           allow-clear
         >
-          <a-option value="0">未作答</a-option>
-          <a-option value="1">未完成</a-option>
-          <a-option value="2">已交卷</a-option>
+          <a-option value="0">未处理</a-option>
+          <a-option value="1">已处理</a-option>
+        </a-select>
+
+        <!--异常状态-->
+        <a-select
+          v-model="correctSearch.exState"
+          placeholder="请选择异常状态"
+          style="width: 250px"
+          allow-clear
+        >
+          <a-option value="0">正常</a-option>
+          <a-option value="1">异常</a-option>
         </a-select>
       </a-space>
       <a-divider style="margin-top: 0" />
@@ -150,7 +160,11 @@
       ...examRecordQuery,
     }).then((res: any) => {
       setLoading(true);
-      ExamList.value = res.data;
+      ExamList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
       setLoading(false);
     });
   };
@@ -265,7 +279,7 @@
       [newPageInfo, oldPageInfo],
       [newCorrectSearch, oldCorrectSearch]
     ) => {
-      // await reloadPaperList({ ...pageInfo.value, ...correctSearch.value });
+      await reloadCorrectList({ ...pageInfo.value, ...correctSearch.value });
     },
     { deep: true }
   );

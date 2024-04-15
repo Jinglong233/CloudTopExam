@@ -1,4 +1,6 @@
-export interface UserQuery {
+import { SimplePage } from '@/types/model/po/SimplePage';
+
+export interface UserQuery extends SimplePage {
   /**
    * ID
    */
