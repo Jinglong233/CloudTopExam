@@ -7,20 +7,16 @@ import cn.hutool.poi.excel.ExcelWriter;
 import com.jl.project.entity.dto.AddQuAndAnswerDTO;
 import com.jl.project.entity.dto.RandomSelectQuDTO;
 import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
-import com.jl.project.entity.po.ClassfiySelect;
-import com.jl.project.entity.po.Qu;
-import com.jl.project.entity.po.QuAnswer;
-import com.jl.project.entity.po.Repo;
+import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
+import com.jl.project.entity.vo.WrongQuVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.enums.QuLevel;
 import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.QuAnswerMapper;
-import com.jl.project.mapper.QuMapper;
-import com.jl.project.mapper.RepoMapper;
+import com.jl.project.mapper.*;
 import com.jl.project.service.QuService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
@@ -62,6 +58,15 @@ public class QuServiceImpl implements QuService {
 
     @Resource
     private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
+
+
+    @Resource
+    private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
+
+
+    @Resource
+    private PaperMapper<Paper, PaperQuery> paperMapper;
+
 
     @Resource
     private RepoMapper<Repo, RepoQuery> repoMapper;
@@ -571,14 +576,14 @@ public class QuServiceImpl implements QuService {
 
     @Override
     @Transactional
-    public Boolean importQuestions(MultipartFile file,String repoId) throws BusinessException{
+    public Boolean importQuestions(MultipartFile file, String repoId) throws BusinessException {
         String filename = file.getOriginalFilename();
 
         if (!(filename.endsWith(".xls") || filename.endsWith(".xlsx"))) {
             throw new BusinessException("文件上传格式错误，请重新上传");
         }
 
-        if(repoId == null || "".equals(repoId.trim())){
+        if (repoId == null || "".equals(repoId.trim())) {
             throw new BusinessException("请选择需要导入的题库");
         }
 
@@ -761,7 +766,7 @@ public class QuServiceImpl implements QuService {
 
         // 更新关联题库
         Repo repo = repoMapper.selectById(repoId);
-        if(repo==null){
+        if (repo == null) {
             throw new BusinessException("请选择题库");
         }
         repo.setSubCount(subCount);
@@ -779,6 +784,7 @@ public class QuServiceImpl implements QuService {
         }
         return true;
     }
+
 
     /**
      * 随机抽取指定数量的题目
@@ -813,5 +819,38 @@ public class QuServiceImpl implements QuService {
 
     }
 
+
+    @Override
+    public List<WrongQuVO> getWrongQu(WrongQuQuery query) {
+        if (query == null) {
+            throw new BusinessException("缺少参数");
+        }
+
+        String deptCode = query.getDeptCode();
+        // 按照班级的
+        if (deptCode != null && !"".equals(deptCode.trim())) {
+            DepartmentQuery departmentQuery = new DepartmentQuery();
+            departmentQuery.setDeptCodeFuzzy(deptCode);
+            List<Department> departments = departmentMapper.selectList(departmentQuery);
+            if (departments == null || departments.size() == 0) {
+                return Collections.emptyList();
+            }
+            // 遍历所有部门（班级）的考试情况。注意：对于指定人员类型的考试不会记录分析
+            // todo 待写
+        }
+
+
+        String paperId = query.getPaperId();
+
+        // 按照试卷的
+        if (paperId != null && !"".equals(paperId.trim())) {
+            Paper paper = paperMapper.selectById(paperId);
+            if (paper == null) {
+                return Collections.emptyList();
+            }
+            // 遍历这场
+        }
+        return null;
+    }
 
 }

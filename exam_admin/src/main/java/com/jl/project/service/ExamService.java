@@ -7,6 +7,7 @@ import com.jl.project.entity.query.ExamQuery;
 import com.jl.project.entity.vo.CorrectExamVO;
 import com.jl.project.entity.vo.ExamVO;
 import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.WrongQuVO;
 
 import java.util.Date;
 import java.util.List;
@@ -93,4 +94,6 @@ public interface ExamService {
     PaginationResultVO<CorrectExamVO> getCorrectExam(ExamQuery examQuery);
 
     List<CorrectExamVO> getCorrectExamByParam(ExamQuery query);
+
+    List<WrongQuVO> getExamQuAnalyse(String examId);
 }

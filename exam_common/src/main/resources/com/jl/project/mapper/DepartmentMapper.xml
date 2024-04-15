@@ -82,7 +82,7 @@
             and parent_code like concat('%', #{query.parentCodeFuzzy}, '%')
         </if>
         <if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
-            and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
+            and dept_code like concat(#{query.deptCodeFuzzy}, '%')
         </if>
         <if test="query.deptTypeFuzzy != null and query.deptTypeFuzzy != '' ">
             and dept_type like concat('%', #{query.deptTypeFuzzy}, '%')

@@ -6,7 +6,9 @@ import com.jl.project.entity.dto.AddQuAndAnswerDTO;
 import com.jl.project.entity.dto.RandomSelectQuDTO;
 import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
 import com.jl.project.entity.query.QuExcludeQuery;
+import com.jl.project.entity.query.WrongQuQuery;
 import com.jl.project.entity.vo.QuAndAnswerVo;
+import com.jl.project.entity.vo.WrongQuVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Qu;
@@ -107,4 +109,6 @@ public interface QuService {
 	 * @param file
 	 */
 	Boolean importQuestions(MultipartFile file,String repoId);
+
+    List<WrongQuVO> getWrongQu(WrongQuQuery query);
 }

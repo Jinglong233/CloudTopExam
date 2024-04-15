@@ -7,9 +7,7 @@ import com.jl.project.entity.dto.AddExamDTO;
 import com.jl.project.entity.dto.UpdateExamDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
-import com.jl.project.entity.vo.CorrectExamVO;
-import com.jl.project.entity.vo.ExamVO;
-import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.*;
 import com.jl.project.enums.ExamRecordStateType;
 import com.jl.project.enums.OpenType;
 import com.jl.project.enums.PageSize;
@@ -17,6 +15,7 @@ import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.ExamService;
+import com.jl.project.service.PaperService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
 import com.jl.project.utils.XxlJobUtil;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -48,6 +48,10 @@ public class ExamServiceImpl implements ExamService {
     @Resource
     private UserMapper<User, UserQuery> userMapper;
 
+
+    @Resource
+    private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
+
     @Resource
     private ExamRecordMapper<ExamRecord, ExamRecordQuery> examRecordMapper;
 
@@ -57,8 +61,15 @@ public class ExamServiceImpl implements ExamService {
     @Resource
     private GroupListMapper<GroupList, GroupListQuery> groupListMapper;
 
+
+    @Resource
+    private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
     @Resource
     private UserService userService;
+
+
+    @Resource
+    private PaperService paperService;
 
     /**
      * 根据条件查询列表
@@ -125,6 +136,19 @@ public class ExamServiceImpl implements ExamService {
             }
         }
 
+        // 获取部分编号（如果有）
+        String deptCode = addExamDTO.getDeptCode();
+        if (deptCode != null) {
+            // 获取对应的部门名称
+            DepartmentQuery departmentQuery = new DepartmentQuery();
+            departmentQuery.setDeptCode(deptCode);
+            List<Department> departments = departmentMapper.selectList(departmentQuery);
+            if (departments != null && departments.size() != 0) {
+                Department department = departments.get(0);
+                exam.setDeptText(department.getDeptName());
+            }
+        }
+
         Integer addExamResult = examMapper.insert(exam);
         if (addExamResult <= 0) {
             throw new BusinessException("创建考试失败");
@@ -169,10 +193,10 @@ public class ExamServiceImpl implements ExamService {
             }
         } else if (OpenType.DEPARTMENT.getValue() == openType) { // 指定部门
             // 获取指定部门Code
-            String deptCode = addExamDTO.getDeptCode();
             if (deptCode == null) {
                 throw new BusinessException("指定部门编码为空");
             }
+
             // 查询部门下的所有用户
             UserQuery userQuery = new UserQuery();
             userQuery.setDeptCode(deptCode);
@@ -734,5 +758,70 @@ public class ExamServiceImpl implements ExamService {
             }
 
         }
+    }
+
+    @Override
+    public List<WrongQuVO> getExamQuAnalyse(String examId) throws BusinessException {
+        if (examId == null) {
+            throw new BusinessException("缺少考试Id");
+        }
+        Exam exam = examMapper.selectById(examId);
+        if (exam == null) {
+            throw new BusinessException("该考试不存在");
+        }
+        String paperId = exam.getPaperId();
+
+        // 获取考试关联试卷
+        if (paperId == null || "".equals(paperId.trim())) {
+            throw new BusinessException("考试未关联试卷");
+        }
+
+        PaperAndQuVO paperDetail = paperService.getPaperDetailById(paperId);
+        if (paperDetail == null) {
+            throw new BusinessException("试卷详细信息缺失");
+        }
+
+        List<WrongQuVO> result = new ArrayList<>();
+
+        // 计算每道题的分析
+        List<GroupListVO> groupLists = paperDetail.getGroupLists();
+        if (groupLists != null) {
+            for (GroupListVO groupList : groupLists) {
+                List<QuAndAnswerVo> quList = groupList.getQuList();
+                if (quList != null && quList.size() != 0) {
+                    // 遍历每道题目
+                    for (QuAndAnswerVo quAndAnswerVo : quList) {
+                        WrongQuVO wrongQuVO = new WrongQuVO();
+                        wrongQuVO.setQuAndAnswerVo(quAndAnswerVo);
+                        // 获取该场考试对应的考试记录
+                        ExamRecordQuery examRecordQuery = new ExamRecordQuery();
+                        examRecordQuery.setExamId(examId);
+                        List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
+                        if (examRecords != null && examRecords.size() != 0) {
+                            Integer rightCount = 0;
+                            for (ExamRecord examRecord : examRecords) {
+                                // 获取该题目的正确率等信息（quId+examRecordId 获取到该场考试该道题目的对错信息）
+                                String quId = quAndAnswerVo.getId();
+                                String recordId = examRecord.getId();
+                                UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+                                userAnswerQuery.setQuId(quId);
+                                userAnswerQuery.setExamRecordId(recordId);
+                                userAnswerQuery.setIsRight(1);
+                                rightCount += userAnswerMapper.selectCount(userAnswerQuery);
+                            }
+                            // 一共有几个考试记录，则有几道题目
+                            wrongQuVO.setRightCount(rightCount);
+                            wrongQuVO.setErrorCount(examRecords.size() - rightCount);
+                            // 正确率计算
+                            DecimalFormat df = new DecimalFormat("0.00%");
+                            String rate = df.format((double)rightCount / (double) examRecords.size());
+                            wrongQuVO.setRightRate(rate);
+                        }
+                        result.add(wrongQuVO);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

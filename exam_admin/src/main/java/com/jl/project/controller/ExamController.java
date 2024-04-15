@@ -4,10 +4,7 @@ import com.jl.project.entity.dto.AddExamDTO;
 import com.jl.project.entity.dto.UpdateExamDTO;
 import com.jl.project.entity.po.Exam;
 import com.jl.project.entity.query.ExamQuery;
-import com.jl.project.entity.vo.CorrectExamVO;
-import com.jl.project.entity.vo.ExamVO;
-import com.jl.project.entity.vo.PaginationResultVO;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.*;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.ExamService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -150,5 +147,18 @@ public class ExamController extends ABaseController {
         return getSuccessResponseVO(result);
     }
 
+    /**
+     * 获取考试题目分析
+     */
+    @RequestMapping("getExamQuAnalyse")
+    public ResponseVO getExamQuAnalyse(@RequestBody String examId) {
+        List<WrongQuVO> result = null;
+        try {
+            result = examService.getExamQuAnalyse(examId);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
 
 }

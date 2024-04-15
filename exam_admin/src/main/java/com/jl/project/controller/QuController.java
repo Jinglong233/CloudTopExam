@@ -6,8 +6,10 @@ import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
 import com.jl.project.entity.po.Qu;
 import com.jl.project.entity.query.QuExcludeQuery;
 import com.jl.project.entity.query.QuQuery;
+import com.jl.project.entity.query.WrongQuQuery;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.WrongQuVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.QuService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -151,14 +153,32 @@ public class QuController extends ABaseController {
      * 导入题库
      */
     @RequestMapping("importQu")
-    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file,@RequestPart("repoId") String repoId) throws BusinessException, IOException {
+    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file, @RequestPart("repoId") String repoId) throws BusinessException, IOException {
         Boolean result = null;
         try {
-            result = quService.importQuestions(file,repoId);
+            result = quService.importQuestions(file, repoId);
         } catch (BusinessException e) {
             return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }
         return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 根据班级获取错题
+     *
+     * @return
+     */
+    @RequestMapping("getWrongQu")
+    public ResponseVO getWrongQu(@RequestBody WrongQuQuery query) {
+        List<WrongQuVO> result = null;
+        try {
+            result = quService.getWrongQu(query);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+
+        return getSuccessResponseVO(result);
+
     }
 
 
