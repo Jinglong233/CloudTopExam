@@ -8,6 +8,7 @@ import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
 import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
 import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
 import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+import { WrongQuVO } from '@/types/model/vo/WrongQuVO';
 
 /**
  * 获取考试列表
@@ -83,4 +84,15 @@ export function getCorrectExamByParam(examQuery: ExamQuery) {
     '/api/exam/getCorrectExamByParam',
     examQuery
   );
+}
+
+/**
+ * 获取考试题目分析
+ */
+export function getExamQuAnalyse(examId: string) {
+  return axios.post<WrongQuVO[]>('/api/exam/getExamQuAnalyse', examId, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
 }

@@ -252,17 +252,21 @@
 
   // 前往该用户作答的详情页
   const goCorrect = (examRecord: any) => {
+    // 判断是否作答（未作答的记录，不允许批阅，防止报缺失userAnswerId错误）
+    if (examRecord.state === 0) {
+      Message.info({
+        content: '考生未作答不允许批阅',
+        duration: 2000,
+      });
+      return;
+    }
+
     if (examRecord.state === 2 || examRecord.handState === 1) {
       router.push({
         name: 'CorrectUserPaper',
         params: {
           examRecordId: examRecord.id,
         },
-      });
-    } else if (examRecord.state === 0) {
-      Message.warning({
-        content: '该考生未开始作答',
-        duration: 2000,
       });
     } else if (examRecord.state === 1) {
       Message.warning({

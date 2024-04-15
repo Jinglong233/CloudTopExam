@@ -27,6 +27,7 @@ import localeQuestionBankManager from '@/views/repo/repo-manager/locale/zh-CN';
 import localeQuManager from '@/views/repo/qu-manager/locale/zh-CN';
 import localePaperManager from '@/views/exam/paper-manager/locale/zh-CN';
 import localeExamManager from '@/views/exam/exam-manager/locale/zh-CN';
+import localeWrongManager from '@/views/wrong-topic-management/locale/zh-CN';
 
 import localeSettings from './zh-CN/settings';
 
@@ -79,4 +80,5 @@ export default {
   ...localeQuestionBankManager,
   ...localePaperManager,
   ...localeExamManager,
+  ...localeWrongManager,
 };

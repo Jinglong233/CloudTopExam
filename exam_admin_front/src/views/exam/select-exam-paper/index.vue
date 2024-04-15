@@ -13,7 +13,6 @@
           v-model="paperSearch.titleFuzzy"
           :placeholder="$t('paperManager.placeholder.title')"
           style="width: 320px"
-          @input="handleChange"
         />
         <!--学科-->
         <a-tree-select
@@ -27,7 +26,6 @@
           style="width: 250px"
           :placeholder="$t('paperManager.placeholder.subjectId')"
           allow-clear
-          @change="handleChange"
         />
         <!--组卷方式预留-->
         <a-select
@@ -35,26 +33,24 @@
           :placeholder="$t('paperManager.placeholder.joinType')"
           style="width: 250px"
           allow-clear
-          @change="handleChange"
         >
           <a-option value="0">随机抽取</a-option>
           <a-option value="1">指定选题</a-option>
         </a-select>
 
-        <!--所属部门预留-->
-        <a-select
-          v-model="paperSearch.deptCode"
+        <!--所属部门-->
+        <a-tree-select
+          v-model="paperSearch.deptCodeFuzzy"
           :placeholder="$t('paperManager.placeholder.deptCode')"
+          :data="deptTree"
           allow-clear
           style="width: 250px"
-          @change="handleChange"
-        >
-          <a-option value="1">单选题</a-option>
-          <a-option value="2">多选题</a-option>
-          <a-option value="3">判断题</a-option>
-          <a-option value="4">填空题</a-option>
-          <a-option value="5">简答题</a-option>
-        </a-select>
+          :field-names="{
+            key: 'deptCode',
+            title: 'deptName',
+            children: 'children',
+          }"
+        />
       </a-space>
       <a-table
         row-key="id"
@@ -62,7 +58,18 @@
         :columns="columns"
         :data="paperList"
         :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
         style="margin-top: 20px"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
       >
         <template #joinType="{ record }">
           <template v-if="record.joinType === 0">题库抽取</template>
@@ -87,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
@@ -99,9 +106,18 @@
   import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
   import { getSubjectTree } from '@/api/subject';
   import { getDeptTree } from '@/api/department';
+  import { SimplePage } from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 10,
+    pageTotal: 0,
+    total: 0,
+  });
 
   const router = useRouter();
   // 添加试卷表单
@@ -123,15 +139,19 @@
   const paperSearch = ref<PaperQuery>({});
 
   // 获取试卷列表
-  const reloadPaperList = async () => {
+  const reloadPaperList = async (paperQuery: PaperQuery) => {
     setLoading(true);
-    await getPaperList({}).then((res: any) => {
-      paperList.value = res.data;
+    await getPaperList(paperQuery).then((res: any) => {
+      paperList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
     });
     setLoading(false);
   };
   onMounted(async () => {
-    await reloadPaperList();
+    await reloadPaperList(pageInfo.value);
     await getSubjectTree().then((res: any) => {
       subjectTree.value = res.data;
     });
@@ -139,6 +159,15 @@
       deptTree.value = res.data;
     });
   });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
@@ -174,13 +203,6 @@
     },
   ]);
 
-  // 查询试卷
-  const handleChange = async () => {
-    await getPaperList(paperSearch.value).then((res: any) => {
-      paperList.value = res.data;
-    });
-  };
-
   // 创建试卷操作
   const addExam = (record: any) => {
     router.push({
@@ -200,6 +222,15 @@
       },
     });
   };
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, paperSearch.value],
+    async ([newPageInfo, oldPageInfo], [newPaperSearch, oldPaperSearch]) => {
+      await reloadPaperList({ ...pageInfo.value, ...paperSearch.value });
+    },
+    { deep: true }
+  );
 </script>
 
 <style scoped lang="less">

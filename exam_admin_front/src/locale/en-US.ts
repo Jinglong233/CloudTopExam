@@ -26,6 +26,7 @@ import localeQuestionBankManager from '@/views/repo/repo-manager/locale/en-US';
 import localeQuManager from '@/views/repo/qu-manager/locale/en-US';
 import localePaperManager from '@/views/exam/paper-manager/locale/en-US';
 import localeExamManager from '@/views/exam/exam-manager/locale/en-US';
+import localeWrongManager from '@/views/wrong-topic-management/locale/en-US';
 
 import localeSettings from './en-US/settings';
 
@@ -78,4 +79,5 @@ export default {
   ...localeQuestionBankManager,
   ...localePaperManager,
   ...localeExamManager,
+  ...localeWrongManager,
 };
