@@ -339,6 +339,7 @@ public class UserServiceImpl implements UserService {
         if (deptCode == null) {
             return findListByParam(query);
         }
+
         List<String> childrenList = new ArrayList<>();
         childrenList.add(deptCode);
         // 2. 获取所有子部门编号

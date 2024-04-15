@@ -1,5 +1,6 @@
 package com.jl.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.jl.project.entity.dto.UpdateExamRecordDTO;
 import com.jl.project.entity.po.Exam;
 import com.jl.project.entity.po.ExamRecord;
@@ -156,6 +157,7 @@ public class ExamRecordServiceImpl implements ExamRecordService {
         // 1. 获取考试对应的考试记录
 
         PaginationResultVO<ExamRecord> paginationResultVO = findListByPage(examRecordQuery);
+        BeanUtil.copyProperties(paginationResultVO,resultVO);
         List<ExamRecord> examRecords = paginationResultVO.getList();
         if (examRecords == null) {
             resultVO.setList(Collections.emptyList());

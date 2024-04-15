@@ -90,8 +90,13 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "管理员获取部分人员列表")
     @RequestMapping("loadDeptUserList")
-    public ResponseVO loadDeptUserList(@RequestBody UserQuery query) throws BusinessException {
-        List<User> result = userService.loadDeptUserList(query);
+    public ResponseVO loadDeptUserList(@RequestBody UserQuery query){
+        List<User> result = null;
+        try {
+            result = userService.loadDeptUserList(query);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null,e.getCode(),e.getMessage());
+        }
         return getSuccessResponseVO(result, "获取成功");
     }
 
