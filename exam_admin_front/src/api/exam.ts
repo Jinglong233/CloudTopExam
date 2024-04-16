@@ -107,3 +107,12 @@ export function getPaperAnalyse(paperId: string) {
     },
   });
 }
+
+/**
+ * 获取考试二维码
+ */
+export function getExamQrCode(examId: string) {
+  return axios.get(`/api/exam/qrcode/${examId}`, {
+    responseType: 'blob', // 设置响应类型为 blob
+  });
+}

@@ -1,15 +1,7 @@
 package com.jl.project.utils;
 
-import com.jl.project.entity.po.Qu;
-import com.jl.project.entity.query.QuQuery;
 import com.jl.project.mapper.QuMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.xm.Similarity;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 题目相似度计算
@@ -23,7 +15,7 @@ public class QuSimilarityCompute {
      */
     public Boolean rebuildAllQuSimilarity(StringRedisTemplate stringRedisTemplate, QuMapper quMapper) {
 
-        // 遍历所有题目
+    /*    // 遍历所有题目
         QuQuery quQuery = new QuQuery();
         List<Qu> quList = quMapper.selectList(quQuery);
         HashMap<String, Double> map1 = new LinkedHashMap<>();
@@ -41,7 +33,7 @@ public class QuSimilarityCompute {
             map1.entrySet()
                     .stream().sorted(Map.Entry.comparingByValue())
                     .forEachOrdered(x -> map1.put(x.getKey(), x.getValue()));
-        }
+        }*/
 
         return null;
     }

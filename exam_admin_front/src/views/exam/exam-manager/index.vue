@@ -101,10 +101,107 @@
             >
               {{ $t('examManager.columns.options.delete') }}
             </a-button>
+            <a-button
+              type="primary"
+              status="danger"
+              @click="createCode(record)"
+            >
+              <template #icon>
+                <icon-scan />
+              </template>
+            </a-button>
           </a-space>
         </template>
       </a-table>
     </a-card>
+    <a-modal
+      v-model:visible="visible"
+      :simple="true"
+      :closable="true"
+      :footer="false"
+      :hide-title="true"
+      :modal-style="{ padding: '0', margin: '0', borderRadius: '100px' }"
+    >
+      <a-card :bordered="false" style="height: 500px">
+        <template #cover>
+          <div
+            :style="{
+              height: '200px',
+              overflow: 'hidden',
+            }"
+          >
+            <img
+              :style="{ width: '100%', transform: 'translateY(-20px)' }"
+              alt="dessert"
+              src="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/examTagBackground.jpg"
+            />
+          </div>
+        </template>
+        <a-card-meta>
+          <template #description>
+            <a-row :gutter="0">
+              <a-col :span="18">
+                <a-descriptions
+                  :title="`考试名称：${currentExam.title}`"
+                  :column="1"
+                >
+                  <a-descriptions-item label="考试开始时间:">
+                    {{ currentExam.startTime }}
+                  </a-descriptions-item>
+                  <a-descriptions-item label="考试结束时间:">
+                    {{ currentExam.endTime }}
+                  </a-descriptions-item>
+                  <a-descriptions-item label="允许迟到时间:">
+                    {{ currentExam.lateMax }}&emsp;分钟
+                  </a-descriptions-item>
+                  <a-descriptions-item label="最少答卷时间:">
+                    {{ currentExam.handMin }}&emsp;分钟
+                  </a-descriptions-item>
+                  <a-descriptions-item label="考试时长:">
+                    {{ currentExam.duration }}&emsp;分钟
+                  </a-descriptions-item>
+                </a-descriptions>
+              </a-col>
+              <a-col :span="6"
+                ><a-image
+                  style="margin-top: 85px"
+                  width="100"
+                  height="100"
+                  :src="imageUrl"
+              /></a-col>
+            </a-row>
+          </template>
+          <template #avatar>
+            <a-space style="position: absolute; bottom: 10px">
+              <a-avatar
+                style="background-color: #ffffff; margin-right: 10px"
+                :size="50"
+                image-url="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/signature.png"
+              >
+              </a-avatar>
+              <a-typography-title style="margin-right: 50px" :heading="6">
+                CloudTopExam
+              </a-typography-title>
+              <a-space>
+                <a-typography-paragraph
+                  :copyable="true"
+                  :copy-text="`http://localhost:8088/api/exam/startExam/${currentExam.id}`"
+                >
+                  <a-space style="margin-top: 20px">
+                    <a-typography-text type="primary">
+                      复制考试链接
+                    </a-typography-text>
+                    <template #copy-icon>
+                      <icon-link />
+                    </template>
+                  </a-space>
+                </a-typography-paragraph>
+              </a-space>
+            </a-space>
+          </template>
+        </a-card-meta>
+      </a-card>
+    </a-modal>
   </div>
 </template>
 
@@ -115,13 +212,20 @@
   import { useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { Message, Modal } from '@arco-design/web-vue';
-  import { deleteExamById, getExamList } from '@/api/exam';
+  import { deleteExamById, getExamList, getExamQrCode } from '@/api/exam';
   import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { ExamVO } from '@/types/model/vo/ExamVO';
   import { SimplePage } from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  // 考试扫码考试对话框
+  const visible = ref(false);
+
+  const imageUrl = ref();
+
+  const currentExam = ref<ExamVO>({});
 
   // 分页信息
   const pageInfo = ref<SimplePage>({
@@ -288,6 +392,16 @@
     });
   };
 
+  // 获取二维码
+  const createCode = async (record: any) => {
+    currentExam.value = record;
+    await getExamQrCode(record.id).then((res: any) => {
+      imageUrl.value = window.URL.createObjectURL(res.data); // 将 blob 对象转换为 URL
+    });
+    // 打开对话框
+    visible.value = true;
+  };
+
   // 监视查询数据及其页码变化
   watch(
     [pageInfo.value, examSearch.value],
@@ -299,6 +413,9 @@
 </script>
 
 <style scoped lang="less">
+  .arco-modal-simple .arco-modal-header {
+    margin-bottom: 0;
+  }
   .container {
     padding: 0 20px 20px 20px;
   }
@@ -330,5 +447,23 @@
       margin-left: 12px;
       cursor: pointer;
     }
+  }
+
+  .icon-hover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transition: all 0.1s;
+  }
+
+  .icon-hover:hover {
+    background-color: rgb(var(--gray-2));
+  }
+
+  .arco-image-img {
+    margin-top: 85px;
   }
 </style>

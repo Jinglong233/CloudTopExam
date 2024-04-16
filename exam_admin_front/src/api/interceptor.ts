@@ -34,12 +34,9 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   (response: AxiosResponse<HttpResponse>) => {
+    console.log('response', response);
     const res = response.data;
     if (res.code === 200) {
-      // Message.success({
-      //   content: '',
-      //   duration: 5 * 1000,
-      // });
       return res;
     }
 
@@ -51,10 +48,15 @@ axios.interceptors.response.use(
       router.push({ name: 'login' });
       return null;
     }
+    if (response.status === 200) {
+      return response;
+    }
+
     Message.error({
       content: res.info || '请求出错',
       duration: 5 * 1000,
     });
+
     return Promise.reject(new Error(res.info || '请求出错'));
   },
   (error) => {
