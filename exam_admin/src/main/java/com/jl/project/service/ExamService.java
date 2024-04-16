@@ -96,4 +96,6 @@ public interface ExamService {
     List<CorrectExamVO> getCorrectExamByParam(ExamQuery query);
 
     List<WrongQuVO> getExamQuAnalyse(String examId);
+
+    List<WrongQuVO> getPaperQuAnalyse(String paperId);
 }

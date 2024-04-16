@@ -814,7 +814,86 @@ public class ExamServiceImpl implements ExamService {
                             wrongQuVO.setErrorCount(examRecords.size() - rightCount);
                             // 正确率计算
                             DecimalFormat df = new DecimalFormat("0.00%");
-                            String rate = df.format((double)rightCount / (double) examRecords.size());
+                            String rate = df.format((double) rightCount / (double) examRecords.size());
+                            wrongQuVO.setRightRate(rate);
+                        }
+                        result.add(wrongQuVO);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<WrongQuVO> getPaperQuAnalyse(String paperId) throws BusinessException {
+        if (paperId == null || "".equals(paperId.trim())) {
+            throw new BusinessException("缺少参数");
+        }
+        // 1. 获取试卷信息
+        Paper paper = paperMapper.selectById(paperId);
+        if (paper == null) {
+            throw new BusinessException("试卷不存在");
+        }
+
+        // 2. 获取试卷的详细信息
+        PaperAndQuVO paperDetail = paperService.getPaperDetailById(paperId);
+        if (paperDetail == null) {
+            throw new BusinessException("试卷详情为空");
+        }
+
+
+        // 3. 获取试卷关联的考试信息
+        ExamQuery examQuery = new ExamQuery();
+        examQuery.setPaperId(paperId);
+        List<Exam> examList = examMapper.selectList(examQuery);
+        if (examList == null || examList.isEmpty()) {
+            throw new BusinessException("未曾使用过该试卷发布考试");
+        }
+        List<WrongQuVO> result = new ArrayList<>();
+
+        // 计算每道题的分析
+        List<GroupListVO> groupLists = paperDetail.getGroupLists();
+        if (groupLists != null) {
+            for (GroupListVO groupList : groupLists) {
+                List<QuAndAnswerVo> quList = groupList.getQuList();
+                if (quList != null && quList.size() != 0) {
+                    // 遍历每道题目
+                    for (QuAndAnswerVo quAndAnswerVo : quList) {
+                        // 总记录数（相当于一道题目有多少个人做）
+                        Integer totalCount = 0;
+                        // 作对的人数
+                        Integer rightCount = 0;
+                        WrongQuVO wrongQuVO = new WrongQuVO();
+                        wrongQuVO.setQuAndAnswerVo(quAndAnswerVo);
+                        // 4.遍历考试
+                        if (!examList.isEmpty()) {
+                            for (Exam exam : examList) {
+                                String examId = exam.getId();
+                                // 获取该场考试对应的考试记录
+                                ExamRecordQuery examRecordQuery = new ExamRecordQuery();
+                                examRecordQuery.setExamId(examId);
+                                List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
+                                if (examRecords != null && examRecords.size() != 0) {
+                                    totalCount += examRecords.size();
+                                    for (ExamRecord examRecord : examRecords) {
+                                        // 获取该题目的正确率等信息（quId+examRecordId 获取到该场考试该道题目的对错信息）
+                                        String quId = quAndAnswerVo.getId();
+                                        String recordId = examRecord.getId();
+                                        UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+                                        userAnswerQuery.setQuId(quId);
+                                        userAnswerQuery.setExamRecordId(recordId);
+                                        userAnswerQuery.setIsRight(1);
+                                        rightCount += userAnswerMapper.selectCount(userAnswerQuery);
+                                    }
+                                }
+                            }
+                            // 一共有几个考试记录，则有几道题目
+                            wrongQuVO.setRightCount(rightCount);
+                            wrongQuVO.setErrorCount(totalCount - rightCount);
+                            // 正确率计算
+                            DecimalFormat df = new DecimalFormat("0.00%");
+                            String rate = df.format((double) rightCount / (double) totalCount);
                             wrongQuVO.setRightRate(rate);
                         }
                         result.add(wrongQuVO);

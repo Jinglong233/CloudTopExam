@@ -96,3 +96,14 @@ export function getExamQuAnalyse(examId: string) {
     },
   });
 }
+
+/**
+ * 获取试卷题目分析
+ */
+export function getPaperAnalyse(paperId: string) {
+  return axios.post<WrongQuVO[]>('/api/exam/getPaperQuAnalyse', paperId, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
+}

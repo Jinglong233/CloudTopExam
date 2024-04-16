@@ -161,4 +161,19 @@ public class ExamController extends ABaseController {
         return getSuccessResponseVO(result);
     }
 
+
+    /**
+     * 获取试卷题目分析
+     */
+    @RequestMapping("getPaperQuAnalyse")
+    public ResponseVO getPaperQuAnalyse(@RequestBody String paperId) {
+        List<WrongQuVO> result = null;
+        try {
+            result = examService.getPaperQuAnalyse(paperId);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
 }
