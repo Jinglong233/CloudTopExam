@@ -50,6 +50,7 @@
   import { getCorrectExam } from '@/api/exam';
   import { useUserStore } from '@/store';
   import { useRouter } from 'vue-router';
+  import { ExamQuery } from '@/types/model/query/ExamQuery';
 
   const type = ref('text');
   const { loading, setLoading } = useLoading();
@@ -60,9 +61,13 @@
   const fetchData = async (contentType: string) => {
     try {
       setLoading(true);
-      await getCorrectExam(userStore.id as string).then((res: any) => {
+      await getCorrectExam({
+        createBy: userStore.id as string,
+      } as ExamQuery).then((res: any) => {
         if (res.data) {
-          renderList.value = res.data.filter((r: any) => r.correctTotal > 0);
+          renderList.value = res.data.list.filter(
+            (r: any) => r.correctTotal > 0
+          );
         }
       });
     } catch (err) {

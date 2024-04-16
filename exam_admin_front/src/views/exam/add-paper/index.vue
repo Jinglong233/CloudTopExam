@@ -580,7 +580,7 @@
 
   onMounted(async () => {
     await getRepoList({}).then((res: any) => {
-      repoList.value = res.data;
+      repoList.value = res.data.list;
     });
     addPaperForm.value.joinType = Number(route.params.joinType);
     addPaperForm.value.title = route.params.title as string;
