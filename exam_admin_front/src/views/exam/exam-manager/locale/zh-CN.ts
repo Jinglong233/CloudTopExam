@@ -5,6 +5,7 @@ export default {
   'menu.exam.modifyExam': '修改考试',
   'menu.exam.paperInfo': '试卷信息',
   'menu.exam.correctUserExam': '批阅列表',
+  'menu.exam.record': '考试记录',
 
   'examManager.form.search': '查询',
   'examManager.form.reset': '重置',
@@ -35,6 +36,15 @@ export default {
 
   'examManager.columns.status.0': '正常',
   'examManager.columns.status.1': '异常',
+
+  // examRecord columns
+  'examManager.columns.userName': '用户名',
+  'examManager.columns.passed': '是否通过',
+  'examManager.columns.totalScore': '得分',
+  'examManager.columns.exState': '异常状态',
+  'examManager.columns.exMsg': '异常信息',
+  'examManager.columns.state': '作答状态',
+  'examManager.columns.answerTime': '答卷时长',
 
   // placeholder
   'examManager.placeholder.deptCode': '请选择部门',

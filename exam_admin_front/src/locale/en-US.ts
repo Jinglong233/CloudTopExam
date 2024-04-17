@@ -16,7 +16,7 @@ import locale500 from '@/views/exception/500/locale/en-US';
 import localeUserInfo from '@/views/user/info/locale/en-US';
 import localeUserSetting from '@/views/user/setting/locale/en-US';
 
-import localeCorrectManager from '@/views/exam/correct-manager/locale/en-US';
+import localeCorrectManager from '@/views/paper/correct-manager/locale/en-US';
 import localeUserManager from '@/views/user-manager/user-list/locale/en-US';
 import localeDepartment from '@/views/user-manager/deptment/locale/en-US';
 import localeSubject from '@/views/user-manager/subject/locale/en-US';
@@ -24,7 +24,7 @@ import localeSubject from '@/views/user-manager/subject/locale/en-US';
 import localeQu from '@/views/repo/repo-manager/locale/en-US';
 import localeQuestionBankManager from '@/views/repo/repo-manager/locale/en-US';
 import localeQuManager from '@/views/repo/qu-manager/locale/en-US';
-import localePaperManager from '@/views/exam/paper-manager/locale/en-US';
+import localePaperManager from '@/views/paper/paper-manager/locale/en-US';
 import localeExamManager from '@/views/exam/exam-manager/locale/en-US';
 import localeWrongManager from '@/views/wrong-topic-management/locale/en-US';
 

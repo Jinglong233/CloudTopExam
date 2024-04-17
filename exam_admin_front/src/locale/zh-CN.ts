@@ -16,7 +16,7 @@ import locale500 from '@/views/exception/500/locale/zh-CN';
 import localeUserInfo from '@/views/user/info/locale/zh-CN';
 import localeUserSetting from '@/views/user/setting/locale/zh-CN';
 
-import localeCorrectManager from '@/views/exam/correct-manager/locale/zh-CN';
+import localeCorrectManager from '@/views/paper/correct-manager/locale/zh-CN';
 
 import localeUserManager from '@/views/user-manager/user-list/locale/zh-CN';
 import localeDepartment from '@/views/user-manager/deptment/locale/zh-CN';
@@ -25,7 +25,7 @@ import localeSubject from '@/views/user-manager/subject/locale/zh-CN';
 import localeQu from '@/views/repo/repo-manager/locale/zh-CN';
 import localeQuestionBankManager from '@/views/repo/repo-manager/locale/zh-CN';
 import localeQuManager from '@/views/repo/qu-manager/locale/zh-CN';
-import localePaperManager from '@/views/exam/paper-manager/locale/zh-CN';
+import localePaperManager from '@/views/paper/paper-manager/locale/zh-CN';
 import localeExamManager from '@/views/exam/exam-manager/locale/zh-CN';
 import localeWrongManager from '@/views/wrong-topic-management/locale/zh-CN';
 

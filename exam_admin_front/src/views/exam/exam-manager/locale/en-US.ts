@@ -5,6 +5,7 @@ export default {
   'menu.exam.modifyExam': 'Modify Exam',
   'menu.exam.paperInfo': 'Paper Information',
   'menu.exam.correctUserExam': 'Correct User Exam',
+  'menu.exam.record': 'Exam Record',
 
   'examManager.form.search': 'Search',
   'examManager.form.reset': 'Reset',
@@ -34,6 +35,15 @@ export default {
 
   'examManager.columns.status.0': 'Normal',
   'examManager.columns.status.1': 'Abnormal',
+
+  // examRecord columns
+  'examManager.columns.userName': 'User Name',
+  'examManager.columns.passed': 'Passed',
+  'examManager.columns.totalScore': 'Total Score',
+  'examManager.columns.exState': 'Exception State',
+  'examManager.columns.exMsg': 'Exception Message',
+  'examManager.columns.state': 'State',
+  'examManager.columns.answerTime': 'Answer Time',
 
   // placeholder
   'examManager.placeholder.deptCode': 'Select Department',

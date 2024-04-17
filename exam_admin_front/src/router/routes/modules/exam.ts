@@ -15,7 +15,7 @@ const EXAM: AppRouteRecordRaw = {
     {
       path: 'paper-manager', // The midline path complies with SEO specifications
       name: 'ExamList',
-      component: () => import('@/views/exam/paper-manager/index.vue'),
+      component: () => import('@/views/paper/paper-manager/index.vue'),
       meta: {
         locale: 'menu.exam.paperManager',
         requiresAuth: true,
@@ -25,7 +25,7 @@ const EXAM: AppRouteRecordRaw = {
     {
       path: 'add-paper/:joinType/:deptCode/:subjectId/:title', // The midline path complies with SEO specifications
       name: 'AddPaper',
-      component: () => import('@/views/exam/add-paper/index.vue'),
+      component: () => import('@/views/paper/add-paper/index.vue'),
       meta: {
         locale: 'menu.exam.addPaper',
         requiresAuth: true,
@@ -36,7 +36,7 @@ const EXAM: AppRouteRecordRaw = {
     {
       path: 'preview-paper', // The midline path complies with SEO specifications
       name: 'PreviewPaper',
-      component: () => import('@/views/exam/preview-paper/index.vue'),
+      component: () => import('@/views/paper/preview-paper/index.vue'),
       meta: {
         locale: 'menu.exam.preview',
         requiresAuth: true,
@@ -47,7 +47,7 @@ const EXAM: AppRouteRecordRaw = {
     {
       path: 'modify-paper', // The midline path complies with SEO specifications
       name: 'ModifyPaper',
-      component: () => import('@/views/exam/modify-paper/index.vue'),
+      component: () => import('@/views/paper/modify-paper/index.vue'),
       meta: {
         locale: 'menu.exam.modifyPaper',
         requiresAuth: true,
@@ -102,7 +102,7 @@ const EXAM: AppRouteRecordRaw = {
       path: 'correct-exam-list', // The midline path complies with SEO specifications
       name: 'CorrectList',
       component: () =>
-        import('@/views/exam/correct-manager/correct-exam-list/index.vue'),
+        import('@/views/paper/correct-manager/correct-exam-list/index.vue'),
       meta: {
         locale: 'menu.exam.correctExam',
         requiresAuth: true,
@@ -113,7 +113,7 @@ const EXAM: AppRouteRecordRaw = {
       path: 'correct-user-list/:examId', // The midline path complies with SEO specifications
       name: 'CorrectUserExam',
       component: () =>
-        import('@/views/exam/correct-manager/correct-user-list/index.vue'),
+        import('@/views/paper/correct-manager/correct-user-list/index.vue'),
       meta: {
         locale: 'menu.exam.correctUserExam',
         requiresAuth: true,
@@ -125,9 +125,20 @@ const EXAM: AppRouteRecordRaw = {
       path: 'correct-user-paper/:examRecordId', // The midline path complies with SEO specifications
       name: 'CorrectUserPaper',
       component: () =>
-        import('@/views/exam/correct-manager/correct-user-paper/index.vue'),
+        import('@/views/paper/correct-manager/correct-user-paper/index.vue'),
       meta: {
         locale: 'menu.exam.answerDetail',
+        requiresAuth: true,
+        hideInMenu: true,
+        roles: ['admin', 'teacher'],
+      },
+    },
+    {
+      path: 'exam-record/:examId', // The midline path complies with SEO specifications
+      name: 'ExamRecord',
+      component: () => import('@/views/exam/exam-record/index.vue'),
+      meta: {
+        locale: 'menu.exam.record',
         requiresAuth: true,
         hideInMenu: true,
         roles: ['admin', 'teacher'],

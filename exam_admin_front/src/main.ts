@@ -3,8 +3,6 @@ import ArcoVue from '@arco-design/web-vue';
 import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import globalComponents from '@/components';
 // 引入打印插件
-// @ts-ignore
-import { hiPrintPlugin } from 'vue-plugin-hiprint';
 
 // @ts-ignore
 import VMdPreviewHtml from '@kangc/v-md-editor/lib/preview-html';
@@ -16,7 +14,6 @@ import store from './store';
 import i18n from './locale';
 import directive from './directive';
 import App from './App.vue';
-
 import '@/assets/style/global.less';
 import '@/api/interceptor';
 
@@ -26,7 +23,6 @@ import '@kangc/v-md-editor/lib/theme/style/vuepress.css';
 
 const app = createApp(App);
 app.use(VMdPreviewHtml);
-
 app.use(ArcoVue, {});
 app.use(ArcoVueIcon);
 
@@ -35,6 +31,4 @@ app.use(store);
 app.use(i18n);
 app.use(globalComponents);
 app.use(directive);
-app.use(hiPrintPlugin, '$pluginName');
-hiPrintPlugin.disAutoConnect();
 app.mount('#app');

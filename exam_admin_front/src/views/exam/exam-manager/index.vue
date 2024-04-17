@@ -13,7 +13,6 @@
           v-model="examSearch.titleFuzzy"
           :placeholder="$t('examManager.placeholder.title')"
           style="width: 320px"
-          @input="handleChange"
         />
 
         <!--开放类型-->
@@ -22,7 +21,6 @@
           :placeholder="$t('examManager.placeholder.openType')"
           style="width: 250px"
           allow-clear
-          @change="handleChange"
         >
           <a-option value="0">完全公开</a-option>
           <a-option value="1">指定学生</a-option>
@@ -37,7 +35,6 @@
           :time-picker-props="{ defaultValue: '09:09:06' }"
           :placeholder="t('examManager.placeholder.startTime')"
           format="YYYY-MM-DD HH:mm:ss"
-          @ok="handleChange"
         />
         <a-date-picker
           v-model="examSearch.endTimeEnd"
@@ -45,7 +42,6 @@
           show-time
           :placeholder="t('examManager.placeholder.endTime')"
           format="YYYY-MM-DD hh:mm"
-          @ok="handleChange"
         />
       </a-space>
       <a-divider style="margin-top: 0" />
@@ -89,6 +85,12 @@
           {{ record.startTime }} ~ {{ record.endTime }}
         </template>
 
+        <template #statue="{ record }">
+          <a-tag v-if="record.statue === 0" color="red">未开始</a-tag>
+          <a-tag v-if="record.statue === 1" color="blue">已开始</a-tag>
+          <a-tag v-if="record.statue === 2" color="green">已结束</a-tag>
+        </template>
+
         <template #option="{ record }">
           <a-space>
             <a-button type="primary" @click="handleModify(record)">
@@ -99,109 +101,131 @@
               status="danger"
               @click="handleDelete(record.id)"
             >
-              {{ $t('examManager.columns.options.delete') }}
+              <template #icon>
+                <icon-delete />
+              </template>
             </a-button>
             <a-button
               type="primary"
-              status="danger"
+              status="success"
               @click="createCode(record)"
             >
               <template #icon>
                 <icon-scan />
               </template>
             </a-button>
+            <a-dropdown>
+              <a-button>
+                <template #icon>
+                  <icon-more />
+                </template>
+              </a-button>
+              <template #content>
+                <a-button type="dashed" @click="goExamRecord(record)">
+                  考试记录
+                </a-button>
+              </template>
+            </a-dropdown>
           </a-space>
         </template>
       </a-table>
     </a-card>
-    <a-modal
-      v-model:visible="visible"
-      :simple="true"
-      :closable="true"
-      :footer="false"
-      :hide-title="true"
-      :modal-style="{ padding: '0', margin: '0', borderRadius: '100px' }"
-    >
-      <a-card :bordered="false" style="height: 500px">
-        <template #cover>
-          <div
-            :style="{
-              height: '200px',
-              overflow: 'hidden',
-            }"
-          >
-            <img
-              :style="{ width: '100%', transform: 'translateY(-20px)' }"
-              alt="dessert"
-              src="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/examTagBackground.jpg"
-            />
-          </div>
-        </template>
-        <a-card-meta>
-          <template #description>
-            <a-row :gutter="0">
-              <a-col :span="18">
-                <a-descriptions
-                  :title="`考试名称：${currentExam.title}`"
-                  :column="1"
-                >
-                  <a-descriptions-item label="考试开始时间:">
-                    {{ currentExam.startTime }}
-                  </a-descriptions-item>
-                  <a-descriptions-item label="考试结束时间:">
-                    {{ currentExam.endTime }}
-                  </a-descriptions-item>
-                  <a-descriptions-item label="允许迟到时间:">
-                    {{ currentExam.lateMax }}&emsp;分钟
-                  </a-descriptions-item>
-                  <a-descriptions-item label="最少答卷时间:">
-                    {{ currentExam.handMin }}&emsp;分钟
-                  </a-descriptions-item>
-                  <a-descriptions-item label="考试时长:">
-                    {{ currentExam.duration }}&emsp;分钟
-                  </a-descriptions-item>
-                </a-descriptions>
-              </a-col>
-              <a-col :span="6"
-                ><a-image
-                  style="margin-top: 85px"
-                  width="100"
-                  height="100"
-                  :src="imageUrl"
-              /></a-col>
-            </a-row>
+    <div ref="imageRef">
+      <a-modal
+        v-model:visible="visible"
+        :simple="true"
+        :closable="true"
+        :footer="false"
+        :hide-title="true"
+        :modal-style="{ padding: '0', margin: '0', borderRadius: '100px' }"
+      >
+        <a-card :bordered="false" style="height: 500px">
+          <template #cover>
+            <div
+              :style="{
+                height: '200px',
+                overflow: 'hidden',
+              }"
+            >
+              <img
+                :style="{ width: '100%', transform: 'translateY(-20px)' }"
+                alt="dessert"
+                src="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/examTagBackground.jpg"
+              />
+            </div>
           </template>
-          <template #avatar>
-            <a-space style="position: absolute; bottom: 10px">
-              <a-avatar
-                style="background-color: #ffffff; margin-right: 10px"
-                :size="50"
-                image-url="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/signature.png"
-              >
-              </a-avatar>
-              <a-typography-title style="margin-right: 50px" :heading="6">
-                CloudTopExam
-              </a-typography-title>
-              <a-space>
-                <a-typography-paragraph
-                  :copyable="true"
-                  :copy-text="`http://localhost:8088/api/exam/startExam/${currentExam.id}`"
+          <a-card-meta>
+            <template #description>
+              <a-row :gutter="0">
+                <a-col :span="18">
+                  <a-descriptions
+                    :title="`考试名称：${currentExam.title}`"
+                    :column="1"
+                  >
+                    <a-descriptions-item label="考试开始时间:">
+                      {{ currentExam.startTime }}
+                    </a-descriptions-item>
+                    <a-descriptions-item label="考试结束时间:">
+                      {{ currentExam.endTime }}
+                    </a-descriptions-item>
+                    <a-descriptions-item label="允许迟到时间:">
+                      {{ currentExam.lateMax }}&emsp;分钟
+                    </a-descriptions-item>
+                    <a-descriptions-item label="最少答卷时间:">
+                      {{ currentExam.handMin }}&emsp;分钟
+                    </a-descriptions-item>
+                    <a-descriptions-item label="考试时长:">
+                      {{ currentExam.duration }}&emsp;分钟
+                    </a-descriptions-item>
+                  </a-descriptions>
+                </a-col>
+                <a-col :span="6"
+                  ><a-image
+                    style="margin-top: 85px"
+                    width="100"
+                    height="100"
+                    :src="imageUrl"
+                /></a-col>
+              </a-row>
+            </template>
+            <template #avatar>
+              <a-space style="position: absolute; bottom: 10px">
+                <a-avatar
+                  style="background-color: #ffffff; margin-right: 10px"
+                  :size="50"
+                  image-url="https://avatar-store.oss-cn-beijing.aliyuncs.com/other/signature.png"
                 >
-                  <a-space style="margin-top: 20px">
-                    <a-typography-text type="primary">
-                      复制考试链接
-                    </a-typography-text>
-                    <template #copy-icon>
-                      <icon-link />
-                    </template>
-                  </a-space>
-                </a-typography-paragraph>
+                </a-avatar>
+                <a-typography-title style="margin-right: 20px" :heading="6">
+                  CloudTopExam
+                </a-typography-title>
+                <a-space>
+                  <a-typography-paragraph
+                    :copyable="true"
+                    :copy-text="`http://localhost:8088/api/exam/startExam/${currentExam.id}`"
+                  >
+                    <a-space style="margin-top: 20px">
+                      <a-typography-text type="primary">
+                        复制考试链接
+                      </a-typography-text>
+                      <template #copy-icon>
+                        <icon-link />
+                      </template>
+                    </a-space>
+                  </a-typography-paragraph>
+                </a-space>
+                <a-space>
+                  <a-typography-text type="primary" @click="download">
+                    <icon-download />
+                    下载
+                  </a-typography-text>
+                </a-space>
               </a-space>
-            </a-space>
-          </template>
-        </a-card-meta>
-      </a-card>
-    </a-modal>
+            </template>
+          </a-card-meta>
+        </a-card>
+      </a-modal>
+    </div>
   </div>
 </template>
 
@@ -219,6 +243,8 @@
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
+
+  const imageRef = ref<HTMLElement>();
 
   // 考试扫码考试对话框
   const visible = ref(false);
@@ -242,8 +268,6 @@
     subjectId: '',
     joinType: '',
   });
-  // 添加考试模态框开关
-  const addExamVisible = ref<boolean>(false);
 
   // 考试列表
   const ExamList = ref<ExamVO[]>();
@@ -306,7 +330,7 @@
       title: t('examManager.columns.deptText'),
       dataIndex: 'deptText',
       slotName: 'deptText',
-      width: 100,
+      width: 80,
       ellipsis: true,
       tooltip: true,
     },
@@ -342,15 +366,6 @@
       ellipsis: true,
     },
   ]);
-
-  // 查询考试
-  const handleChange = async () => {
-    examSearch.value.endTimeStart = '';
-    examSearch.value.startTimeEnd = '';
-    await getExamList(examSearch.value).then((res: any) => {
-      ExamList.value = res.data;
-    });
-  };
 
   // 编辑
   const handleModify = (record: any) => {
@@ -402,6 +417,16 @@
     visible.value = true;
   };
 
+  // 获取考试记录
+  const goExamRecord = (record: any) => {
+    router.push({
+      name: 'ExamRecord',
+      params: {
+        examId: record.id,
+      },
+    });
+  };
+
   // 监视查询数据及其页码变化
   watch(
     [pageInfo.value, examSearch.value],
@@ -410,6 +435,14 @@
     },
     { deep: true }
   );
+
+  // 下载图片
+  const download = () => {
+    Message.info({
+      content: '功能未完成',
+      duration: 2000,
+    });
+  };
 </script>
 
 <style scoped lang="less">

@@ -9,6 +9,7 @@ import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
 import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
 import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 import { WrongQuVO } from '@/types/model/vo/WrongQuVO';
+import { ExamRecord } from '@/types/model/po/ExamRecord';
 
 /**
  * 获取考试列表
@@ -72,6 +73,16 @@ export function getCorrectExam(examQuery: ExamQuery) {
 export function getExamRecordByExamId(examRecordQuery: ExamRecordQuery) {
   return axios.post<CorrectUserExamUserVO[]>(
     '/api/examRecord/getExamRecordByExamId',
+    examRecordQuery
+  );
+}
+
+/**
+ * 获取考试记录
+ */
+export function getExamRecord(examRecordQuery: ExamRecordQuery) {
+  return axios.post<ExamRecord[]>(
+    '/api/examRecord/loadDataList',
     examRecordQuery
   );
 }

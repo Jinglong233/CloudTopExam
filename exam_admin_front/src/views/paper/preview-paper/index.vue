@@ -167,9 +167,6 @@
                 <a-typography-title :heading="6">试题数量</a-typography-title>
                 <a-typography-text>{{ paper.quCount }}</a-typography-text>
                 <a-divider />
-                <a-button type="primary" @click="handlePrint"
-                  >打印试卷</a-button
-                >
               </a-space>
               <div style="margin-top: 20px" />
             </a-scrollbar>
@@ -186,6 +183,7 @@
   import BookMark from '@/components/bookMark/index.vue';
   import { getPaperDetail } from '@/api/paper';
   import { PaperAndQuVO } from '@/types/model/vo/PaperAndQuVO';
+
   // todo wangEditor的预览展示
   import MyEditor from '@/components/my-editor/index.vue';
 
@@ -206,18 +204,6 @@
       isShowEditor.value = true;
     });
   });
-
-  // todo 打印功能实现
-  // 打印
-  const handlePrint = () => {
-    // const printData = { name: '名称1' };
-    // const printData2 = { name: '名称2' };
-    // const hiprintTemplate = new hiprint.PrintTemplate({ template: panel });
-    // // 打印
-    // hiprintTemplate.print(printData);
-    // // 批量打印
-    // hiprintTemplate.print([printData, printData2]);
-  };
 </script>
 
 <style scoped></style>
