@@ -5,6 +5,7 @@ import com.jl.project.entity.dto.UpdateExamRecordDTO;
 import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.query.ExamRecordQuery;
 import com.jl.project.entity.vo.CorrectUserExamUserVO;
+import com.jl.project.entity.vo.ExamRecordVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 
 import java.util.List;
@@ -66,4 +67,6 @@ public interface ExamRecordService {
 	 * @return
 	 */
     PaginationResultVO<CorrectUserExamUserVO> getExamRecordByExamId(ExamRecordQuery examRecordQuery);
+
+    PaginationResultVO<ExamRecordVO> loadDatalist(ExamRecordQuery query);
 }

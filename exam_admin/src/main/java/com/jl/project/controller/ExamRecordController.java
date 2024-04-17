@@ -4,6 +4,7 @@ import com.jl.project.entity.dto.UpdateExamRecordDTO;
 import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.query.ExamRecordQuery;
 import com.jl.project.entity.vo.CorrectUserExamUserVO;
+import com.jl.project.entity.vo.ExamRecordVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
@@ -32,8 +33,17 @@ public class ExamRecordController extends ABaseController {
      */
     @RequestMapping("loadDataList")
     public ResponseVO loadDatalist(@RequestBody ExamRecordQuery query) {
-        return getSuccessResponseVO(examRecordService.findListByPage(query));
+        PaginationResultVO<ExamRecordVO> result = null;
+        try {
+            result = examRecordService.loadDatalist(query);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null,e.getCode(),e.getMessage());
+        }
+        return getSuccessResponseVO(result);
     }
+
+
+
 
     /**
      * 根据考试Id获取考试记录

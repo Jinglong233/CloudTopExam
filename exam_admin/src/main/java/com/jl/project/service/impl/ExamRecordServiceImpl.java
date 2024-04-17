@@ -1,6 +1,8 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import com.jl.project.entity.dto.UpdateExamRecordDTO;
 import com.jl.project.entity.po.Exam;
 import com.jl.project.entity.po.ExamRecord;
@@ -8,6 +10,7 @@ import com.jl.project.entity.po.Paper;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.CorrectUserExamUserVO;
+import com.jl.project.entity.vo.ExamRecordVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
@@ -157,7 +160,7 @@ public class ExamRecordServiceImpl implements ExamRecordService {
         // 1. 获取考试对应的考试记录
 
         PaginationResultVO<ExamRecord> paginationResultVO = findListByPage(examRecordQuery);
-        BeanUtil.copyProperties(paginationResultVO,resultVO);
+        BeanUtil.copyProperties(paginationResultVO, resultVO);
         List<ExamRecord> examRecords = paginationResultVO.getList();
         if (examRecords == null) {
             resultVO.setList(Collections.emptyList());
@@ -187,6 +190,41 @@ public class ExamRecordServiceImpl implements ExamRecordService {
         }
 
         resultVO.setList(correctUserExamUserVOS);
+        return resultVO;
+    }
+
+    @Override
+    public PaginationResultVO<ExamRecordVO> loadDatalist(ExamRecordQuery query) throws BusinessException {
+        if (query == null) {
+            throw new BusinessException("缺少查询参数");
+        }
+        PaginationResultVO<ExamRecord> paginationResultVO = findListByPage(query);
+        PaginationResultVO<ExamRecordVO> resultVO = new PaginationResultVO<>();
+        BeanUtil.copyProperties(paginationResultVO, resultVO);
+        if (paginationResultVO == null) {
+            return resultVO;
+        }
+        List<ExamRecord> examRecords = paginationResultVO.getList();
+        List<ExamRecordVO> list = new ArrayList<>();
+        if (examRecords != null && examRecords.size() != 0) {
+            for (ExamRecord examRecord : examRecords) {
+                ExamRecordVO examRecordVO = new ExamRecordVO();
+                BeanUtil.copyProperties(examRecord, examRecordVO);
+                String userId = examRecord.getUserId();
+                User user = userMapper.selectById(userId);
+                // 赋值作答者姓名
+                if (user != null) {
+                    examRecordVO.setUserName(user.getUserName());
+                }
+
+                if (examRecord.getState() == 2) {// 已作答才有时长
+                    long between = DateUtil.between(examRecord.getEndTime(), examRecord.getStartTime(), DateUnit.MINUTE);
+                    examRecordVO.setAnswerTime(between);
+                }
+                list.add(examRecordVO);
+            }
+        }
+        resultVO.setList(list);
         return resultVO;
     }
 
