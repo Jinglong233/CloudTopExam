@@ -4,7 +4,7 @@
 
     <a-layout>
       <!--左侧题目总数展示-->
-      <a-affix :offset-top="80">
+      <a-affix :offset-top="100">
         <a-layout-sider :width="310" style="margin-left: 20px">
           <a-card hoverable>
             <a-scrollbar type="track" style="height: 680px; overflow: auto">

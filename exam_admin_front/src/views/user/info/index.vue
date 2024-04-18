@@ -6,7 +6,7 @@
       <div class="content-left">
         <a-grid :cols="24" :col-gap="16" :row-gap="16">
           <a-grid-item :span="24">
-            <MyProject />
+            <MyExam />
           </a-grid-item>
           <a-grid-item :span="24">
             <LatestActivity />
@@ -16,7 +16,7 @@
       <div class="content-right">
         <a-grid :cols="24" :row-gap="16">
           <a-grid-item :span="24">
-            <MyTeam />
+            <MyPaper />
           </a-grid-item>
           <a-grid-item class="panel" :span="24">
             <LatestNotification />
@@ -30,9 +30,9 @@
 <script lang="ts" setup>
   import UserInfoHeader from './components/user-info-header.vue';
   import LatestNotification from './components/latest-notification.vue';
-  import MyProject from './components/my-exam.vue';
+  import MyExam from './components/my-exam.vue';
   import LatestActivity from './components/latest-activity.vue';
-  import MyTeam from './components/my-class.vue';
+  import MyPaper from './components/my-paper.vue';
 </script>
 
 <script lang="ts">

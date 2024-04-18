@@ -12,7 +12,7 @@
         <a-input
           v-model="paperSearch.titleFuzzy"
           :placeholder="$t('paperManager.placeholder.title')"
-          style="width: 320px"
+          style="width: 200px"
         />
         <!--学科-->
         <a-tree-select
@@ -23,7 +23,7 @@
             title: 'title',
             children: 'children',
           }"
-          style="width: 250px"
+          style="width: 200px"
           placeholder="请选择学科"
           allow-clear
         />
@@ -31,7 +31,7 @@
         <a-select
           v-model="paperSearch.joinType"
           :placeholder="$t('paperManager.placeholder.joinType')"
-          style="width: 250px"
+          style="width: 200px"
           allow-clear
         >
           <a-option value="0">随机抽取</a-option>
@@ -44,13 +44,14 @@
           :placeholder="$t('paperManager.placeholder.deptCode')"
           :data="deptTree"
           allow-clear
-          style="width: 250px"
+          style="width: 200px"
           :field-names="{
             key: 'deptCode',
             title: 'deptName',
             children: 'children',
           }"
         />
+        <a-checkbox @change="onlyMyCreate">只查看我创建的</a-checkbox>
       </a-space>
       <a-row style="margin-bottom: 16px; margin-top: 20px">
         <a-col :span="12">
@@ -196,10 +197,12 @@
   import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
   import { getDeptTree } from '@/api/department';
   import { SimplePage } from '@/types/model/po/SimplePage';
+  import { useUserStore } from '@/store';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
 
+  const userStore = useUserStore();
   const router = useRouter();
 
   // 分页信息
@@ -301,6 +304,15 @@
       width: 300,
     },
   ]);
+
+  // 只查看我创建的试卷
+  const onlyMyCreate = (flag: any) => {
+    if (flag) {
+      paperSearch.value.createBy = userStore.id;
+    } else {
+      paperSearch.value.createBy = '';
+    }
+  };
 
   // 预览试卷
   const handlePreview = (record: any) => {

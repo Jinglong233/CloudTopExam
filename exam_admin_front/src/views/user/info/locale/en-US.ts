@@ -3,7 +3,7 @@ export default {
   'userInfo.editUserInfo': 'Edit Information',
   'userInfo.tab.title.overview': 'Overview',
   'userInfo.tab.title.project': 'Project',
-  'userSetting.label.class': 'My Class',
+  'userSetting.label.paper': 'My Paper',
   'userInfo.title.latestActivity': 'Latest Activity',
   'userInfo.title.latestNotification': 'Latest Notifications',
   'userSetting.label.myExam': 'My Published Exams',

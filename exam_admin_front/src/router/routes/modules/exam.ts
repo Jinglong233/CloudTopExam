@@ -14,7 +14,7 @@ const EXAM: AppRouteRecordRaw = {
   children: [
     {
       path: 'paper-manager', // The midline path complies with SEO specifications
-      name: 'ExamList',
+      name: 'PaperManager',
       component: () => import('@/views/paper/paper-manager/index.vue'),
       meta: {
         locale: 'menu.exam.paperManager',
@@ -137,6 +137,17 @@ const EXAM: AppRouteRecordRaw = {
       path: 'exam-record/:examId', // The midline path complies with SEO specifications
       name: 'ExamRecord',
       component: () => import('@/views/exam/exam-record/index.vue'),
+      meta: {
+        locale: 'menu.exam.record',
+        requiresAuth: true,
+        hideInMenu: true,
+        roles: ['admin', 'teacher'],
+      },
+    },
+    {
+      path: 'exam-record-detail/:examRecordId', // The midline path complies with SEO specifications
+      name: 'ExamRecordDetail',
+      component: () => import('@/views/exam/exam-record-detail/index.vue'),
       meta: {
         locale: 'menu.exam.record',
         requiresAuth: true,

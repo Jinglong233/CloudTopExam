@@ -5,15 +5,42 @@
       <!--左侧题目总数展示（看所有题）-->
       <template v-if="!subView">
         <a-col :span="5">
-          <a-affix :offset-top="80">
-            <a-card
-              :style="{ height: '720px', width: '100%' }"
-              :title="exam.title"
+          <VerticalNav :title="exam.title">
+            <template
+              v-for="(groupList, index) in paper.groupLists"
+              :key="index"
             >
-              <template
-                v-for="(groupList, index) in paper.groupLists"
-                :key="index"
-              >
+              <a-row :gutter="10">
+                <a-col :span="8">{{ groupList.title }}</a-col>
+                <a-col :span="16"
+                  >共{{ groupList.quCount }}题 / 共{{
+                    groupList.totalScore
+                  }}分</a-col
+                >
+              </a-row>
+              <a-row :gutter="50">
+                <a-col
+                  v-for="qu in groupList.quList"
+                  :key="qu.id"
+                  style="margin-top: 10px"
+                  :span="4"
+                >
+                  <LeftNavButton :anchor-id="qu.id" :qu-sort="qu.sort" />
+                </a-col>
+              </a-row>
+            </template>
+          </VerticalNav>
+        </a-col>
+      </template>
+      <!--左侧题目总数展示（只看主观题）-->
+      <template v-else>
+        <a-col :span="5">
+          <VerticalNav :title="exam.title">
+            <template
+              v-for="(groupList, index) in paper.groupLists"
+              :key="index"
+            >
+              <template v-if="groupList.quType === QuestionType.SHORTANSWER">
                 <a-row :gutter="10">
                   <a-col :span="8">{{ groupList.title }}</a-col>
                   <a-col :span="16"
@@ -29,193 +56,12 @@
                     style="margin-top: 10px"
                     :span="4"
                   >
-                    <a-button
-                      :type="isNowNumber(qu.id) ? 'primary' : 'outline'"
-                      >{{ qu.sort }}</a-button
-                    >
+                    <LeftNavButton :qu-sort="qu.sort" :anchor-id="qu.id" />
                   </a-col>
                 </a-row>
               </template>
-            </a-card>
-          </a-affix>
-        </a-col>
-      </template>
-      <!--左侧题目总数展示（只看主观题）-->
-      <template v-else>
-        <a-col :span="5">
-          <a-affix :offset-top="80">
-            <a-card
-              :style="{ height: '720px', width: '100%' }"
-              :title="exam.title"
-            >
-              <template
-                v-for="(groupList, index) in paper.groupLists"
-                :key="index"
-              >
-                <template v-if="groupList.quType === QuestionType.SHORTANSWER">
-                  <a-row :gutter="10">
-                    <a-col :span="8">{{ groupList.title }}</a-col>
-                    <a-col :span="16"
-                      >共{{ groupList.quCount }}题 / 共{{
-                        groupList.totalScore
-                      }}分</a-col
-                    >
-                  </a-row>
-                  <a-row :gutter="50">
-                    <a-col
-                      v-for="qu in groupList.quList"
-                      :key="qu.id"
-                      style="margin-top: 10px"
-                      :span="4"
-                    >
-                      <a-button
-                        :type="isNowNumber(qu.id) ? 'primary' : 'outline'"
-                        >{{ qu.sort }}</a-button
-                      >
-                    </a-col>
-                  </a-row>
-                </template>
-              </template>
-            </a-card>
-            <!--<a-card :style="{ height: '100%', width: '100%' }">
-              &lt;!&ndash;1.单选题 2.多选题 3.判断题 4.填空题 5.简答题&ndash;&gt;
-              <template v-if="topicClassify(exam.problem).has(1)">
-                <a-typography-title type="primary" :heading="6"
-                  >单选题</a-typography-title
-                >
-                <a-divider :margin="0" />
-                <a-typography
-                  >共
-                  <a-typography-text type="primary">
-                    {{ topicClassify(exam.problem).size }}
-                  </a-typography-text>
-                  题,共
-                  <a-typography-text type="primary">
-                    {{ computeScore(topicClassify(exam.problem).get(1)) }}
-                  </a-typography-text>
-                  分
-                </a-typography>
-                <a-space style="margin: 10px 0px" :wrap="true">
-                  <a-button
-                    v-for="(item, index) in topicClassify(exam.problem).get(1)"
-                    :key="index"
-                    :status="item.doRight === 0 ? 'danger' : 'normal'"
-                    type="primary"
-                  >
-                    {{ index + 1 }}
-                  </a-button>
-                </a-space>
-              </template>
-              <template v-if="topicClassify(exam.problem).has(2)">
-                <a-typography-title type="primary" :heading="6"
-                  >多选题</a-typography-title
-                >
-                <a-divider />
-                <a-typography
-                  >共
-                  <a-typography-text type="primary">
-                    {{ topicClassify(exam.problem).get(2).length }}
-                  </a-typography-text>
-                  题,共
-                  <a-typography-text type="primary">
-                    {{ computeScore(topicClassify(exam.problem).get(2)) }}
-                  </a-typography-text>
-                  分
-                </a-typography>
-                <a-space style="margin: 10px 0px" :wrap="true">
-                  <a-button
-                    v-for="(item, index) in topicClassify(exam.problem).get(2)"
-                    :key="index"
-                    :status="item.doRight === 0 ? 'danger' : 'normal'"
-                    type="primary"
-                  >
-                    {{ index + 1 }}
-                  </a-button>
-                </a-space>
-              </template>
-              <template v-if="topicClassify(exam.problem).has(3)">
-                <a-typography-title type="primary" :heading="6"
-                  >判断题</a-typography-title
-                >
-                <a-divider />
-                <a-typography
-                  >共
-                  <a-typography-text type="primary">
-                    {{ topicClassify(exam.problem).get(3).length }}
-                  </a-typography-text>
-                  题,共
-                  <a-typography-text type="primary">
-                    {{ computeScore(topicClassify(exam.problem).get(3)) }}
-                  </a-typography-text>
-                  分
-                </a-typography>
-                <a-space style="margin: 10px 0px" :wrap="true">
-                  <a-button
-                    v-for="(item, index) in topicClassify(exam.problem).get(3)"
-                    :key="index"
-                    :status="item.doRight === 0 ? 'danger' : 'normal'"
-                    type="primary"
-                  >
-                    {{ index + 1 }}
-                  </a-button>
-                </a-space>
-              </template>
-              <template v-if="topicClassify(exam.problem).has(4)">
-                <a-typography-title type="primary" :heading="6"
-                  >单选题</a-typography-title
-                >
-                <a-divider />
-                <a-typography
-                  >共
-                  <a-typography-text type="primary">
-                    {{ topicClassify(exam.problem).get(4).length }}
-                  </a-typography-text>
-                  题,共
-                  <a-typography-text type="primary">
-                    {{ computeScore(topicClassify(exam.problem).get(4)) }}
-                  </a-typography-text>
-                  分
-                </a-typography>
-                <a-space style="margin: 10px 0px" :wrap="true">
-                  <a-button
-                    v-for="(item, index) in topicClassify(exam.problem).get(4)"
-                    :key="index"
-                    :status="item.doRight === 0 ? 'danger' : 'normal'"
-                    type="primary"
-                  >
-                    {{ index + 1 }}
-                  </a-button>
-                </a-space>
-              </template>
-              <template v-if="topicClassify(exam.problem).has(5)">
-                <a-typography-title type="primary" :heading="6"
-                  >单选题</a-typography-title
-                >
-                <a-divider />
-                <a-typography
-                  >共
-                  <a-typography-text type="primary">
-                    {{ topicClassify(exam.problem).get(5).length }}
-                  </a-typography-text>
-                  题,共
-                  <a-typography-text type="primary">
-                    {{ computeScore(topicClassify(exam.problem).get(5)) }}
-                  </a-typography-text>
-                  分
-                </a-typography>
-                <a-space style="margin: 10px 0px" :wrap="true">
-                  <a-button
-                    v-for="(item, index) in topicClassify(exam.problem).get(5)"
-                    :key="index"
-                    :status="item.doRight === 0 ? 'danger' : 'normal'"
-                    type="primary"
-                  >
-                    {{ index + 1 }}
-                  </a-button>
-                </a-space>
-              </template>
-            </a-card>-->
-          </a-affix>
+            </template>
+          </VerticalNav>
         </a-col>
       </template>
 
@@ -224,13 +70,11 @@
         <a-col :span="15">
           <template v-for="(qu, outIndex) in allQuestion" :key="outIndex">
             <a-card class="general-card">
-              <!--锚点位置-->
-              <div :id="`单选${outIndex + 1}`" class="cli"></div>
               <!--问题部分-->
               <template #title>
                 <a-space>
                   <span>
-                    <BookMark :number="outIndex + 1" />
+                    <BookMark :number="outIndex + 1" :anchor-id="qu.id" />
                   </span>
                   <div v-html="qu.content" />
                 </a-space>
@@ -358,7 +202,6 @@
                           <template v-else> 错误 </template>
                         </div>
                       </a-space>
-
                       <a-space>
                         <a-typography-text>答案解析：</a-typography-text>
                         <div
@@ -643,27 +486,23 @@
 
       <!--右侧批阅展示-->
       <a-col :span="4">
-        <a-affix :offset-top="80">
-          <a-card style="text-align: center">
-            <a-space direction="vertical" fill>
-              <a-typography-title :heading="6">人员姓名</a-typography-title>
-              <a-typography-text>张三</a-typography-text>
-              <a-divider />
-              <a-typography-title :heading="6">考试成绩</a-typography-title>
-              <a-typography-text>{{
-                examRecordInfo.totalScore
-              }}</a-typography-text>
-              <a-divider />
-              <a-divider />
-              <a-typography-title :heading="6">仅看主观题</a-typography-title>
-              <a-switch v-model="subView" @change="subViewSwitch" />
-              <a-divider />
-              <a-button type="primary" @click="submitCorrect"
-                >提交阅卷</a-button
-              >
-            </a-space>
-          </a-card>
-        </a-affix>
+        <VerticalNav style="text-align: center">
+          <a-space direction="vertical" fill>
+            <a-typography-title :heading="6">人员姓名</a-typography-title>
+            <a-typography-text>张三</a-typography-text>
+            <a-divider />
+            <a-typography-title :heading="6">考试成绩</a-typography-title>
+            <a-typography-text>{{
+              examRecordInfo.totalScore
+            }}</a-typography-text>
+            <a-divider />
+            <a-divider />
+            <a-typography-title :heading="6">仅看主观题</a-typography-title>
+            <a-switch v-model="subView" @change="subViewSwitch" />
+            <a-divider />
+            <a-button type="primary" @click="submitCorrect">提交阅卷</a-button>
+          </a-space>
+        </VerticalNav>
       </a-col>
     </a-row>
   </div>
@@ -686,6 +525,9 @@
   import { getUserAnswerList, updateUserAnswerList } from '@/api/userAnswer';
   import { Qu } from '@/types/model/po/Qu';
   import { Message } from '@arco-design/web-vue';
+  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import VerticalNav from '@/components/verticalNav/index.vue';
+  import LeftNavButton from '@/components/leftNavButton/index.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -709,7 +551,7 @@
     // 获取考试记录
     await getExamRecord({
       id: examRecordId,
-    }).then((res: any) => {
+    } as ExamRecordQuery).then((res: any) => {
       examRecordInfo.value = res.data[0] as ExamRecord;
     });
 
@@ -763,7 +605,7 @@
     // 获取考试记录信息
     await getExamRecord({
       id: examRecordInfo.value.id,
-    }).then((res: any) => {
+    } as ExamRecordQuery).then((res: any) => {
       examRecordInfo.value = res.data[0] as ExamRecord;
     });
   };

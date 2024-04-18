@@ -1,11 +1,11 @@
 <template>
   <a-card class="general-card" :title="$t('userSetting.label.myExam')">
     <template #extra>
-      <a-link>{{ $t('userInfo.showMore') }}</a-link>
+      <a-link @click="goExamManager">{{ $t('userInfo.showMore') }}</a-link>
     </template>
     <a-row :gutter="16">
       <a-col
-        v-for="exam in examList"
+        v-for="exam in myCreateExam"
         :key="exam.id"
         :xs="12"
         :sm="12"
@@ -30,10 +30,10 @@
                 <a-typography-text type="Secondary">
                   <a-tag v-if="exam.statue === 0" color="blue">未开始</a-tag>
                   <a-tag v-if="exam.statue === 1" color="green">已开始</a-tag>
-                  <a-tag v-if="exam.statue === 2" color="grey">已结束</a-tag>
+                  <a-tag v-if="exam.statue === 2" color="red">已结束</a-tag>
                 </a-typography-text>
               </a-descriptions-item>
-              <a-descriptions-item>
+              <a-descriptions-item label="考试时间">
                 <a-typography-text
                   type="Secondary"
                   :ellipsis="{
@@ -42,11 +42,6 @@
                   }"
                 >
                   {{ exam.startTime }} ~ {{ exam.endTime }}
-                </a-typography-text>
-              </a-descriptions-item>
-              <a-descriptions-item label="创建时间">
-                <a-typography-text type="Secondary">
-                  {{ exam.createTime }}
                 </a-typography-text>
               </a-descriptions-item>
               <a-descriptions-item label="开放类型">
@@ -69,19 +64,32 @@
   import { useUserStore } from '@/store';
   import { getExamList } from '@/api/exam';
   import { ExamVO } from '@/types/model/vo/ExamVO';
-
-  const userInfo = useUserStore();
+  import { Exam } from '@/types/model/po/Exam';
+  import { useRouter } from 'vue-router';
+  import { ExamQuery } from '@/types/model/query/ExamQuery';
 
   const loading = ref<boolean>(true);
+  const myCreateExam = ref<Exam[]>([]);
 
-  const examList = ref<ExamVO[]>([]);
+  const router = useRouter();
 
+  const userStore = useUserStore();
   onMounted(async () => {
-    await getExamList({ createBy: userInfo.id }).then((res: any) => {
-      examList.value = res.data;
+    await getExamList({
+      createBy: userStore.id,
+      pageSize: 6,
+    } as ExamQuery).then((res: any) => {
+      myCreateExam.value = res.data.list;
       loading.value = false;
     });
   });
+
+  // 前往考试管理界面
+  const goExamManager = () => {
+    router.push({
+      name: 'ExamManager',
+    });
+  };
 </script>
 
 <style scoped lang="less">

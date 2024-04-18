@@ -1,9 +1,12 @@
 <template>
+  <!--这里有锚点-->
+  <div :id="anchorId" style="position: relative; top: -100px" />
   <div class="flag">{{ number }}</div>
 </template>
 
 <script lang="ts" setup>
-  defineProps(['number']);
+  // anchorId 锚点Id
+  defineProps(['number', 'anchorId']);
 </script>
 
 <style>

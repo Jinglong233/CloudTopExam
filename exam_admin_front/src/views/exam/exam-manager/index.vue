@@ -43,6 +43,8 @@
           :placeholder="t('examManager.placeholder.endTime')"
           format="YYYY-MM-DD hh:mm"
         />
+
+        <a-checkbox @change="onlyMyCreate">只查看我创建的</a-checkbox>
       </a-space>
       <a-divider style="margin-top: 0" />
       <a-row style="margin-bottom: 16px">
@@ -240,11 +242,14 @@
   import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { ExamVO } from '@/types/model/vo/ExamVO';
   import { SimplePage } from '@/types/model/po/SimplePage';
+  import { useUserStore } from '@/store';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();
 
   const imageRef = ref<HTMLElement>();
+
+  const userStore = useUserStore();
 
   // 考试扫码考试对话框
   const visible = ref(false);
@@ -398,6 +403,15 @@
         });
       },
     });
+  };
+
+  // 只查看我创建的考试
+  const onlyMyCreate = (flag: any) => {
+    if (flag) {
+      examSearch.value.createBy = userStore.id;
+    } else {
+      examSearch.value.createBy = '';
+    }
   };
 
   // 前往添加考试界面

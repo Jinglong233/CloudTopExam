@@ -67,3 +67,10 @@ export function getQuestionNoun(type: number) {
   map.set(QuestionType.SHORTANSWER, '简答题');
   return map.get(type);
 }
+
+/**
+ * 锚点滚动
+ */
+export function clickAnchor(id: any) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
