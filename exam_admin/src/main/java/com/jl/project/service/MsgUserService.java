@@ -57,4 +57,7 @@ public interface MsgUserService {
 	 */
 	Integer deleteMsgUserById(String id);
 
+    PaginationResultVO loadDatalist(MsgUserQuery query);
+
+	Integer getMyUnreadCount(MsgUserQuery query);
 }

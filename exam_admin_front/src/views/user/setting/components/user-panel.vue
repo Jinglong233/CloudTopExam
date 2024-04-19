@@ -88,11 +88,11 @@
     },
     {
       label: 'userSetting.label.deptCode',
-      value: userStore.deptCode,
+      value: userStore.deptText,
     },
     {
       label: 'userSetting.label.roles',
-      value: userStore.roles,
+      value: userStore.role,
     },
     {
       label: 'userSetting.label.createTime',

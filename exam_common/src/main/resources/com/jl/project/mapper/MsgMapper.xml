@@ -20,10 +20,14 @@
 		<result column="send_time" property="sendTime"/>
 		<!-- 状态 -->
 		<result column="state" property="state"/>
+		<!-- 发送人Id -->
+		<result column="create_user" property="createUser"/>
+		<!-- 发送人姓名 -->
+		<result column="create_user_text" property="createUserText"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,templ_id,title,content,send_count,read_count,send_time,state
+		id,templ_id,title,content,send_count,read_count,send_time,state,create_user,create_user_text
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -51,6 +55,12 @@
 		<if test="query.state != null">
 			and state = #{query.state}
 		</if>
+		<if test="query.createUser != null and query.createUser!= ''">
+			and create_user = #{query.createUser}
+		</if>
+		<if test="query.createUserText != null and query.createUserText!= ''">
+			and create_user_text = #{query.createUserText}
+		</if>
 	</sql>
 	<!--扩展查询条件-->
 	<sql id="base_query_condition_extend">
@@ -71,6 +81,12 @@
 		</if>
 		<if test="query.sendTimeEnd != null and query.sendTimeEnd != '' ">
 			<![CDATA[ and send_time < data_sub(str_to_date(#{query.sendTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.createUserFuzzy != null and query.createUserFuzzy != '' ">
+			and create_user like concat('%', #{query.createUserFuzzy}, '%')
+		</if>
+		<if test="query.createUserTextFuzzy != null and query.createUserTextFuzzy != '' ">
+			and create_user_text like concat('%', #{query.createUserTextFuzzy}, '%')
 		</if>
 	</sql>
 	<!--通用查询条件-->
@@ -128,6 +144,12 @@
 			<if test="bean.state != null">
 				state,
 			</if>
+			<if test="bean.createUser != null">
+				create_user,
+			</if>
+			<if test="bean.createUserText != null">
+				create_user_text,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -153,6 +175,12 @@
 			</if>
 			<if test="bean.state != null">
 				#{bean.state},
+			</if>
+			<if test="bean.createUser != null">
+				#{bean.createUser},
+			</if>
+			<if test="bean.createUserText != null">
+				#{bean.createUserText},
 			</if>
 		</trim>
 	</insert>
@@ -185,6 +213,12 @@
 			<if test="bean.state != null">
 				state,
 			</if>
+			<if test="bean.createUser != null">
+				create_user,
+			</if>
+			<if test="bean.createUserText != null">
+				create_user_text,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -211,6 +245,12 @@
 			<if test="bean.state != null">
 				#{bean.state},
 			</if>
+			<if test="bean.createUser != null">
+				#{bean.createUser},
+			</if>
+			<if test="bean.createUserText != null">
+				#{bean.createUserText},
+			</if>
 		</trim>
 		on DUPLICATE key update
 		<trim prefix="" suffix="" suffixOverrides=",">
@@ -235,25 +275,31 @@
 			<if test="bean.state != null">
 				state= VALUES(state),
 			</if>
+			<if test="bean.createUser != null">
+				create_user= VALUES(create_user),
+			</if>
+			<if test="bean.createUserText != null">
+				create_user_text= VALUES(create_user_text),
+			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Msg">
-		INSERT INTO msg(id,templ_id,title,content,send_count,read_count,send_time,state)values
+		INSERT INTO msg(id,templ_id,title,content,send_count,read_count,send_time,state,create_user,create_user_text)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.templId},#{item.title},#{item.content},#{item.sendCount},#{item.readCount},#{item.sendTime},#{item.state})
+			(#{item.id},#{item.templId},#{item.title},#{item.content},#{item.sendCount},#{item.readCount},#{item.sendTime},#{item.state},#{item.createUser},#{item.createUserText})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Msg">
 		INSERT INTO 
-		msg(id,templ_id,title,content,send_count,read_count,send_time,state)values
+		msg(id,templ_id,title,content,send_count,read_count,send_time,state,create_user,create_user_text)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.templId},#{item.title},#{item.content},#{item.sendCount},#{item.readCount},#{item.sendTime},#{item.state})
+			(#{item.id},#{item.templId},#{item.title},#{item.content},#{item.sendCount},#{item.readCount},#{item.sendTime},#{item.state},#{item.createUser},#{item.createUserText})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),templ_id= VALUES(templ_id),title= VALUES(title),content= VALUES(content),send_count= VALUES(send_count),read_count= VALUES(read_count),send_time= VALUES(send_time),state= VALUES(state)
+			on DUPLICATE key update id= VALUES(id),templ_id= VALUES(templ_id),title= VALUES(title),content= VALUES(content),send_count= VALUES(send_count),read_count= VALUES(read_count),send_time= VALUES(send_time),state= VALUES(state),create_user= VALUES(create_user),create_user_text= VALUES(create_user_text)
 	</insert>
 
 
@@ -291,6 +337,12 @@
 			</if>
 			<if test="bean.state != null">
 				state = #{bean.state},
+			</if>
+			<if test="bean.createUser != null">
+				create_user = #{bean.createUser},
+			</if>
+			<if test="bean.createUserText != null">
+				create_user_text = #{bean.createUserText},
 			</if>
 		</set>
 		where id=#{id}

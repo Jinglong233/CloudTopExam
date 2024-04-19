@@ -1,32 +1,21 @@
 <template>
   <a-list :bordered="false">
     <a-list-item
-      v-for="item in renderList"
-      :key="item.id"
+      v-for="msg in renderList"
+      :key="msg.id"
       action-layout="vertical"
-      :style="{
-        opacity: item.status ? 0.5 : 1,
-      }"
     >
       <template #extra>
-        <a-tag v-if="item.messageType === 0" color="gray">未开始</a-tag>
-        <a-tag v-else-if="item.messageType === 1" color="green">已开通</a-tag>
-        <a-tag v-else-if="item.messageType === 2" color="blue">进行中</a-tag>
-        <a-tag v-else-if="item.messageType === 3" color="red">即将到期</a-tag>
+        <a-tag v-if="msg.msgUser.state === 1" color="gray">已读</a-tag>
+        <a-tag v-else-if="msg.msgUser.state === 0" color="green">未读</a-tag>
       </template>
-      <div class="item-wrap" @click="onItemClick(item)">
+      <div class="item-wrap" @click="getMsgDetail(msg)">
         <a-list-item-meta>
-          <template v-if="item.avatar" #avatar>
-            <a-avatar shape="circle">
-              <img v-if="item.avatar" :src="item.avatar" />
-              <icon-desktop v-else />
-            </a-avatar>
-          </template>
           <template #title>
             <a-space :size="4">
-              <span>{{ item.title }}</span>
+              <span>{{ msg.title }}</span>
               <a-typography-text type="secondary">
-                {{ item.subTitle }}
+                {{ msg.sendTime }}
               </a-typography-text>
             </a-space>
           </template>
@@ -36,14 +25,8 @@
                 :ellipsis="{
                   rows: 1,
                 }"
-                >{{ item.content }}</a-typography-paragraph
+                >{{ msg.content }}</a-typography-paragraph
               >
-              <a-typography-text
-                v-if="item.type === 'message'"
-                class="time-text"
-              >
-                {{ item.time }}
-              </a-typography-text>
             </div>
           </template>
         </a-list-item-meta>
@@ -72,27 +55,24 @@
 
 <script lang="ts" setup>
   import { PropType } from 'vue';
-  import { MessageRecord, MessageListType } from '@/api/message';
+  import { Msg } from '@/types/model/po/Msg';
+  import { MsgVO } from '@/types/model/vo/MsgVO';
 
   const props = defineProps({
     renderList: {
-      type: Array as PropType<MessageListType>,
+      type: Array as PropType<MsgVO>,
       required: true,
-    },
-    unreadCount: {
-      type: Number,
-      default: 0,
     },
   });
   const emit = defineEmits(['itemClick']);
+
+  // 触发全部已读
   const allRead = () => {
-    emit('itemClick', [...props.renderList]);
+    emit('itemClick', props.renderList);
   };
 
-  const onItemClick = (item: MessageRecord) => {
-    if (!item.status) {
-      emit('itemClick', [item]);
-    }
+  const getMsgDetail = (msg: Msg) => {
+    console.log('11111', msg);
   };
   const showMax = 3;
 </script>

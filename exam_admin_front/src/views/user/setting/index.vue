@@ -27,11 +27,7 @@
   import SecuritySettings from './components/security-settings.vue';
 </script>
 
-<script lang="ts">
-  export default {
-    name: 'Setting',
-  };
-</script>
+<script lang="ts" setup></script>
 
 <style scoped lang="less">
   .container {

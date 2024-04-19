@@ -1,9 +1,9 @@
 package com.jl.project.service.impl;
 
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.GlQu;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.GlQuQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.GlQuMapper;
 import com.jl.project.service.GlQuService;

@@ -1,10 +1,9 @@
 package com.jl.project.service.impl;
 
-;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Log;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.LogQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.LogMapper;
 import com.jl.project.service.LogService;
@@ -12,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+;
 /**
  * @Description:日志表Service
  * @author:jingLong

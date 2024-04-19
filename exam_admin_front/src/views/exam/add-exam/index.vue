@@ -275,7 +275,9 @@
             </a-tab-pane>
           </a-tabs>
         </a-card>
-        <a-button type="primary" @click="saveExam">保存</a-button>
+        <a-button type="primary" :loading="saveLoading" @click="saveExam"
+          >保存</a-button
+        >
       </a-layout-content>
       <a-layout-sider style="width: 300px; margin-left: 30px">
         <a-card class="general-card" :title="t('menu.exam.paperInfo')">
@@ -323,6 +325,8 @@
   const router = useRouter();
   const userStore = useUserStore();
   const addExamFormRef = ref({});
+  // 保存考试按钮加载
+  const saveLoading = ref(false);
 
   // 添加考试表单
   const addExamForm = ref<AddExamDTO>({
@@ -440,6 +444,7 @@
 
   // 保存考试
   const saveExam = async () => {
+    saveLoading.value = true;
     try {
       if (
         addExamForm.value.openType === 1 &&
@@ -487,6 +492,7 @@
                   content: '考试创建失败',
                 });
               }
+              saveLoading.value = false;
             });
           } else {
             console.log('失败');

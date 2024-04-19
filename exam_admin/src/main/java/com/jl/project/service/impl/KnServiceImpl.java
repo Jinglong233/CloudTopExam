@@ -1,10 +1,9 @@
 package com.jl.project.service.impl;
 
-;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Kn;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.KnQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.KnMapper;
 import com.jl.project.service.KnService;
@@ -12,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+;
 /**
  * @Description:知识点表Service
  * @author:jingLong

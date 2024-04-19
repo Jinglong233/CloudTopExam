@@ -14,6 +14,7 @@ import com.jl.project.enums.PageSize;
 import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.service.EmailService;
 import com.jl.project.service.ExamService;
 import com.jl.project.service.PaperService;
 import com.jl.project.service.UserService;
@@ -32,7 +33,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-;
 
 /**
  * @Description:考试表Service
@@ -70,6 +70,9 @@ public class ExamServiceImpl implements ExamService {
 
     @Resource
     private PaperService paperService;
+
+    @Resource
+    private EmailService emailService;
 
     /**
      * 根据条件查询列表
@@ -229,6 +232,9 @@ public class ExamServiceImpl implements ExamService {
         if (endTime == null || !endTime.after(startTime)) {
             throw new BusinessException("考试结束时间为空/考试结束时间应大于开始时间");
         }
+
+        // 发送考试通知
+        emailService.setExamNotification(exam);
 
 
         // 创建开始考试任务

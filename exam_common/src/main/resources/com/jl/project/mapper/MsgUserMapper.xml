@@ -10,12 +10,12 @@
 		<result column="msg_id" property="msgId"/>
 		<!-- 用户ID -->
 		<result column="user_id" property="userId"/>
-		<!-- 发送状态 -->
-		<result column="send_state" property="sendState"/>
+		<!-- 状态：-1异常 0未读 1已读 -->
+		<result column="state" property="state"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,msg_id,user_id,send_state
+		id,msg_id,user_id,state
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -28,8 +28,8 @@
 		<if test="query.userId != null and query.userId!= ''">
 			and user_id = #{query.userId}
 		</if>
-		<if test="query.sendState != null">
-			and send_state = #{query.sendState}
+		<if test="query.state != null">
+			and state = #{query.state}
 		</if>
 	</sql>
 	<!--扩展查询条件-->
@@ -84,8 +84,8 @@
 			<if test="bean.userId != null">
 				user_id,
 			</if>
-			<if test="bean.sendState != null">
-				send_state,
+			<if test="bean.state != null">
+				state,
 			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -98,8 +98,8 @@
 			<if test="bean.userId != null">
 				#{bean.userId},
 			</if>
-			<if test="bean.sendState != null">
-				#{bean.sendState},
+			<if test="bean.state != null">
+				#{bean.state},
 			</if>
 		</trim>
 	</insert>
@@ -117,8 +117,8 @@
 			<if test="bean.userId != null">
 				user_id,
 			</if>
-			<if test="bean.sendState != null">
-				send_state,
+			<if test="bean.state != null">
+				state,
 			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -131,8 +131,8 @@
 			<if test="bean.userId != null">
 				#{bean.userId},
 			</if>
-			<if test="bean.sendState != null">
-				#{bean.sendState},
+			<if test="bean.state != null">
+				#{bean.state},
 			</if>
 		</trim>
 		on DUPLICATE key update
@@ -143,28 +143,28 @@
 			<if test="bean.userId != null">
 				user_id= VALUES(user_id),
 			</if>
-			<if test="bean.sendState != null">
-				send_state= VALUES(send_state),
+			<if test="bean.state != null">
+				state= VALUES(state),
 			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.MsgUser">
-		INSERT INTO msg_user(id,msg_id,user_id,send_state)values
+		INSERT INTO msg_user(id,msg_id,user_id,state)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.msgId},#{item.userId},#{item.sendState})
+			(#{item.id},#{item.msgId},#{item.userId},#{item.state})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.MsgUser">
 		INSERT INTO 
-		msg_user(id,msg_id,user_id,send_state)values
+		msg_user(id,msg_id,user_id,state)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.msgId},#{item.userId},#{item.sendState})
+			(#{item.id},#{item.msgId},#{item.userId},#{item.state})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),msg_id= VALUES(msg_id),user_id= VALUES(user_id),send_state= VALUES(send_state)
+			on DUPLICATE key update id= VALUES(id),msg_id= VALUES(msg_id),user_id= VALUES(user_id),state= VALUES(state)
 	</insert>
 
 
@@ -188,8 +188,8 @@
 			<if test="bean.userId != null">
 				user_id = #{bean.userId},
 			</if>
-			<if test="bean.sendState != null">
-				send_state = #{bean.sendState},
+			<if test="bean.state != null">
+				state = #{bean.state},
 			</if>
 		</set>
 		where id=#{id}

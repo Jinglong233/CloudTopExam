@@ -1,9 +1,9 @@
 package com.jl.project.service.impl;
 
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.KnQu;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.KnQuQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.KnQuMapper;
 import com.jl.project.service.KnQuService;

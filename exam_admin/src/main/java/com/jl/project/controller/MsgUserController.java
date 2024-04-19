@@ -2,7 +2,9 @@ package com.jl.project.controller;
 
 import com.jl.project.entity.po.MsgUser;
 import com.jl.project.entity.query.MsgUserQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.exception.BusinessException;
 import com.jl.project.service.MsgUserService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +26,32 @@ public class MsgUserController extends ABaseController{
 	private MsgUserService msgUserService;
 
 	/**
-	 * 根据条件分页查询
+	 * 查询未读消息的数量
+	 */
+	@RequestMapping("getMyUnreadCount")
+	public ResponseVO getMyUnreadCount(@RequestBody MsgUserQuery query) {
+		Integer result = null;
+		try {
+			result = msgUserService.getMyUnreadCount(query);
+		} catch (BusinessException e) {
+			return getErrorResponseVO(null,e.getCode(),e.getMessage());
+		}
+		return getSuccessResponseVO(result);
+	}
+
+
+	/**
+	 * 分页查询消息
 	 */
 	@RequestMapping("loadDataList")
-	public ResponseVO loadDatalist(MsgUserQuery query) {
-		return getSuccessResponseVO(msgUserService.findListByPage(query));
+	public ResponseVO loadDatalist(@RequestBody MsgUserQuery query) {
+		PaginationResultVO result = null;
+		try {
+			result = msgUserService.loadDatalist(query);
+		} catch (BusinessException e) {
+			return getErrorResponseVO(null,e.getCode(),e.getMessage());
+		}
+		return getSuccessResponseVO(result);
 	}
 
 	/**

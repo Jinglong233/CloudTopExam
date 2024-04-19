@@ -85,7 +85,7 @@
       <li>
         <a-tooltip :content="$t('settings.navbar.alerts')">
           <div class="message-box-trigger">
-            <a-badge :count="9" dot>
+            <a-badge :count="unreadCount">
               <a-button
                 class="nav-btn"
                 type="outline"
@@ -105,7 +105,7 @@
         >
           <div ref="refBtn" class="ref-btn"></div>
           <template #content>
-            <message-box />
+            <message-box @refresh-unread-msg="reloadUnreadCount" />
           </template>
         </a-popover>
       </li>
@@ -193,14 +193,16 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, ref, inject } from 'vue';
+  import { computed, inject, onMounted, ref } from 'vue';
   import { Message } from '@arco-design/web-vue';
-  import { useDark, useToggle, useFullscreen } from '@vueuse/core';
+  import { useDark, useFullscreen, useToggle } from '@vueuse/core';
   import { useAppStore, useUserStore } from '@/store';
   import { LOCALE_OPTIONS } from '@/locale';
   import useLocale from '@/hooks/locale';
   import useUser from '@/hooks/user';
   import Menu from '@/components/menu/index.vue';
+  import { getMyUnreadMsgCount } from '@/api/msg';
+  import { MsgUserQuery } from '@/types/model/query/MsgUserQuery';
   import MessageBox from '../message-box/index.vue';
 
   const appStore = useAppStore();
@@ -260,6 +262,21 @@
     Message.success(res as string);
   };
   const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
+
+  // 未读消息数量
+  const unreadCount = ref(0);
+  const reloadUnreadCount = async () => {
+    await getMyUnreadMsgCount({
+      userId: userStore.id,
+      state: 0,
+    } as MsgUserQuery).then((res: any) => {
+      unreadCount.value = res.data;
+    });
+  };
+
+  onMounted(async () => {
+    await reloadUnreadCount();
+  });
 </script>
 
 <style scoped lang="less">

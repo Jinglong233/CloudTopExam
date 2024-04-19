@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.util.Date;
@@ -184,18 +183,19 @@ public class ExamController extends ABaseController {
 
     /**
      * 生成考试二维码
+     *
      * @param examId
      * @param response
      * @return
      */
     @RequestMapping("/qrcode/{examId}")
-    public ResponseVO qrcode(@PathVariable(name = "examId")String examId, HttpServletResponse response) {
+    public ResponseVO qrcode(@PathVariable(name = "examId") String examId, HttpServletResponse response) {
         String requestUrl = examId;
         try {
             OutputStream os = response.getOutputStream();
             QrCodeUtil.encode(requestUrl, null, os);
         } catch (Exception e) {
-            return getErrorResponseVO(null,500,"生成二维码失败");
+            return getErrorResponseVO(null, 500, "生成二维码失败");
         }
         return getSuccessResponseVO(null);
     }

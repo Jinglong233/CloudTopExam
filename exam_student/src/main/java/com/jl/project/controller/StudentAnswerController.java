@@ -1,14 +1,11 @@
 package com.jl.project.controller;
 
 import com.jl.project.entity.dto.AddUserAnswerDTO;
-import com.jl.project.entity.dto.UpdateUserAnswerDTO;
-import com.jl.project.entity.po.Qu;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.QuMapper;
 import com.jl.project.service.StudentAnswerService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

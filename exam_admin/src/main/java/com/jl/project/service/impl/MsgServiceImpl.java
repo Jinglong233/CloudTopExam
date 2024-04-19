@@ -1,10 +1,9 @@
 package com.jl.project.service.impl;
 
-;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Msg;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.MsgQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.MsgMapper;
 import com.jl.project.service.MsgService;
@@ -12,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+;
 /**
  * @Description:消息表Service
  * @author:jingLong

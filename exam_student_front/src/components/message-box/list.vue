@@ -79,10 +79,6 @@
       type: Array as PropType<MessageListType>,
       required: true,
     },
-    unreadCount: {
-      type: Number,
-      default: 0,
-    },
   });
   const emit = defineEmits(['itemClick']);
   const allRead = () => {

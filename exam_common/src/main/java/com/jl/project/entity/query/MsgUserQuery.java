@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * @Description:用户消息关联表查询对象
  * @author:jingLong
- * @date:2023/11/22
+ * @date:2024/04/19
  */
-@Schema(description = "用户消息关联表查询对象")
+@Schema(description = ":用户消息关联表查询对象")
 public class MsgUserQuery extends BaseQuery{
 	/**
 	 * ID
@@ -37,10 +37,10 @@ public class MsgUserQuery extends BaseQuery{
 	private String userIdFuzzy;
 
 	/**
-	 * 发送状态
+	 * 状态：-1异常 0未读 1已读
 	 */
-	@Schema(description = "发送状态")
-	private Integer sendState;
+	@Schema(description = "状态：-1异常 0未读 1已读")
+	private Integer state;
 
 	public void setId(String id) {
 		this.id = id;
@@ -66,12 +66,12 @@ public class MsgUserQuery extends BaseQuery{
 		return this.userId;
 	}
 
-	public void setSendState(Integer sendState) {
-		this.sendState = sendState;
+	public void setState(Integer state) {
+		this.state = state;
 	}
 
-	public Integer getSendState() {
-		return this.sendState;
+	public Integer getState() {
+		return this.state;
 	}
 
 	public void setIdFuzzy(String idFuzzy) {

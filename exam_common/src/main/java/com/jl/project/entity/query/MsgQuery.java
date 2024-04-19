@@ -1,80 +1,77 @@
 package com.jl.project.entity.query;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Date;
 /**
  * @Description:消息表查询对象
  * @author:jingLong
- * @date:2023/11/22
+ * @date:2024/04/19
  */
-@Schema(description = "消息表查询对象")
 public class MsgQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
-	@Schema(description = "ID")
 	private String id;
 
-	@Schema(hidden = true)
 	private String idFuzzy;
 
 	/**
 	 * 模板ID
 	 */
-	@Schema(description = "模板ID")
 	private String templId;
 
-	@Schema(hidden = true)
 	private String templIdFuzzy;
 
 	/**
 	 * 标题
 	 */
-	@Schema(description = "标题")
 	private String title;
 
-	@Schema(hidden = true)
 	private String titleFuzzy;
 
 	/**
 	 * 消息内容
 	 */
-	@Schema(description = "消息内容")
 	private String content;
 
-	@Schema(hidden = true)
 	private String contentFuzzy;
 
 	/**
 	 * 发送人数
 	 */
-	@Schema(description = "发送人数")
 	private Integer sendCount;
 
 	/**
 	 * 已读人数
 	 */
-	@Schema(description = "已读人数")
 	private Integer readCount;
 
 	/**
 	 * 发送时间
 	 */
-	@Schema(description = "发送时间")
 	private Date sendTime;
 
-	@Schema(hidden = true)
 	private String sendTimeStart;
 
-	@Schema(hidden = true)
 	private String sendTimeEnd;
 
 	/**
 	 * 状态
 	 */
-	@Schema(description = "状态")
 	private Integer state;
+
+	/**
+	 * 发送人Id
+	 */
+	private String createUser;
+
+	private String createUserFuzzy;
+
+	/**
+	 * 发送人姓名
+	 */
+	private String createUserText;
+
+	private String createUserTextFuzzy;
 
 	public void setId(String id) {
 		this.id = id;
@@ -140,6 +137,22 @@ public class MsgQuery extends BaseQuery{
 		return this.state;
 	}
 
+	public void setCreateUser(String createUser) {
+		this.createUser = createUser;
+	}
+
+	public String getCreateUser() {
+		return this.createUser;
+	}
+
+	public void setCreateUserText(String createUserText) {
+		this.createUserText = createUserText;
+	}
+
+	public String getCreateUserText() {
+		return this.createUserText;
+	}
+
 	public void setIdFuzzy(String idFuzzy) {
 		this.idFuzzy = idFuzzy;
 	}
@@ -186,6 +199,22 @@ public class MsgQuery extends BaseQuery{
 
 	public String getSendTimeEnd() {
 		return this.sendTimeEnd;
+	}
+
+	public void setCreateUserFuzzy(String createUserFuzzy) {
+		this.createUserFuzzy = createUserFuzzy;
+	}
+
+	public String getCreateUserFuzzy() {
+		return this.createUserFuzzy;
+	}
+
+	public void setCreateUserTextFuzzy(String createUserTextFuzzy) {
+		this.createUserTextFuzzy = createUserTextFuzzy;
+	}
+
+	public String getCreateUserTextFuzzy() {
+		return this.createUserTextFuzzy;
 	}
 
 }
