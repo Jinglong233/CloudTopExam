@@ -2,6 +2,8 @@ package com.jl.project.entity.po;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
+
 /**
  * 邮件主体
  */
@@ -26,6 +28,13 @@ public class MailContent {
     private String toEmail;
 
 
+    /**
+     * 邮件接收者列表（群发的时候有用）
+     */
+    @Schema(description = "邮件接收者列表")
+    private List<String> emailList;
+
+
     public String getSubject() {
         return subject;
     }
@@ -48,5 +57,13 @@ public class MailContent {
 
     public void setToEmail(String toEmail) {
         this.toEmail = toEmail;
+    }
+
+    public List<String> getEmailList() {
+        return emailList;
+    }
+
+    public void setEmailList(List<String> emailList) {
+        this.emailList = emailList;
     }
 }

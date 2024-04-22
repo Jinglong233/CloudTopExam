@@ -1,6 +1,8 @@
 package com.jl.project.controller;
 
+import com.jl.project.entity.dto.UpdateEmailDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.LoginQuery;
 import com.jl.project.entity.query.UserQuery;
@@ -90,12 +92,12 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "管理员获取部分人员列表")
     @RequestMapping("loadDeptUserList")
-    public ResponseVO loadDeptUserList(@RequestBody UserQuery query){
+    public ResponseVO loadDeptUserList(@RequestBody UserQuery query) {
         List<User> result = null;
         try {
             result = userService.loadDeptUserList(query);
         } catch (BusinessException e) {
-            return getErrorResponseVO(null,e.getCode(),e.getMessage());
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }
         return getSuccessResponseVO(result, "获取成功");
     }
@@ -180,5 +182,57 @@ public class UserController extends ABaseController {
         Integer result = userService.getUserCount(userQuery);
         return getSuccessResponseVO(result);
     }
+
+    /**
+     * 修改用户密码
+     *
+     * @return
+     */
+    @ApiOperation(value = "修改用户密码")
+    @RequestMapping("updateUserPassword")
+    public ResponseVO updateUserPassword(@RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
+        Boolean result = null;
+        try {
+            result = userService.updateUserPassword(updateUserPasswordDTO);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(false, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 获取邮箱验证码
+     *
+     * @return
+     */
+    @ApiOperation(value = "获取邮箱验证码")
+    @RequestMapping("getEmailCode")
+    public ResponseVO getEmailCode(@RequestBody String email) {
+        Boolean result = null;
+        try {
+            result = userService.getEmailCode(email);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(false, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 更新/绑定邮箱
+     *
+     * @return
+     */
+    @ApiOperation(value = "更新/绑定邮箱")
+    @RequestMapping("updateUserEmail")
+    public ResponseVO updateUserEmail(@RequestBody UpdateEmailDTO updateEmailDTO) {
+        Boolean result = null;
+        try {
+            result = userService.updateUserEmail(updateEmailDTO);
+        } catch (BusinessException e) {
+            return getErrorResponseVO("更新/绑定失败", e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
 
 }

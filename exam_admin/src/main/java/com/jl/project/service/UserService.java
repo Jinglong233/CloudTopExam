@@ -1,6 +1,8 @@
 package com.jl.project.service;
 
+import com.jl.project.entity.dto.UpdateEmailDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.LoginQuery;
 import com.jl.project.entity.query.UserQuery;
@@ -108,4 +110,10 @@ public interface UserService {
      * @return
      */
     Integer getUserCount(UserQuery userQuery);
+
+    Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO);
+
+    Boolean getEmailCode(String email);
+
+    Boolean updateUserEmail(UpdateEmailDTO updateEmailDTO);
 }

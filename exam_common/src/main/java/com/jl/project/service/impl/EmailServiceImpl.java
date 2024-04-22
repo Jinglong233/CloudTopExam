@@ -7,20 +7,24 @@ import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.EmailService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.MailUtil;
 import com.jl.project.utils.StringTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static com.jl.project.utils.MailUtil.sendMail;
 
 
 /**
@@ -28,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service("emailService")
 public class EmailServiceImpl implements EmailService {
+    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
 
     @Resource
@@ -59,7 +64,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
-    public void sendEmailCode(String email) {
+    public Boolean sendEmailCode(String email) {
         // 验证码（不用做持久化，时间到了就销毁）
         String code = StringTools.getRandomNumber(MailConstant.LENGTH_5);
         MailContent mailContent = new MailContent();
@@ -78,8 +83,8 @@ public class EmailServiceImpl implements EmailService {
             throw new BusinessException("请输入正确验证码");
         }
         // 发送验证码
-        sendMailCode(mailContent);
-
+        sendMail(mailContent, javaMailSender, from);
+        return true;
     }
 
 
@@ -94,7 +99,10 @@ public class EmailServiceImpl implements EmailService {
         mailContent.setSubject(title);
         String tmplContent = tmpl.getContent();
 
-        String mailContext = String.format(tmplContent, exam.getTitle(), exam.getStartTime(), exam.getEndTime());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String startTime = simpleDateFormat.format(exam.getStartTime());
+        String endTime = simpleDateFormat.format(exam.getEndTime());
+        String mailContext = String.format(tmplContent, exam.getTitle(), startTime, endTime);
         mailContent.setContext(mailContext);
 
         // 查询该场考试关联的所有考生
@@ -102,6 +110,7 @@ public class EmailServiceImpl implements EmailService {
         examRecordQuery.setExamId(exam.getId());
         List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
 
+        List<String> userEmailList = new ArrayList<>();
         // 生成MsgId
         String msgId = CommonUtil.getRandomId();
         if (examRecords != null && !examRecords.isEmpty()) {
@@ -113,9 +122,10 @@ public class EmailServiceImpl implements EmailService {
                 if (user != null) { // 有邮箱才发送邮件通知
                     String toEmail = user.getEmail();
                     if (toEmail != null && !"".equals(toEmail.trim())) {
-                        mailContent.setToEmail(toEmail);
-                        // 发送验证码
-                        sendMailCode(mailContent);
+                        userEmailList.add(toEmail);
+                       /* mailContent.setToEmail(toEmail);
+                        // 发送邮件
+                        MailUtil.sendMail(mailContent,javaMailSender,from);*/
                         // 存储发送考试通知消息记录
                         MsgUser msgUser = new MsgUser();
                         msgUser.setId(CommonUtil.getRandomId());
@@ -125,12 +135,17 @@ public class EmailServiceImpl implements EmailService {
                         msgUser.setUserId(userId);
                         // 插入消息考试关联表
                         Integer insert = msgUserMapper.insert(msgUser);
-                        if (insert > 0) {
-                            successCount++;
+                        if (insert <= 0) {
+                            throw new BusinessException("消息保存失败");
                         }
                     }
                 }
             }
+
+            // 发送邮件通知
+            mailContent.setEmailList(userEmailList);
+            MailUtil.groupEmail(mailContent, javaMailSender, from);
+
             // 插入考试消息记录
             Msg msg = new Msg();
             msg.setId(msgId);
@@ -138,7 +153,7 @@ public class EmailServiceImpl implements EmailService {
             msg.setState(1);
             msg.setReadCount(0);
             msg.setTemplId(tmpl.getId());
-            msg.setSendCount(successCount);
+            msg.setSendCount(examRecords.size());
             msg.setSendTime(new Date());
             msg.setTitle(tmpl.getTitle());
             msg.setCreateUser(exam.getCreateBy());
@@ -155,32 +170,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void checkCode(String email, String code) {
-
+    public Boolean checkCode(String email, String code) {
         String rightCode = stringRedisTemplate.opsForValue().get(MailConstant.CODE_PREFIX + email);
+        if(rightCode==null){
+            throw new BusinessException("验证码失效");
+        }
         if (!rightCode.equals(code)) {
             throw new BusinessException("邮箱验证码不正确");
         }
+        return true;
     }
 
-    private void sendMailCode(MailContent mailContent) {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            // 发送者
-            helper.setFrom(from);
-            // 接收者
-            helper.setTo(mailContent.getToEmail());
-            // 邮件标题
-            helper.setSubject(mailContent.getSubject());
-            // 邮件内容
-            helper.setText(mailContent.getContext());
-            // 发送
-            helper.setSentDate(new Date());
-            javaMailSender.send(message);
-        } catch (MessagingException e) {
-            throw new BusinessException("邮件发送失败");
-        }
 
-    }
 }

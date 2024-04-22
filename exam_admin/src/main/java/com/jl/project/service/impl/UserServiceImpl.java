@@ -8,13 +8,13 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
+import com.jl.project.entity.dto.UpdateEmailDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
 import com.jl.project.entity.po.Department;
+import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.DepartmentQuery;
-import com.jl.project.entity.query.LoginQuery;
-import com.jl.project.entity.query.SimplePage;
-import com.jl.project.entity.query.UserQuery;
+import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
@@ -22,12 +22,16 @@ import com.jl.project.enums.ResponseCodeEnum;
 import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.DepartmentMapper;
+import com.jl.project.mapper.TmplMapper;
 import com.jl.project.mapper.UserMapper;
 import com.jl.project.service.DepartmentService;
+import com.jl.project.service.EmailService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.MD5Util;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -72,6 +76,20 @@ public class UserServiceImpl implements UserService {
     @Resource
     private Environment env;
 
+    @Resource
+    private JavaMailSender javaMailSender;
+
+
+    @Resource
+    private EmailService emailService;
+
+
+    @Resource
+    private TmplMapper<Tmpl, TmplQuery> tmplMapper;
+
+
+    @Value("${spring.mail.username}")
+    private String from;
 
     /**
      * 根据条件查询列表
@@ -455,6 +473,101 @@ public class UserServiceImpl implements UserService {
         }
         Integer count = userMapper.selectCount(userQuery);
         return count;
+    }
+
+    @Override
+    public Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
+        if (updateUserPasswordDTO == null) {
+            throw new BusinessException("缺少参数");
+        }
+
+        String oldPassword = updateUserPasswordDTO.getOldPassword();
+        if (oldPassword == null || "".equals(oldPassword.trim())) {
+            throw new BusinessException("原密码错误");
+        }
+
+        String userId = updateUserPasswordDTO.getUserId();
+        if (userId == null || "".equals(userId.trim())) {
+            throw new BusinessException("缺少必要参数");
+        }
+
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户信息不存在");
+        }
+
+        // 对比密码
+        String rightPassword = user.getPassword();
+        String mixPassword = MD5Util.getMD5Encode(oldPassword, user.getSalt());
+        if (!rightPassword.equals(mixPassword)) {
+            throw new BusinessException("密码错误");
+        }
+
+        String newPassword = updateUserPasswordDTO.getNewPassword();
+        if (newPassword == null || "".equals(newPassword.trim())) {
+            throw new BusinessException("缺少新密码");
+        }
+
+        // 更新密码
+        String newMIxPassword = MD5Util.getMD5Encode(newPassword, user.getSalt());
+        user.setPassword(newMIxPassword);
+        user.setUpdateTime(new Date());
+        user.setUpdateBy(userId);
+
+        Integer result = userMapper.updateById(user, userId);
+        return result > 0;
+    }
+
+    @Override
+    public Boolean getEmailCode(String email) throws BusinessException {
+        if (email == null || "".equals(email)) {
+            throw new BusinessException("邮箱错误");
+        }
+        emailService.sendEmailCode(email);
+        return true;
+    }
+
+    @Override
+    public Boolean updateUserEmail(UpdateEmailDTO updateEmailDTO) throws BusinessException {
+        if (updateEmailDTO == null) {
+            throw new BusinessException("缺少参数");
+        }
+
+        String userId = updateEmailDTO.getUserId();
+        if (userId == null || "".equals(userId.trim())) {
+            throw new BusinessException("缺少参数");
+        }
+
+
+        String email = updateEmailDTO.getEmail();
+        if (email == null || "".equals(email.trim())) {
+            throw new BusinessException("请输入邮箱");
+        }
+
+        String code = updateEmailDTO.getCode();
+        if (code == null || "".equals(code.trim())) {
+            throw new BusinessException("请输入验证码");
+        }
+
+        // 获取验证码
+        Boolean isRight = emailService.checkCode(email, code);
+
+        if (!isRight) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 查询该邮箱是否被注册过
+        UserQuery userQuery = new UserQuery();
+        userQuery.setEmail(email);
+        List<User> list = userMapper.selectList(userQuery);
+        if (!list.isEmpty()) {
+            throw new BusinessException("该邮箱已被绑定");
+        }
+        User user = new User();
+        user.setId(userId);
+        user.setEmail(email);
+        Integer result = userMapper.updateById(user, userId);
+        return result > 0;
     }
 
 

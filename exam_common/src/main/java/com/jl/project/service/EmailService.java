@@ -16,7 +16,7 @@ public interface EmailService {
      * @param email
      * @param type
      */
-    void sendEmailCode(String email);
+    Boolean sendEmailCode(String email);
 
     /**
      * 发送考试通知
@@ -32,5 +32,5 @@ public interface EmailService {
      * @param emailCode
      * @return
      */
-    void checkCode(String email, String emailCode);
+    Boolean checkCode(String email, String emailCode);
 }
