@@ -6,8 +6,10 @@ import com.google.gson.Gson;
 import com.jl.project.entity.dto.StartTrainDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.TrainRecordQuVO;
+import com.jl.project.enums.PageSize;
 import com.jl.project.enums.QuType;
 import com.jl.project.enums.TrainMode;
 import com.jl.project.exception.BusinessException;
@@ -69,17 +71,17 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         // 单选
         quQuery.setQuType(QuType.RADIO.getValue());
         Integer radioCount = quMapper.selectCount(quQuery);
-        result.put(QuType.RADIO.getValue(),Long.valueOf(radioCount));
+        result.put(QuType.RADIO.getValue(), Long.valueOf(radioCount));
 
         // 多选
         quQuery.setQuType(QuType.MULTI.getValue());
         Integer multiCount = quMapper.selectCount(quQuery);
-        result.put(QuType.MULTI.getValue(),Long.valueOf(multiCount));
+        result.put(QuType.MULTI.getValue(), Long.valueOf(multiCount));
 
         // 判断
         quQuery.setQuType(QuType.JUDGE.getValue());
         Integer judgeCount = quMapper.selectCount(quQuery);
-        result.put(QuType.JUDGE.getValue(),Long.valueOf(judgeCount));
+        result.put(QuType.JUDGE.getValue(), Long.valueOf(judgeCount));
 
         return result;
     }
@@ -412,7 +414,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
         if (trainRecords != null && !trainRecords.isEmpty()) {
             Boolean delete = clearNoAnswerRecord();
-            if(delete == false){
+            if (delete == false) {
                 throw new BusinessException("提交失败");
             }
         }
@@ -432,17 +434,44 @@ public class StudentTrainServiceImpl implements StudentTrainService {
     }
 
     @Override
-    public List<Train> getTrain(TrainQuery trainQuery) throws BusinessException {
+    public PaginationResultVO<Train> getTrain(TrainQuery trainQuery) throws BusinessException {
 
         if (trainQuery == null) {
             throw new BusinessException("缺少参数");
         }
 
-        List<Train> trains = trainMapper.selectList(trainQuery);
-        return trains;
+        return findListByPage(trainQuery);
     }
 
-    private Boolean clearNoAnswerRecord(){
+
+    /**
+     * 根据条件查询列表
+     */
+    public List<Train> findListByParam(TrainQuery query) {
+        return this.trainMapper.selectList(query);
+    }
+
+    /**
+     * 根据条件查询数量
+     */
+    public Integer findCountByParam(TrainQuery query) {
+        return this.trainMapper.selectCount(query);
+    }
+
+    /**
+     * 分页查询
+     */
+    public PaginationResultVO<Train> findListByPage(TrainQuery query) {
+        Integer count = this.findCountByParam(query);
+        Integer pageSize = query.getPageSize() == null ? PageSize.SIZE15.getSize() : query.getPageSize();
+        SimplePage page = new SimplePage(query.getPageNo(), count, pageSize);
+        query.setSimplePage(page);
+        List<Train> list = this.findListByParam(query);
+        PaginationResultVO<Train> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
+        return result;
+    }
+
+    private Boolean clearNoAnswerRecord() {
         Integer integer = trainRecordMapper.deleteNoAnswerRecord();
         return integer > 0;
     }

@@ -7,6 +7,7 @@ import com.jl.project.entity.po.TrainRecord;
 import com.jl.project.entity.query.RepoQuery;
 import com.jl.project.entity.query.TrainQuery;
 import com.jl.project.entity.query.TrainRecordQuQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.entity.vo.TrainRecordQuVO;
 import com.jl.project.exception.BusinessException;
@@ -43,7 +44,7 @@ public class StudentTrainController extends ABaseController {
     @ApiOperation(value = "条件查询训练记录")
     @RequestMapping("getTrain")
     public ResponseVO getTrain(@RequestBody TrainQuery trainQuery) throws BusinessException {
-        List<Train> result = null;
+        PaginationResultVO<Train> result = null;
         try {
             result = studentTrainService.getTrain(trainQuery);
         } catch (BusinessException e) {
