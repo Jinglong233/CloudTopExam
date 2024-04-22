@@ -4,9 +4,11 @@ import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
+import com.jl.project.entity.vo.ErrorVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.StudentAnswerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,14 +21,13 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/12/11
  */
+@Tag(name = "用户答案表Controller", description = "用户答案表Controller")
 @RestController
 @RequestMapping("/studentAnswer")
 public class StudentAnswerController extends ABaseController {
 
     @Resource
     private StudentAnswerService studentAnswerService;
-
-
 
 
     /**
@@ -118,5 +119,24 @@ public class StudentAnswerController extends ABaseController {
         this.studentAnswerService.deleteUserAnswerById(id);
         return getSuccessResponseVO(null);
     }
+
+
+    /**
+     * 获取错题统计
+     *
+     * @param userId
+     * @return
+     */
+    @RequestMapping("errorCount")
+    public ResponseVO errorCount(@RequestBody String userId) {
+        List<ErrorVO> result = null;
+        try {
+            result = studentAnswerService.errorCount(userId);
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
+
 
 }

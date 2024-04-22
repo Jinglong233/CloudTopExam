@@ -1,27 +1,24 @@
 package com.jl.project.service.impl;
 
 import com.jl.project.entity.dto.AddUserAnswerDTO;
-import com.jl.project.entity.po.GlQu;
-import com.jl.project.entity.po.Qu;
-import com.jl.project.entity.po.QuAnswer;
-import com.jl.project.entity.po.UserAnswer;
-import com.jl.project.entity.query.GlQuQuery;
-import com.jl.project.entity.query.QuQuery;
-import com.jl.project.entity.query.SimplePage;
-import com.jl.project.entity.query.UserAnswerQuery;
+import com.jl.project.entity.po.*;
+import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.*;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.GlQuMapper;
-import com.jl.project.mapper.QuMapper;
-import com.jl.project.mapper.UserAnswerMapper;
+import com.jl.project.mapper.*;
+import com.jl.project.service.QuService;
 import com.jl.project.service.StudentAnswerService;
 import com.jl.project.strategy.StrategyContext;
 import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description:用户答案表Service
@@ -34,14 +31,29 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
 
+
+    @Resource
+    private UserMapper<User, UserQuery> userMapper;
     @Resource
     private QuMapper<Qu, QuQuery> quMapper;
 
     @Resource
     private GlQuMapper<GlQu, GlQuQuery> glQuMapper;
 
+
+    @Resource
+    private TrainRecordMapper<TrainRecord, TrainRecordQuQuery> trainRecordMapper;
+
+    @Resource
+    private TrainMapper<Train, TrainQuery> trainMapper;
+
+    @Resource
+    private QuService quService;
+
+
     @Resource
     private StrategyContext strategyContext;
+
 
     /**
      * 根据条件查询列表
@@ -222,7 +234,7 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
         }
 
 
-        Boolean answer = strategyContext.isAnswer(userAnswer, quType,score);
+        Boolean answer = strategyContext.isAnswer(userAnswer, quType, score);
         if (!answer) {
             throw new BusinessException("用户答题记录更新出错");
         }
@@ -240,6 +252,105 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
      */
     public Integer deleteUserAnswerById(String id) {
         return this.userAnswerMapper.deleteById(id);
+    }
+
+    @Override
+    public List<ErrorVO> errorCount(String userId) throws BusinessException {
+        if (userId == null) {
+            throw new BusinessException("缺少参数");
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        // 获取考试中的错题
+        UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+        userAnswerQuery.setUserId(userId);
+        List<UserAnswer> userAnswers =
+                userAnswerMapper.selectList(userAnswerQuery);
+        // 抽取题目回答的正确错误次数(考试记录中：1是答对，null和0是答错)
+        // 注意：true是答对的，false是答错的
+        Map<String, Map<Boolean, Long>> examCount = userAnswers.stream()
+                .collect(Collectors.groupingBy(p -> p.getQuId(),
+                        Collectors.partitioningBy(p -> p.getIsRight() != null && p.getIsRight() == 1,
+                                Collectors.counting())));
+
+
+        List<TrainRecord> trainRecordCount = new ArrayList<>();
+        // 获取训练记录
+        TrainQuery trainQuery = new TrainQuery();
+        trainQuery.setUserId(userId);
+        List<Train> trains = trainMapper.selectList(trainQuery);
+        if (trains != null && !trains.isEmpty()) {
+            // 遍历记录，获取答题记录
+            for (Train train : trains) {
+                Integer answerCount = train.getAnswerCount();
+                // 如果训练回答题目数量为0，则题目记录就不存在
+                if (answerCount <= 0) {
+                    continue;
+                }
+                TrainRecordQuery trainRecordQuery = new TrainRecordQuery();
+                trainRecordQuery.setTrainId(train.getId());
+                List<TrainRecord> trainRecords =
+                        trainRecordMapper.selectList(trainRecordQuery);
+                trainRecordCount.addAll(trainRecords);
+            }
+        }
+
+        // 统计训练的错题
+        Map<String, Map<Boolean, Long>> trainCount = trainRecordCount.stream()
+                .filter(p -> p.getIsRight() != null) // 过滤p.getIsRight()的情况（因为训练的null没意义，训练结束后会删除）
+                .collect(Collectors.groupingBy(p -> p.getQuId(),
+                        Collectors.partitioningBy(p -> p.getIsRight() == 1,
+                                Collectors.counting())));
+
+        // 统计总记录
+        // 创建一个新的Map用于存储合并后的结果
+        Map<String, Map<Boolean, Long>> resultCount = new HashMap<>();
+
+        // 将trainCount1的内容添加到mergedTrainCount中
+        for (Map.Entry<String, Map<Boolean, Long>> entry : examCount.entrySet()) {
+            String key = entry.getKey();
+            Map<Boolean, Long> value = entry.getValue();
+            resultCount.put(key, new HashMap<>(value));
+        }
+
+        // 将trainCount2的内容添加到mergedTrainCount中
+        for (Map.Entry<String, Map<Boolean, Long>> entry : trainCount.entrySet()) {
+            String key = entry.getKey();
+            Map<Boolean, Long> value = entry.getValue();
+            if (!resultCount.containsKey(key)) {
+                resultCount.put(key, new HashMap<>(value));
+            } else {
+                Map<Boolean, Long> existingValue = resultCount.get(key);
+                for (Map.Entry<Boolean, Long> subEntry : value.entrySet()) {
+                    Boolean subKey = subEntry.getKey();
+                    Long subValue = subEntry.getValue();
+                    existingValue.put(subKey, existingValue.getOrDefault(subKey, 0L) + subValue);
+                }
+            }
+        }
+
+        List<ErrorVO> result = new ArrayList<>();
+
+        // 查询题目的具体信息
+        for (Map.Entry<String, Map<Boolean, Long>> quEntry : resultCount.entrySet()) {
+            String quId = quEntry.getKey();
+            Map<Boolean, Long> value = quEntry.getValue();
+            QuAndAnswerVo quAndAnswerVo = quService.getQuById(quId);
+            if (quAndAnswerVo != null) {
+                ErrorVO errorVO = new ErrorVO();
+                errorVO.setQuAndAnswerVo(quAndAnswerVo);
+                Integer rightCount = Integer.valueOf(value.get(true).toString());
+                Integer wrongCount = Integer.valueOf(value.get(false).toString());
+                errorVO.setRightCount(rightCount);
+                errorVO.setWrongCount(wrongCount);
+                errorVO.setTotalCount(rightCount + wrongCount);
+                result.add(errorVO);
+            }
+        }
+
+        return result;
     }
 
 }

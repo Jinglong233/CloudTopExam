@@ -1,10 +1,10 @@
 package com.jl.project.service;
 
 import com.jl.project.entity.dto.AddUserAnswerDTO;
-import com.jl.project.entity.dto.UpdateUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
+import com.jl.project.entity.vo.ErrorVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 
 import java.util.List;
@@ -61,4 +61,5 @@ public interface StudentAnswerService {
      */
     Integer deleteUserAnswerById(String id);
 
+    List<ErrorVO> errorCount(String userId);
 }
