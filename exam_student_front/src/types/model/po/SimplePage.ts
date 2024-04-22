@@ -1,8 +1,8 @@
-export interface SimplePage{
-  countTotal?: number;
+export interface SimplePage {
+  total: number;
   end?: number;
-  pageNo?: number;
-  pageSize?: number;
-  pageTotal?: number;
+  pageNo: number;
+  pageSize: number;
+  pageTotal: number;
   start?: number;
 }

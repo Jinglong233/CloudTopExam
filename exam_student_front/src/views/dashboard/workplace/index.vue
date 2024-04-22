@@ -45,7 +45,7 @@
   import Banner from './components/banner.vue';
   import DataPanel from './components/data-panel.vue';
   import ContentChart from './components/content-chart.vue';
-  import PopularContent from './components/popular-content.vue';
+  import PopularContent from './components/uncompleted-train.vue';
   import CategoriesPercent from './components/categories-percent.vue';
   import RecentlyVisited from './components/recently-visited.vue';
   import QuickOperation from './components/quick-operation.vue';

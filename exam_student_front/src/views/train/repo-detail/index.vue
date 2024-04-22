@@ -119,7 +119,7 @@
     await startTrain(startTrainDTO.value).then((res: any) => {
       if (res.data) {
         router.push({
-          name: 'TrainRecord',
+          name: 'StartTrain',
           params: {
             trainId: res.data,
           },

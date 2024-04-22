@@ -1,4 +1,6 @@
-export interface TrainQuery {
+import { SimplePage } from '@/types/model/po/SimplePage';
+
+export interface TrainQuery extends SimplePage {
   /**
    * ID
    */

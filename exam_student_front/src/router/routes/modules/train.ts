@@ -23,11 +23,21 @@ const TRAIN: AppRouteRecordRaw = {
       },
     },
     {
-      path: 'train-record/:trainId',
+      path: 'train-record',
       name: 'TrainRecord',
       component: () => import('@/views/train/train-record/index.vue'),
       meta: {
         locale: 'menu.train.trainRecord',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'start-train/:trainId',
+      name: 'StartTrain',
+      component: () => import('@/views/train/start-train/index.vue'),
+      meta: {
+        locale: 'menu.train.startTrain',
         requiresAuth: true,
         roles: ['*'],
         hideInMenu: true,
