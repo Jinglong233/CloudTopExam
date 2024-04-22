@@ -653,7 +653,7 @@
   // 导入
   import MyEditor from '@/components/my-editor/index.vue';
   import { onMounted, ref, toRaw } from 'vue';
-  import { numberToChar } from '@/api/common';
+  import { numberToChar } from '@/utils/common';
   import { Message } from '@arco-design/web-vue';
 
   import { getRepoList } from '@/api/repo';

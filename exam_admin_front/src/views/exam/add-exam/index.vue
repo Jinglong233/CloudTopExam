@@ -9,19 +9,20 @@
           class="general-card"
           :title="t('menu.exam.addExam')"
         >
-          <a-tabs direction="vertical">
-            <a-tab-pane key="1" title="基础设置">
+          <a-tabs
+            direction="vertical"
+            :active-key="activeKey"
+            @change="panelChange"
+          >
+            <a-tab-pane :key="1" title="基础设置">
               <a-form
                 ref="addExamFormRef"
                 :model="addExamForm"
                 :scroll-to-first-error="true"
+                :rules="formRules"
               >
                 <a-row>
-                  <a-form-item
-                    label="考试名称"
-                    field="title"
-                    :rules="[{ required: true, message: '请输入考试名称' }]"
-                  >
+                  <a-form-item label="考试名称" field="title">
                     <a-input
                       v-model="addExamForm.title"
                       placeholder="输入考试名称"
@@ -34,17 +35,14 @@
                       label="考试开始时间"
                       label-col-flex="120px"
                       field="startTime"
-                      :rules="[
-                        { required: true, message: '请选择考试开始时间' },
-                      ]"
                     >
                       <a-date-picker
                         v-model="addExamForm.startTime"
                         placeholder="请选择考试开始时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        :time-picker-props="{ defaultValue: '09:09:06' }"
                         format="YYYY-MM-DD HH:mm:ss"
+                        :disabled-input="true"
                         :disabled-date="
                           (current) =>
                             dayjs(current).isBefore(dayjs().subtract(1, 'day'))
@@ -57,9 +55,6 @@
                       label="考试结束时间"
                       field="endTime"
                       label-col-flex="120px"
-                      :rules="[
-                        { required: true, message: '请选择考试结束时间' },
-                      ]"
                     >
                       <a-date-picker
                         v-model="addExamForm.endTime"
@@ -67,13 +62,13 @@
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
                         format="YYYY-MM-DD HH:mm:ss"
+                        :disabled-input="true"
                         :disabled-date="
                           (current) =>
                             dayjs(current).isBefore(
                               dayjs(addExamForm.startTime).subtract(1, 'day')
                             )
                         "
-                        :disabled-time="getDisabledTime"
                       />
                     </a-form-item>
                   </a-col>
@@ -84,7 +79,6 @@
                       label="及格分"
                       field="qualifyScore"
                       label-col-flex="120px"
-                      :rules="[{ required: true, message: '请输入及格分数' }]"
                     >
                       <a-input-number
                         v-model="addExamForm.qualifyScore"
@@ -99,10 +93,9 @@
                   <a-col :span="12">
                     <a-form-item
                       label="考试时长"
-                      field="qualifyScore"
+                      field="duration"
                       label-col-flex="120px"
                       tooltip="单位：分钟（时长由开始时间和结束时间推算而来）"
-                      :rules="[{ required: true, message: '请输入考试时长' }]"
                     >
                       <a-input-number
                         v-model="addExamForm.duration"
@@ -159,7 +152,7 @@
                 </a-row>
               </a-form>
             </a-tab-pane>
-            <a-tab-pane key="2" title="权限设置">
+            <a-tab-pane :key="2" title="权限设置">
               <a-radio-group
                 v-model="addExamForm.openType"
                 direction="horizontal"
@@ -219,8 +212,35 @@
                     :row-selection="{
                       type: 'checkbox',
                     }"
+                    :pagination="{
+                      showTotal: true,
+                      showPageSize: true,
+                      total: pageInfo.total,
+                      pageSize: pageInfo.pageSize,
+                      current: pageInfo.pageNo,
+                    }"
+                    :scroll="{ x: 100, y: 400 }"
+                    @page-change="pageChange"
+                    @page-size-change="pageSizeChange"
                     @select="userTableRowSelect"
                   >
+                    <template #role="{ record }">
+                      <a-tag v-if="record.role === 'student'" color="green"
+                        >学生</a-tag
+                      >
+                      <a-tag v-if="record.role === 'teacher'" color="skyblue"
+                        >教师</a-tag
+                      >
+                      <a-tag v-if="record.role === 'admin'" color="orange"
+                        >管理员</a-tag
+                      >
+                    </template>
+                    <template #state="{ record }">
+                      <a-tag v-if="record.state === 0" color="green"
+                        >正常</a-tag
+                      >
+                      <a-tag v-if="record.state === 1" color="red">异常</a-tag>
+                    </template>
                   </a-table>
                 </template>
                 <template v-if="addExamForm.openType === 2">
@@ -242,7 +262,7 @@
                 </template>
               </a-scrollbar>
             </a-tab-pane>
-            <a-tab-pane key="3" title="考试结果展示">
+            <a-tab-pane :key="3" title="考试结果展示">
               <a-radio-group
                 v-model="addExamForm.resultType"
                 direction="horizontal"
@@ -305,7 +325,7 @@
   import dayjs from 'dayjs';
   import { useRoute, useRouter } from 'vue-router';
   import { useI18n } from 'vue-i18n';
-  import { onMounted, ref, watch } from 'vue';
+  import { onMounted, ref, toRaw, watch } from 'vue';
   import { Paper } from '@/types/model/po/Paper';
   import { getPaperDetail } from '@/api/paper';
   import { UserQuery } from '@/types/model/query/UserQuery';
@@ -315,8 +335,9 @@
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { User } from '@/types/model/po/User';
   import { Message, ValidatedError } from '@arco-design/web-vue';
-  import { range } from 'lodash';
   import { useUserStore } from '@/store';
+  import { SimplePage } from '@/types/model/po/SimplePage';
+  import { removeObjByProperty } from '@/utils/common';
   import { addExam } from '@/api/exam';
 
   const { t } = useI18n();
@@ -324,9 +345,11 @@
   const route = useRoute();
   const router = useRouter();
   const userStore = useUserStore();
-  const addExamFormRef = ref({});
+  const addExamFormRef = ref();
   // 保存考试按钮加载
   const saveLoading = ref(false);
+  // 当前的活动面板
+  const activeKey = ref(1);
 
   // 添加考试表单
   const addExamForm = ref<AddExamDTO>({
@@ -354,20 +377,43 @@
     },
     {
       title: t('department.userColumns.deptCode'),
-      dataIndex: 'deptCode',
+      dataIndex: 'deptText',
     },
     {
-      title: t('department.userColumns.roles'),
-      dataIndex: 'roles',
+      title: t('department.userColumns.role'),
+      dataIndex: 'role',
+      slotName: 'role',
     },
     {
       title: t('department.userColumns.state'),
       dataIndex: 'state',
+      slotName: 'state',
     },
   ]);
 
   // 用户筛选表单
-  const userSearch = ref<UserQuery>({});
+  const userSearch = ref<UserQuery>({} as UserQuery);
+
+  // 用户列表数据
+  const userList = ref<[]>();
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 2,
+    pageTotal: 0,
+    total: 0,
+  });
+
+  // 加载用户列表
+  const reloadUserList = async (userQuery: UserQuery) => {
+    await getUserList(userQuery).then((res: any) => {
+      userList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
+    });
+  };
 
   onMounted(async () => {
     const paperId = route.query.id;
@@ -380,18 +426,26 @@
     });
   });
 
-  // 用户列表数据
-  const userList = ref<[]>();
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
+
+  // tab变化
+  const panelChange = (index: any) => {
+    activeKey.value = index;
+  };
 
   // 开放权限按钮改变
   const openTypeChange = async (value: any) => {
     if (value === 1) {
       // 重置指定部门
       addExamForm.value.deptCode = '';
-      // 加载用户列表
-      await getUserList({}).then((res: any) => {
-        userList.value = res.data.list;
-      });
+      await reloadUserList(pageInfo.value);
     } else if (value === 2) {
       // 切换开放权限，清空用户列表
       addExamForm.value.userList = [];
@@ -407,21 +461,6 @@
     }
   };
 
-  // 获取不可选择的时间
-  const getDisabledTime = (date: Date) => {
-    if (dayjs(date).day() === dayjs(addExamForm.value.startTime).day()) {
-      return {
-        disabledHours: () =>
-          range(0, dayjs(addExamForm.value.startTime).hour()),
-        disabledMinutes: () =>
-          range(0, dayjs(addExamForm.value.startTime).minute() + 1),
-        disabledSeconds: () =>
-          range(0, dayjs(addExamForm.value.startTime).second()),
-      };
-    }
-    return {};
-  };
-
   // 显示考试结果按钮改变
   const resultTypeChange = (value: any) => {};
 
@@ -434,53 +473,82 @@
 
   // 问题列表行被选择时触发
   const userTableRowSelect = (rowKeys: any, rowKey: any, record: User) => {
-    addExamForm.value.userList = [];
-    userList.value?.forEach((user: User) => {
-      if (rowKeys.includes(user.id)) {
-        addExamForm.value.userList?.push(user);
-      }
-    });
+    if (!addExamForm.value.userList) {
+      addExamForm.value.userList = [];
+    }
+    const isInclude = addExamForm.value.userList?.some(
+      (user: User) => user.id === rowKey
+    );
+    if (!isInclude) {
+      addExamForm.value.userList.push(record);
+    } else {
+      // 移除取消选中的用户
+      addExamForm.value.userList = removeObjByProperty(
+        addExamForm.value.userList,
+        'id',
+        rowKey
+      );
+    }
   };
 
   // 保存考试
   const saveExam = async () => {
-    saveLoading.value = true;
     try {
+      // 判断指定人员情况下未选择人员的情况
       if (
         addExamForm.value.openType === 1 &&
         addExamForm.value.userList?.length === 0
       ) {
         Message.warning({
           content: '请选择考试人员',
+          duration: 2000,
         });
-        throw new Error('请选择考试人员');
+        return;
       }
+      // 判断指定部门情况下未选择部门的情况
       if (
         addExamForm.value.openType === 2 &&
         (addExamForm.value.deptCode === '' || !addExamForm.value.deptCode)
       ) {
         Message.warning({
           content: '请选择部门',
+          duration: 2000,
         });
-        throw new Error('请选择部门');
+        return;
+      }
+
+      // 判断考试结束显示样式
+      if (
+        addExamForm.value.resultType === 0 ||
+        addExamForm.value.resultType === 1
+      ) {
+        if (addExamForm.value.thanks?.trim().length === 0) {
+          Message.warning({
+            content: '请输入感谢语',
+            duration: 2000,
+          });
+          activeKey.value = 3;
+          return;
+        }
       }
 
       // 检验表单
       addExamFormRef.value.validate(
         async (errors: undefined | Record<string, ValidatedError>) => {
           if (!errors) {
-            // 判断时间
-            if (
-              !dayjs(addExamForm.value.startTime).isBefore(
-                dayjs(addExamForm.value.endTime)
-              )
-            ) {
+            // 校验通过
+            // 判断时间差
+            const { startTime } = addExamForm.value;
+            const { endTime } = addExamForm.value;
+            if (!dayjs(startTime).isBefore(dayjs(endTime))) {
               Message.warning({
                 content: '考试开始时间必须小于结束时间',
+                duration: 2000,
               });
-              throw new Error('考试开始时间必须小于结束时间');
+              throw new Error();
             }
-            console.log('通过');
+            saveLoading.value = true;
+            // 提交表单
             await addExam(addExamForm.value).then((res: any) => {
               if (res.data === true) {
                 Message.success({
@@ -495,15 +563,18 @@
               saveLoading.value = false;
             });
           } else {
-            console.log('失败');
+            // 校验未通过
+            activeKey.value = 1;
+            throw new Error();
           }
         }
       );
-    } catch (error) {
-      console.log('');
+    } catch {
+      console.log();
     }
   };
 
+  // 计算考试开始结束时间差
   watch(
     addExamForm.value,
     (newData, oldValue) => {
@@ -516,6 +587,26 @@
       deep: true,
       immediate: true,
     }
+  );
+
+  const formRules = {
+    title: [{ required: true, message: '请输入考试名称' }],
+    startTime: { required: true, message: '请选择考试开始时间' },
+    endTime: { required: true, message: '请选择考试结束时间' },
+    qualifyScore: { required: true, message: '请输入及格分数' },
+    duration: { required: true, message: '请输入考试时长' },
+  };
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, userSearch.value],
+    async (
+      [newPageInfo, oldPageInfo],
+      [newUserRecordSearch, oldUserRecordSearch]
+    ) => {
+      await reloadUserList({ ...pageInfo.value, ...userSearch.value });
+    },
+    { deep: true }
   );
 </script>
 

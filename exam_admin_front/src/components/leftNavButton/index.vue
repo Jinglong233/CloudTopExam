@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-  import { clickAnchor } from '@/api/common';
+  import { clickAnchor } from '@/utils/common';
 
   defineProps(['anchorId', 'quSort']);
 

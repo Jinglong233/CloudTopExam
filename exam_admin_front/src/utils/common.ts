@@ -74,3 +74,20 @@ export function getQuestionNoun(type: number) {
 export function clickAnchor(id: any) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
+
+/**
+ * 数组对象根据属性值移除对象
+ * @param arr 移除对象的数组
+ * @param targetProperty 目标属性名
+ * @param targetValue 目标属性值
+ * @return 移除指定属性值的新数组
+ */
+export function removeObjByProperty(
+  arr: object[],
+  targetProperty: string,
+  targetValue: any
+) {
+  const temp = arr.filter((obj: any) => obj[targetProperty] !== targetValue);
+  // 转换代理对象为普通数组
+  return temp.map((obj: any) => ({ ...obj }));
+}

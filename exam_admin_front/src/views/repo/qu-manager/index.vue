@@ -169,7 +169,7 @@
   import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
   import { useUserStore } from '@/store';
   import { SimplePage } from '@/types/model/po/SimplePage';
-  import { getQuestionTypeName } from '../../../api/common';
+  import { getQuestionTypeName } from '../../../utils/common';
 
   const { loading, setLoading } = useLoading(true);
   const { t } = useI18n();

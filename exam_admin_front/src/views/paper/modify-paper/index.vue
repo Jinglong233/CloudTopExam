@@ -439,7 +439,7 @@
   import { QuExcludeQuery } from '@/types/model/query/QuExcludeQuery';
   import { QuAndAnswerVO } from '@/types/model/vo/QuAndAnswerVO';
   import { getPaperDetail, updatePaperById } from '@/api/paper';
-  import { getQuestionTypeName } from '../../../api/common';
+  import { getQuestionTypeName } from '../../../utils/common';
 
   const { t } = useI18n();
 

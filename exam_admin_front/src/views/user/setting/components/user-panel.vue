@@ -50,6 +50,17 @@
               女
             </a-tag>
           </template>
+          <template v-else-if="data.label === 'userSetting.label.roles'">
+            <a-tag v-if="value == 'student'" color="skyBlue" size="small">
+              学生
+            </a-tag>
+            <a-tag v-if="value == 'teacher'" color="pink" size="small">
+              教师
+            </a-tag>
+            <a-tag v-if="value == 'admin'" color="grey" size="small">
+              管理员
+            </a-tag>
+          </template>
           <span v-else>{{ value }}</span>
         </template>
       </a-descriptions>

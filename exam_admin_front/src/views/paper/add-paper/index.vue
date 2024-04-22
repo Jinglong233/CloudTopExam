@@ -496,7 +496,7 @@
   import { getSubjectTree } from '@/api/subject';
   import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
   import { getDeptTree } from '@/api/department';
-  import { getQuestionTypeName } from '../../../api/common';
+  import { getQuestionTypeName } from '../../../utils/common';
 
   const { t } = useI18n();
 

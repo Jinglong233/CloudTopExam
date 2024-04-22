@@ -34,7 +34,6 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   (response: AxiosResponse<HttpResponse>) => {
-    console.log('response', response);
     const res = response.data;
     if (res.code === 200) {
       return res;
@@ -49,7 +48,7 @@ axios.interceptors.response.use(
       return null;
     }
     if (response.status === 200) {
-      return response;
+      return response.data;
     }
 
     Message.error({

@@ -7,16 +7,6 @@
     :wrapper-col-props="{ span: 16 }"
   >
     <a-form-item
-      field="email"
-      :label="$t('userSetting.basicInfo.form.label.email')"
-      :rules="[{ type: 'email' }]"
-    >
-      <a-input
-        v-model="formData.user.email"
-        :placeholder="$t('userSetting.basicInfo.placeholder.email')"
-      />
-    </a-form-item>
-    <a-form-item
       field="phone"
       :label="$t('userSetting.basicInfo.form.label.phone')"
     >
@@ -55,11 +45,12 @@
   import { useUserStore } from '@/store';
   import { UpdateUserDTO } from '@/types/model/dto/UpdateUserDTO';
   import { updateUserById } from '@/api/user';
+  import { User } from '@/types/model/po/User';
 
   const userInfo = useUserStore();
   const formRef = ref();
   const formData = ref<UpdateUserDTO>({
-    user: {},
+    user: {} as User,
     id: userInfo.id,
   });
 

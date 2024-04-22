@@ -55,7 +55,7 @@ export default {
   // 'userSetting.SecuritySettings.placeholder.phone': '已绑定：150******50',
   'userSetting.SecuritySettings.form.label.email': 'Email',
   'userSetting.SecuritySettings.placeholder.email':
-    'You have not set a mailbox yet. The mailbox binding can be used to retrieve passwords and receive notifications.',
+    'The mailbox binding can be used to retrieve passwords and receive notifications.',
   'userSetting.SecuritySettings.button.settings': 'Settings',
   'userSetting.SecuritySettings.button.update': 'Update',
   'userSetting.certification.title.enterprise':

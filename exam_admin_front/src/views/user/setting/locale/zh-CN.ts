@@ -49,7 +49,7 @@ export default {
   // 'userSetting.SecuritySettings.placeholder.phone': '已绑定：150******50',
   'userSetting.SecuritySettings.form.label.email': '安全邮箱',
   'userSetting.SecuritySettings.placeholder.email':
-    '您暂未设置邮箱，绑定邮箱可以用来找回密码、接收通知等。',
+    '绑定邮箱可以用来找回密码、接收通知等。',
   'userSetting.SecuritySettings.button.settings': '设置',
   'userSetting.SecuritySettings.button.update': '修改',
   'userSetting.certification.title.enterprise': '企业实名认证',

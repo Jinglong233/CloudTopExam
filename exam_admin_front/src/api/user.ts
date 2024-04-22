@@ -4,6 +4,9 @@ import { UserState } from '@/store/modules/user/types';
 import { UserQuery } from '@/types/model/query/UserQuery';
 import { User } from '@/types/model/po/User';
 import { UpdateUserDTO } from '@/types/model/dto/UpdateUserDTO';
+import { UpdateUserPasswordDTO } from '@/types/model/dto/UpdateUserPasswordDTO';
+import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
+import { UpdateEmailDTO } from '@/types/model/dto/UpdateEmailDTO';
 
 export interface LoginData {
   userName: string;
@@ -75,4 +78,34 @@ export function addUser(user: User) {
  */
 export function getUserCount(query: UserQuery) {
   return axios.post<boolean>('/api/user/userCount', query);
+}
+
+/**
+ * 修改密码
+ */
+export function updateUserPassword(
+  updateUserPasswordDTO: UpdateUserPasswordDTO
+) {
+  return axios.post<boolean>(
+    '/api/user/updateUserPassword',
+    updateUserPasswordDTO
+  );
+}
+
+/**
+ * 发送验证码
+ */
+export function getEmailCode(email: string) {
+  return axios.post<boolean>('/api/user/getEmailCode', email, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
+}
+
+/**
+ * 更新绑定邮箱
+ */
+export function updateUserEmail(updateEmailDTO: UpdateEmailDTO) {
+  return axios.post<boolean>('/api/user/updateUserEmail', updateEmailDTO);
 }
