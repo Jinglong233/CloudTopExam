@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ExamVO } from '@/types/model/vo/ExamVO';
 import { ExamQuery } from '@/types/model/query/ExamQuery';
 import { SubmitExamDTO } from '@/types/model/dto/SubmitExamDTO';
+import { ErrorVO } from '@/types/model/vo/ErrorVO';
 
 // eslint-disable-next-line import/prefer-default-export
 export function getMyExamList(examQuery: ExamQuery) {
@@ -29,4 +30,13 @@ export function getExamListByUserId(userId: string) {
 // 提交试卷
 export function submitMyExam(submitExamDTO: SubmitExamDTO) {
   return axios.post<boolean>('/api/student/submitExam', submitExamDTO);
+}
+
+// 获取错题统计
+export function getErrorCount(userId: string) {
+  return axios.post<ErrorVO[]>('/api/studentAnswer/errorCount', userId, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
 }
