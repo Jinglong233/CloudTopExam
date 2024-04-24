@@ -1,15 +1,13 @@
-package com.jl.project.strategy.strategyImpl;
+package com.jl.project.strategy.abstractStrategy.strategyImpl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.google.gson.Gson;
 import com.jl.project.entity.po.QuAnswer;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.QuAnswerQuery;
-import com.jl.project.entity.query.UserAnswerQuery;
+import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.QuAnswerMapper;
-import com.jl.project.mapper.UserAnswerMapper;
-import com.jl.project.strategy.AbstractJudgeProblem;
+import com.jl.project.strategy.abstractStrategy.AbstractJudgeProblem;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class JudgeDecide extends AbstractJudgeProblem {
-
-
 
 
     @Override
@@ -77,5 +73,10 @@ public class JudgeDecide extends AbstractJudgeProblem {
 
 
         return result > 0;
+    }
+
+    @Override
+    public Boolean support(Integer quType) {
+        return QuType.JUDGE.getValue().equals(quType);
     }
 }

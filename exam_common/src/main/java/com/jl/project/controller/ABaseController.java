@@ -2,7 +2,6 @@ package com.jl.project.controller;
 
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.enums.ResponseCodeEnum;
-import org.springframework.stereotype.Repository;
 
 public class ABaseController {
     protected static final String STATUC_SUCCESS = "success";
@@ -32,6 +31,15 @@ public class ABaseController {
         responseVO.setCode(code);
         responseVO.setInfo(message);
         responseVO.setData(t);
+        return responseVO;
+    }
+
+
+    protected <T> ResponseVO getErrorResponseVO(Integer code, String message) {
+        ResponseVO<T> responseVO = new ResponseVO<>();
+        responseVO.setStatus(STATUC_ERROR);
+        responseVO.setCode(code);
+        responseVO.setInfo(message);
         return responseVO;
     }
 }

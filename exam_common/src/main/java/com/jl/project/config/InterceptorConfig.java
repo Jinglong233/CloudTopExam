@@ -2,15 +2,13 @@ package com.jl.project.config;
 
 import com.jl.project.interceptor.TokenInterceptor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
 
-@Configuration
+//@Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
 
     @Resource
@@ -25,7 +23,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     //定义排除swagger访问的路径配置
     String[] swaggerExcludes = new String[]{"/swagger-ui.html", "/swagger-resources/**", "/webjars/**","/v3/api-docs/**"};
 
-    @Override
+   /* @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // todo 拦截器有问题
         registry.addInterceptor(tokenInterceptor())
@@ -34,7 +32,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/**.html")
                 .excludePathPatterns(swaggerExcludes);
 
-    }
+    }*/
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

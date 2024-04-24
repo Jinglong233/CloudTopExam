@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -12,18 +13,21 @@ public class UpdateUserPasswordDTO {
      * 用户Id
      */
     @Schema(description = "用户Id")
+    @VerifyParam(require = true)
     private String userId;
 
     /**
      * 原密码
      */
     @Schema(description = "原密码")
+    @VerifyParam(require = true)
     private String oldPassword;
 
     /**
      * 新密码
      */
     @Schema(description = "新密码")
+    @VerifyParam(require = true)
     private String newPassword;
 
     public String getOldPassword() {

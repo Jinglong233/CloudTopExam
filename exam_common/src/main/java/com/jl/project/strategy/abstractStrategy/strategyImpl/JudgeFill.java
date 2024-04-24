@@ -1,16 +1,13 @@
-package com.jl.project.strategy.strategyImpl;
+package com.jl.project.strategy.abstractStrategy.strategyImpl;
 
 import com.jl.project.entity.po.QuAnswer;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.QuAnswerQuery;
-import com.jl.project.entity.query.UserAnswerQuery;
+import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.QuAnswerMapper;
-import com.jl.project.mapper.UserAnswerMapper;
-import com.jl.project.strategy.AbstractJudgeProblem;
+import com.jl.project.strategy.abstractStrategy.AbstractJudgeProblem;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,5 +75,10 @@ public class JudgeFill extends AbstractJudgeProblem {
 
 
         return result > 0;
+    }
+
+    @Override
+    public Boolean support(Integer quType) {
+        return QuType.FILL.getValue().equals(quType);
     }
 }

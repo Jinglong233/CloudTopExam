@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.ClassfiySelect;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -21,17 +22,20 @@ public class RandomSelectQuDTO {
      * 题库ID
      */
     @Schema(description = "题库ID")
+    @VerifyParam(require = true)
     private String repoId;
 
     /**
      * 分类列表
      */
     @Schema(description = "分类列表")
+    @VerifyParam(require = true)
     private List<ClassfiySelect> levels;
     /**
      * 题型
      */
     @Schema(description = "题型")
+    @VerifyParam(require = true)
     private Integer quType;
 
     public String getRepoId() {

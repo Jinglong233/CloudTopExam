@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.QuAnswer;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -15,18 +16,15 @@ public class AddQuAndAnswerDTO {
      * 所属题库的ID
      */
     @Schema(description = "所属题库的ID")
+    @VerifyParam(require = true)
     private String repoId;
 
-    /**
-     * 关联题库标题
-     */
-    @Schema(description = "关联题库标题")
-    private String repoText;
 
     /**
      * 题目内容
      */
     @Schema(description = "题目内容")
+    @VerifyParam(require = true)
     private String content;
 
     /**
@@ -39,6 +37,7 @@ public class AddQuAndAnswerDTO {
      * 题目难度0:简单1:困难
      */
     @Schema(description = "题目难度0:简单1:困难")
+    @VerifyParam(require = true)
     private Integer level;
 
     /**
@@ -52,6 +51,7 @@ public class AddQuAndAnswerDTO {
      * 题型
      */
     @Schema(description = "题型")
+    @VerifyParam(require = true)
     private Integer quType;
 
     /**
@@ -66,14 +66,6 @@ public class AddQuAndAnswerDTO {
 
     public void setRepoId(String repoId) {
         this.repoId = repoId;
-    }
-
-    public String getRepoText() {
-        return repoText;
-    }
-
-    public void setRepoText(String repoText) {
-        this.repoText = repoText;
     }
 
     public String getContent() {

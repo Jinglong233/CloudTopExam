@@ -1,5 +1,6 @@
 package com.jl.project.utils;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.jl.project.entity.po.MailContent;
 import com.jl.project.exception.BusinessException;
 import org.apache.commons.lang3.StringUtils;
@@ -15,10 +16,7 @@ import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 邮件工具类
@@ -132,13 +130,17 @@ public class MailUtil {
      * @return
      */
     public static String[] getStringAddress(Address[] address) {
-        List<String> invalid = new ArrayList<>();
-        for (Address a : address) {
-            String aa = ((InternetAddress) a).getAddress();
-            if (!StringUtils.isEmpty(aa)) {
-                invalid.add(aa);
+        if (!ObjectUtil.isEmpty(address)){
+            List<String> invalid = new ArrayList<>();
+            for (Address a : address) {
+                String aa = ((InternetAddress) a).getAddress();
+                if (!StringUtils.isEmpty(aa)) {
+                    invalid.add(aa);
+                }
             }
+            return invalid.stream().distinct().toArray(String[]::new);
         }
-        return invalid.stream().distinct().toArray(String[]::new);
+        logger.warn("尝试发送邮件失败");
+        return new String[1];
     }
 }

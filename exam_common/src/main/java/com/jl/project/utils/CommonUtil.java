@@ -1,6 +1,8 @@
 package com.jl.project.utils;
 
 import cn.hutool.core.util.IdUtil;
+import com.jl.project.enums.QuLevel;
+import com.jl.project.enums.QuType;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -34,5 +36,36 @@ public class CommonUtil {
                 .append(month).append(" ")
                 .append("?");
         return cron.toString();
+    }
+
+
+    /**
+     * 判断题型是否合法
+     *
+     * @param quType
+     * @return
+     */
+    public static Boolean isValidQuestionType(Integer quType) {
+        for (QuType type : QuType.values()) {
+            if (type.getValue().equals(quType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断题目难度是否合法
+     *
+     * @param level
+     * @return
+     */
+    public static Boolean isValidLevelType(Integer level) {
+        for (QuLevel type : QuLevel.values()) {
+            if (type.getValue().equals(level)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,25 +1,26 @@
-package com.jl.project.strategy.strategyImpl;
+package com.jl.project.strategy.abstractStrategy.strategyImpl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.google.gson.Gson;
 import com.jl.project.entity.po.QuAnswer;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.QuAnswerQuery;
+import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.strategy.AbstractJudgeProblem;
+import com.jl.project.strategy.abstractStrategy.AbstractJudgeProblem;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Component
-public class JudgeMulti extends AbstractJudgeProblem {
+public class JudgeRadio extends AbstractJudgeProblem {
 
 
     @Override
     public Boolean judge(UserAnswer userAnswer, Integer score) {
-
         if (userAnswer == null) {
             throw new BusinessException("缺少参数");
         }
@@ -55,32 +56,27 @@ public class JudgeMulti extends AbstractJudgeProblem {
                     .map(QuAnswer::getId).collect(Collectors.toList());
         }
 
+        // 判断题目是否作对
+        boolean isEqual = CollUtil.isEqualList(trueAnswerIdList, answerIdList);
 
-        boolean isEqual = false;
+        // 设置得分
         Integer myScore = 0;
-        if (answerIdList != null && !answerIdList.isEmpty()) {
-            // 全部答对才给分
-            isEqual = CollUtil.isEqualList(trueAnswerIdList, answerIdList);
+        if (isEqual) {
             myScore = score;
-            // todo 部分给分逻辑
-            /*
-            // 判断题目是否作对(这里因为前边判断了用户答案id为空的情况，所以可以使用containsAll()。因为空集合是所有集合的子集)
-            isEqual = trueAnswerIdList.containsAll(answerIdList);
-            // 获取选对的个数
-            int min = Math.min(answerIdList.size(), trueAnswerIdList.size());
-            myScore = (score / answerIdList.size()) * min;
-            */
         }
 
 
         userAnswer.setIsRight(isEqual ? 1 : 0);
         userAnswer.setScore(myScore);
-
-
         // 更新
         Integer result = userAnswerMapper.updateById(userAnswer, userAnswer.getId());
 
 
         return result > 0;
+    }
+
+    @Override
+    public Boolean support(Integer quType) {
+        return QuType.RADIO.getValue().equals(quType);
     }
 }

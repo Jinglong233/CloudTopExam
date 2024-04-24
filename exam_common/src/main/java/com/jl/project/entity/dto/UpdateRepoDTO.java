@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.Repo;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,11 +13,13 @@ public class UpdateRepoDTO {
      * 题库对象
      */
     @Schema(description = "题库对象")
+    @VerifyParam(require = true)
     private Repo repo;
     /**
      * 题目Id
      */
     @Schema(description = "题目Id")
+    @VerifyParam(require = true)
     private String id;
 
     public Repo getRepo() {

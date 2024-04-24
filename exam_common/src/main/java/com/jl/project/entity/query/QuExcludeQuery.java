@@ -1,5 +1,6 @@
 package com.jl.project.entity.query;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class QuExcludeQuery extends QuQuery{
      * 需要排除的题目Id
      */
     @Schema(description = "需要排除的题目Id")
+    @VerifyParam(require = true)
     private List<String> excludes;
 
     public List<String> getExcludes() {

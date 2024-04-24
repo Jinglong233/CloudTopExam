@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -12,29 +13,34 @@ public class AddRepoDTO {
      * 题库标题
      */
     @Schema(description = "题库标题")
+    @VerifyParam(require = true)
     private String title;
     /**
      * 部门编码（专业）
      */
     @Schema(description = "部门编码（专业）")
+    @VerifyParam(require = true)
     private String deptCode;
 
     /**
      * 学科ID
      */
     @Schema(description = "学科ID")
+    @VerifyParam(require = true)
     private String subjectId;
 
     /**
      * 是否用于考试
      */
     @Schema(description = "是否用于考试")
+    @VerifyParam(require = true)
     private Integer isExam;
 
     /**
      * 是否用于训练
      */
     @Schema(description = "是否用于训练")
+    @VerifyParam(require = true)
     private Integer isTrain;
 
     /**
@@ -43,11 +49,6 @@ public class AddRepoDTO {
     @Schema(description = "备注")
     private String remark;
 
-    /**
-     * 创建者
-     */
-    @Schema(description = "创建者")
-    private String createBy;
 
     public String getDeptCode() {
         return deptCode;
@@ -97,11 +98,4 @@ public class AddRepoDTO {
         this.title = title;
     }
 
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
-    }
 }
