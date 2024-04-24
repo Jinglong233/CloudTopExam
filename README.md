@@ -28,4 +28,18 @@
 
 ![用户设置界面](image/img_14.png)
 
+![班级错题分析界面](image/img_15.png)
+
+![班级错题分析详情页](image/img_16.png)
+
+![试卷错题分析界面](image/img_17.png)
+
+![试卷错题分析详情页](image/img_18.png)
+
 ![学生端登录页面](image/img_1.png)
+
+![错题统计页面](image/img_19.png)
+
+![训练记录界面](image/img_20.png)
+
+![题库训练详情页](image/img_21.png)
