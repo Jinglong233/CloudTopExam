@@ -1,5 +1,8 @@
 package com.jl.project.controller;
 
+
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddQuAndAnswerDTO;
 import com.jl.project.entity.dto.RandomSelectQuDTO;
 import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
@@ -38,31 +41,35 @@ public class QuController extends ABaseController {
     /**
      * 根据条件分页查询
      */
-    @RequestMapping("loadDataList")
-    public ResponseVO loadDatalist(@RequestBody QuQuery query) {
+    @RequestMapping("loadQuList")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO loadQuList(@RequestBody @VerifyParam QuQuery query) {
         return getSuccessResponseVO(quService.findListByPage(query));
     }
 
+    // TODO: 2024-04-24 (前端从未使用，loadExcludeQuAnAnswerList用到了)考虑对此接口做分页，数据量太大，响应速度慢
     /**
-     * 获取详细题目列表
+     * 获取题目+选项列表
      */
-    @RequestMapping("loadDetailDataList")
-    public ResponseVO loadDetailDataList(@RequestBody QuQuery query) throws BusinessException {
-        List<QuAndAnswerVo> result = quService.loadDetailDataList(query);
+    @RequestMapping("loadQuAndAnswerList")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO loadQuAndAnswerList(@RequestBody QuQuery query) throws BusinessException {
+        List<QuAndAnswerVo> result = quService.loadQuAndAnswerList(query);
         return getSuccessResponseVO(result);
     }
 
 
     /**
-     * 获取详细题目列表(排除之后的)
+     * 过滤指定题目之后的题目和选项列表
      *
      * @param query
      * @return
      * @throws BusinessException
      */
-    @RequestMapping("loadExcludeDataList")
-    public ResponseVO loadExcludeDataList(@RequestBody QuExcludeQuery query) throws BusinessException {
-        List<QuAndAnswerVo> result = quService.loadExcludeDataList(query);
+    @RequestMapping("loadExcludeQuAnAnswerList")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO loadExcludeQuAnAnswerList(@RequestBody @VerifyParam QuExcludeQuery query) throws BusinessException {
+        List<QuAndAnswerVo> result = quService.loadExcludeQuAnAnswerList(query);
         return getSuccessResponseVO(result);
     }
 
@@ -70,7 +77,8 @@ public class QuController extends ABaseController {
      * 新增题目和选项
      */
     @RequestMapping("add")
-    public ResponseVO add(@RequestBody AddQuAndAnswerDTO bean) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO add(@RequestBody @VerifyParam AddQuAndAnswerDTO bean) throws BusinessException {
         Boolean result = quService.add(bean);
         return getSuccessResponseVO(result);
     }
@@ -79,7 +87,8 @@ public class QuController extends ABaseController {
      * 根据题目Id更新题目和关联选项
      */
     @RequestMapping("updateQuById")
-    public ResponseVO updateQuById(@RequestBody UpdateQuAndAnswerDTO bean) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO updateQuById(@RequestBody @VerifyParam UpdateQuAndAnswerDTO bean) throws BusinessException {
         Boolean result = quService.updateQuById(bean);
         return getSuccessResponseVO(result);
     }
@@ -88,17 +97,19 @@ public class QuController extends ABaseController {
      * 随机抽题题目
      */
     @RequestMapping("randomSelectQu")
-    public ResponseVO randomSelectQu(@RequestBody RandomSelectQuDTO selectQuDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO randomSelectQu(@RequestBody @VerifyParam RandomSelectQuDTO selectQuDTO) throws BusinessException {
         List<QuAndAnswerVo> result = quService.randomSelectQu(selectQuDTO);
         return getSuccessResponseVO(result);
     }
 
 
     /**
-     * 根据Id查询
+     * 根据Id查询题目和对应选项的信息
      */
     @RequestMapping("getQuById")
-    public ResponseVO getQuById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         QuAndAnswerVo result = quService.getQuById(id);
         return getSuccessResponseVO(result);
     }
@@ -108,11 +119,43 @@ public class QuController extends ABaseController {
      * 根据Id删除
      */
     @RequestMapping("deleteQuById")
-    public ResponseVO deleteQuById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO deleteQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         Boolean result = quService.deleteQuById(id);
         return getSuccessResponseVO(result);
     }
 
+
+    /**
+     * 获取题目数量
+     */
+    @RequestMapping("quCount")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getQuCount(@RequestBody @VerifyParam QuQuery query) throws BusinessException {
+        Integer result = quService.getQuCount(query);
+        return getSuccessResponseVO(result);
+    }
+
+//    以下接口未测试
+
+    /**
+     * 导出
+     */
+    @RequestMapping("export")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public void getQuCount(HttpServletResponse response) throws BusinessException, IOException {
+        quService.export(response);
+    }
+
+    /**
+     * 导入题库
+     */
+    @RequestMapping("importQu")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file, @RequestPart("repoId") String repoId) throws BusinessException, IOException {
+        Boolean result = quService.importQuestions(file, repoId);
+        return getSuccessResponseVO(result);
+    }
 
     /**
      * 批量新增
@@ -129,56 +172,6 @@ public class QuController extends ABaseController {
     @RequestMapping("addOrUpdateBatch")
     public ResponseVO addOrUpdateBatch(@RequestBody List<Qu> listBean) {
         return getSuccessResponseVO(this.quService.addOrUpdateBatch(listBean));
-    }
-
-    /**
-     * 获取题目数量
-     */
-    @RequestMapping("quCount")
-    public ResponseVO getQuCount(@RequestBody QuQuery query) throws BusinessException {
-        Integer result = quService.getQuCount(query);
-        return getSuccessResponseVO(result);
-    }
-
-
-    /**
-     * 导出
-     */
-    @RequestMapping("export")
-    public void getQuCount(HttpServletResponse response) throws BusinessException, IOException {
-        quService.export(response);
-    }
-
-    /**
-     * 导入题库
-     */
-    @RequestMapping("importQu")
-    public ResponseVO importQuestions(@RequestPart("file") MultipartFile file, @RequestPart("repoId") String repoId) throws BusinessException, IOException {
-        Boolean result = null;
-        try {
-            result = quService.importQuestions(file, repoId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 根据班级获取错题
-     *
-     * @return
-     */
-    @RequestMapping("getWrongQu")
-    public ResponseVO getWrongQu(@RequestBody WrongQuQuery query) {
-        List<WrongQuVO> result = null;
-        try {
-            result = quService.getWrongQu(query);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-
-        return getSuccessResponseVO(result);
-
     }
 
 

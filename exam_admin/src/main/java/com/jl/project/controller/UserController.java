@@ -1,13 +1,14 @@
 package com.jl.project.controller;
 
-import com.jl.project.entity.dto.UpdateEmailDTO;
-import com.jl.project.entity.dto.UpdateUserDTO;
-import com.jl.project.entity.dto.UpdateUserPasswordDTO;
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
+import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.LoginQuery;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.enums.VerifyRegexEnum;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserService;
 import io.swagger.annotations.Api;
@@ -35,13 +36,14 @@ public class UserController extends ABaseController {
     /**
      * 登录
      *
-     * @param user
+     * @param loginDTO
      * @return
      */
     @ApiOperation(value = "管理员/教师登录")
     @RequestMapping("login")
-    public ResponseVO login(@RequestBody LoginQuery user) throws BusinessException {
-        LoginResponseVo result = userService.login(user);
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    public ResponseVO login(@RequestBody @VerifyParam LoginDTO loginDTO) {
+        LoginResponseVo result = userService.login(loginDTO);
         return getSuccessResponseVO(result, "登录成功");
     }
 
@@ -52,6 +54,7 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "管理员/教师退出登录")
     @RequestMapping("logout")
+    @GlobalInterceptor(checkLogin = true)
     public ResponseVO logout() {
         Boolean result = userService.logout();
         return getSuccessResponseVO(result, "退出成功");
@@ -62,62 +65,70 @@ public class UserController extends ABaseController {
      *
      * @return
      */
-    @ApiOperation(value = "管理员/教师获取个人信息")
+    @ApiOperation(value = "通过token获取登录用户信息")
     @RequestMapping("info")
-    public ResponseVO getLoginUserInfo() {
-        User result = null;
-        try {
-            result = userService.getLoginUserInfo();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true)
+    public ResponseVO getLoginUserInfo() throws BusinessException {
+        LoginResponseVo result = userService.getLoginUserInfo();
         return getSuccessResponseVO(result);
     }
 
     /**
      * 新增（注册）
      */
-    @ApiOperation(value = "管理员添加用户")
+    @ApiOperation(value = "注册")
     @RequestMapping("register")
-    public ResponseVO register(@RequestBody User bean) throws BusinessException {
-        Boolean result = this.userService.register(bean);
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
+    public ResponseVO register(@RequestBody @VerifyParam AddUserDTO addUserDTO) throws BusinessException {
+        Boolean result = userService.register(addUserDTO);
         return getSuccessResponseVO(result, "添加成功");
     }
 
     /**
-     * 获取部门所有人员
+     * 分页获取用户列表
      *
      * @param query
      * @return
      */
-    @ApiOperation(value = "管理员获取部分人员列表")
+    @RequestMapping("loadUserList")
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
+    public ResponseVO loadDatalist(@RequestBody UserQuery query) {
+        return getSuccessResponseVO(userService.findListByPage(query));
+    }
+
+
+    /**
+     * 分页获取部门人员
+     *
+     * @param query
+     * @return
+     */
+    @ApiOperation(value = "分页获取部门人员")
     @RequestMapping("loadDeptUserList")
-    public ResponseVO loadDeptUserList(@RequestBody UserQuery query) {
-        List<User> result = null;
-        try {
-            result = userService.loadDeptUserList(query);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
+    public ResponseVO loadDeptUserList(@RequestBody UserQuery query) throws BusinessException {
+        PaginationResultVO result = userService.loadDeptUserList(query);
         return getSuccessResponseVO(result, "获取成功");
     }
 
     /**
-     * 根据Id更新
+     * 根据Id更新用户信息
      */
-    @ApiOperation(value = "管理员更新用户信息")
+    @ApiOperation(value = "更新用户信息")
     @RequestMapping("updateUserById")
-    public ResponseVO updateUserById(@RequestBody UpdateUserDTO updateUserDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO updateUserById(@RequestBody @VerifyParam UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = userService.updateUserById(updateUserDTO);
         return getSuccessResponseVO(result, "更新成功");
     }
 
     /**
-     * 根据Id删除
+     * 根据Id删除用户
      */
-    @ApiOperation(value = "管理员删除用户")
+    @ApiOperation(value = "删除用户")
     @RequestMapping("deleteUserById")
-    public ResponseVO deleteUserById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
+    public ResponseVO deleteUserById(@VerifyParam(require = true) @RequestBody String id) throws BusinessException {
         Boolean result = userService.deleteUserById(id);
         return getSuccessResponseVO(result, result ? "删除成功" : "删除失败");
     }
@@ -128,48 +139,23 @@ public class UserController extends ABaseController {
      *
      * @param file
      */
-    @ApiOperation(value = "管理员/教师上传头像")
+    @ApiOperation(value = "用户上传头像")
     @PostMapping("/upload/avatar")
-    public ResponseVO uploadAvatar(@RequestParam("file") MultipartFile file) throws BusinessException, IOException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws BusinessException, IOException {
         String result = userService.uploadAvatar(file);
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 根据条件分页查询
+     * 根据Id查询用户信息
      */
-    @RequestMapping("loadDataList")
-    public ResponseVO loadDatalist(@RequestBody UserQuery query) {
-        return getSuccessResponseVO(userService.findListByPage(query));
-    }
-
-
-    /**
-     * 批量新增
-     */
-    @ApiOperation(value = "批量导入用户信息接口（预留）")
-    @RequestMapping("addBatch")
-    public ResponseVO addBatch(@RequestBody List<User> listBean) {
-        return getSuccessResponseVO(this.userService.addBatch(listBean));
-    }
-
-    /**
-     * 批量新增或修改
-     */
-    @RequestMapping("addOrUpdateBatch")
-    public ResponseVO addOrUpdateBatch(@RequestBody List<User> listBean) {
-        return getSuccessResponseVO(this.userService.addOrUpdateBatch(listBean));
-    }
-
-    /**
-     * 根据Id查询
-     */
-    @ApiOperation(value = "根据用户Id查询用户信息")
+    @ApiOperation(value = "根据Id查询用户信息")
     @RequestMapping("getUserById")
-    public ResponseVO getUserById(String id) {
-        return getSuccessResponseVO(this.userService.getUserById(id));
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
+    public ResponseVO getUserById(@RequestBody @VerifyParam(require = true) String id) {
+        return getSuccessResponseVO(userService.getUserById(id));
     }
-
 
     /**
      * 获取用户总数
@@ -178,7 +164,8 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "获取用户总数")
     @RequestMapping("userCount")
-    public ResponseVO getUserCount(@RequestBody UserQuery userQuery) throws BusinessException {
+    @GlobalInterceptor(checkAdmin = true, checkParams = true)
+    public ResponseVO getUserCount(@RequestBody @VerifyParam(require = true) UserQuery userQuery) throws BusinessException {
         Integer result = userService.getUserCount(userQuery);
         return getSuccessResponseVO(result);
     }
@@ -190,13 +177,9 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "修改用户密码")
     @RequestMapping("updateUserPassword")
-    public ResponseVO updateUserPassword(@RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
-        Boolean result = null;
-        try {
-            result = userService.updateUserPassword(updateUserPasswordDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(false, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true)
+    public ResponseVO updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
+        Boolean result = userService.updateUserPassword(updateUserPasswordDTO);
         return getSuccessResponseVO(result);
     }
 
@@ -207,13 +190,10 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "获取邮箱验证码")
     @RequestMapping("getEmailCode")
-    public ResponseVO getEmailCode(@RequestBody String email) {
-        Boolean result = null;
-        try {
-            result = userService.getEmailCode(email);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(false, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getEmailCode(@RequestBody @VerifyParam(require = true,
+            regex = VerifyRegexEnum.EMAIL) String email) throws BusinessException {
+        Boolean result = userService.getEmailCode(email);
         return getSuccessResponseVO(result);
     }
 
@@ -224,14 +204,31 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "更新/绑定邮箱")
     @RequestMapping("updateUserEmail")
-    public ResponseVO updateUserEmail(@RequestBody UpdateEmailDTO updateEmailDTO) {
-        Boolean result = null;
-        try {
-            result = userService.updateUserEmail(updateEmailDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO("更新/绑定失败", e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO updateUserEmail(@RequestBody @VerifyParam(require = true) UpdateEmailDTO updateEmailDTO) throws BusinessException {
+        Boolean result = userService.updateUserEmail(updateEmailDTO);
         return getSuccessResponseVO(result);
+    }
+
+    // 下面未做
+
+    /**
+     * 批量新增
+     */
+    @ApiOperation(value = "批量导入用户信息接口（预留）")
+    @RequestMapping("addBatch")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO addBatch(@RequestBody @VerifyParam List<User> listBean) {
+        return getSuccessResponseVO(this.userService.addBatch(listBean));
+    }
+
+    /**
+     * 批量新增或修改
+     */
+    @RequestMapping("addOrUpdateBatch")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO addOrUpdateBatch(@RequestBody @VerifyParam List<User> listBean) {
+        return getSuccessResponseVO(this.userService.addOrUpdateBatch(listBean));
     }
 
 

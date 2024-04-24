@@ -20,7 +20,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-;
 
 /**
  * @Description:部门表Service

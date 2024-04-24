@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddExamDTO;
 import com.jl.project.entity.dto.UpdateExamDTO;
 import com.jl.project.entity.po.Exam;
@@ -34,53 +36,31 @@ public class ExamController extends ABaseController {
     /**
      * 根据条件分页查询
      */
-    @RequestMapping("loadDataList")
-    public ResponseVO loadDatalist(@RequestBody ExamQuery query) throws BusinessException {
-        PaginationResultVO<ExamVO> result = examService.loadDatalist(query);
+    @RequestMapping("loadExamList")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO loadExamList(@RequestBody @VerifyParam ExamQuery query) throws BusinessException {
+        PaginationResultVO<ExamVO> result = examService.loadExamList(query);
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 根据条件分页查询
-     */
-    @RequestMapping("getCorrectExamByParam")
-    public ResponseVO getCorrectExamByParam(@RequestBody ExamQuery query) throws BusinessException {
-        List<CorrectExamVO> result = null;
-        try {
-            result = examService.getCorrectExamByParam(query);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 获取批阅试卷
+     * 获取批阅考试
      */
     @RequestMapping("getCorrectExam")
-    public ResponseVO getCorrectExam(@RequestBody ExamQuery examQuery) {
-
-        PaginationResultVO<CorrectExamVO> result = null;
-        try {
-            result = examService.getCorrectExam(examQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getCorrectExam(@RequestBody @VerifyParam ExamQuery examQuery) throws BusinessException {
+        PaginationResultVO<CorrectExamVO> result = examService.getCorrectExam(examQuery);
         return getSuccessResponseVO(result);
     }
 
 
     /**
-     * 通过用户Id获取考试信息
+     * 根据考试Id查询考试信息
      */
-    @RequestMapping("getExamInfoByUserId")
-    public ResponseVO getExamInfoByUserId(@RequestBody String userId) throws BusinessException {
-        List<ExamVO> result = null;
-        try {
-            result = examService.getExamInfoByUserId(userId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @RequestMapping("getExamById")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getExamById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
+        ExamVO result = examService.getExamById(id);
         return getSuccessResponseVO(result);
     }
 
@@ -88,10 +68,106 @@ public class ExamController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
-    public ResponseVO add(@RequestBody AddExamDTO addExamDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO add(@RequestBody @VerifyParam AddExamDTO addExamDTO) throws BusinessException {
         Boolean result = examService.add(addExamDTO);
         return getSuccessResponseVO(result);
     }
+
+
+    // TODO: 2024-04-24  修改考试信息的时候，当开放类型是 制定部门 的时候，需要根据ExamId获取userList
+
+    /**
+     * 根据Id更新
+     */
+    @RequestMapping("updateExamById")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO updateExamById(@RequestBody @VerifyParam UpdateExamDTO updateExamDTO) {
+        Boolean result = examService.updateExamById(updateExamDTO);
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 根据Id删除
+     */
+    @RequestMapping("deleteExamById")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO deleteExamById(@RequestBody @VerifyParam(require = true) String id) {
+        Boolean result = examService.deleteExamById(id);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 获取服务器时间
+     */
+    @RequestMapping("getServerTime")
+    @GlobalInterceptor(checkLogin = true)
+    public ResponseVO<Date> getServerTime() {
+        Date result = examService.getServerTime();
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 获取考试题目分析
+     */
+    @RequestMapping("getExamQuAnalyse")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getExamQuAnalyse(@RequestBody @VerifyParam(require = true) String examId) {
+        List<WrongQuVO> result = examService.getExamQuAnalyse(examId);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 获取试卷题目分析
+     */
+    @RequestMapping("getPaperQuAnalyse")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getPaperQuAnalyse(@RequestBody @VerifyParam(require = true) String paperId) throws BusinessException {
+        List<WrongQuVO> result = examService.getPaperQuAnalyse(paperId);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 生成考试二维码
+     *
+     * @param examId
+     * @param response
+     * @return
+     */
+    @RequestMapping("/qrcode/{examId}")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO qrcode(@PathVariable(name = "examId") @VerifyParam(require = true) String examId, HttpServletResponse response) throws Exception {
+        String requestUrl = examId;
+        OutputStream os = response.getOutputStream();
+        QrCodeUtil.encode(requestUrl, null, os);
+        return getSuccessResponseVO(null);
+    }
+
+//    下面接口未测试
+
+
+    /**
+     * 根据参数获取批阅考试
+     */
+    /*@RequestMapping("getCorrectExamByParam")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getCorrectExamByParam(@RequestBody @VerifyParam ExamQuery query) throws BusinessException {
+        List<CorrectExamVO> result = examService.getCorrectExamByParam(query);
+        return getSuccessResponseVO(result);
+    }*/
+
+    /**
+     * 通过用户Id获取考试信息
+     */
+  /*  @RequestMapping("getExamInfoByUserId")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getExamInfoByUserId(@RequestBody @VerifyParam(require = true) String userId) throws BusinessException {
+        List<ExamVO> result = examService.getExamInfoByUserId(userId);
+        return getSuccessResponseVO(result);
+    }*/
 
     /**
      * 批量新增
@@ -107,97 +183,6 @@ public class ExamController extends ABaseController {
     @RequestMapping("addOrUpdateBatch")
     public ResponseVO addOrUpdateBatch(@RequestBody List<Exam> listBean) {
         return getSuccessResponseVO(this.examService.addOrUpdateBatch(listBean));
-    }
-
-    /**
-     * 根据Id查询
-     */
-
-    @RequestMapping("getExamById")
-    public ResponseVO getExamById(@RequestBody String id) throws BusinessException {
-        ExamVO result = examService.getExamById(id);
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 根据Id更新
-     */
-    @RequestMapping("updateExamById")
-    public ResponseVO updateExamById(@RequestBody UpdateExamDTO updateExamDTO) {
-        Boolean result = examService.updateExamById(updateExamDTO);
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 根据Id删除
-     */
-    @RequestMapping("deleteExamById")
-    public ResponseVO deleteExamById(@RequestBody String id) {
-        Boolean result = examService.deleteExamById(id);
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 获取考试倒计时
-     */
-    @RequestMapping("getServerTime")
-    public ResponseVO<Date> getServerTime() {
-        Date result = null;
-        try {
-            result = examService.getServerTime();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 获取考试题目分析
-     */
-    @RequestMapping("getExamQuAnalyse")
-    public ResponseVO getExamQuAnalyse(@RequestBody String examId) {
-        List<WrongQuVO> result = null;
-        try {
-            result = examService.getExamQuAnalyse(examId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
-
-
-    /**
-     * 获取试卷题目分析
-     */
-    @RequestMapping("getPaperQuAnalyse")
-    public ResponseVO getPaperQuAnalyse(@RequestBody String paperId) {
-        List<WrongQuVO> result = null;
-        try {
-            result = examService.getPaperQuAnalyse(paperId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
-
-
-    /**
-     * 生成考试二维码
-     *
-     * @param examId
-     * @param response
-     * @return
-     */
-    @RequestMapping("/qrcode/{examId}")
-    public ResponseVO qrcode(@PathVariable(name = "examId") String examId, HttpServletResponse response) {
-        String requestUrl = examId;
-        try {
-            OutputStream os = response.getOutputStream();
-            QrCodeUtil.encode(requestUrl, null, os);
-        } catch (Exception e) {
-            return getErrorResponseVO(null, 500, "生成二维码失败");
-        }
-        return getSuccessResponseVO(null);
     }
 
 }

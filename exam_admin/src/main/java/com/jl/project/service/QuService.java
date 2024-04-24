@@ -1,21 +1,20 @@
 package com.jl.project.service;
 
-import java.io.IOException;
-;
 import com.jl.project.entity.dto.AddQuAndAnswerDTO;
 import com.jl.project.entity.dto.RandomSelectQuDTO;
 import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
+import com.jl.project.entity.po.Qu;
 import com.jl.project.entity.query.QuExcludeQuery;
+import com.jl.project.entity.query.QuQuery;
 import com.jl.project.entity.query.WrongQuQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.WrongQuVO;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.entity.vo.PaginationResultVO;
-import com.jl.project.entity.po.Qu;
-import com.jl.project.entity.query.QuQuery;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 /**
  * @Description:题目表Service
@@ -82,14 +81,14 @@ public interface QuService {
 	 * @param query
 	 * @return
 	 */
-    List<QuAndAnswerVo> loadDetailDataList(QuQuery query);
+	List<QuAndAnswerVo> loadQuAndAnswerList(QuQuery query);
 
 	/**
 	 * 获取详细题目列表(排除之后的)
 	 * @param query
 	 * @return
 	 */
-	List<QuAndAnswerVo> loadExcludeDataList(QuExcludeQuery query);
+	List<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query);
 
 	/**
 	 * 获取题目总数

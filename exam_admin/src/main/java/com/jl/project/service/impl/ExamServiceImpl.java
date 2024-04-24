@@ -1,6 +1,7 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jl.project.entity.dto.AddExamDTO;
@@ -19,14 +20,21 @@ import com.jl.project.service.ExamService;
 import com.jl.project.service.PaperService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
 import com.jl.project.utils.XxlJobUtil;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +49,8 @@ import java.util.List;
  */
 @Service("examService")
 public class ExamServiceImpl implements ExamService {
+
+    private static final Logger logge = LoggerFactory.getLogger(ExamServiceImpl.class);
 
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
@@ -64,6 +74,10 @@ public class ExamServiceImpl implements ExamService {
 
     @Resource
     private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
+
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private UserService userService;
 
@@ -106,9 +120,6 @@ public class ExamServiceImpl implements ExamService {
      */
     @Transactional
     public Boolean add(AddExamDTO addExamDTO) throws BusinessException {
-        if (addExamDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 添加考试信息
         Exam exam = new Exam();
         String examId = CommonUtil.getRandomId();
@@ -152,6 +163,10 @@ public class ExamServiceImpl implements ExamService {
             }
         }
 
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        exam.setCreateBy(loginUserInfo.getId());
+        exam.setCreateTime(new Date());
         Integer addExamResult = examMapper.insert(exam);
         if (addExamResult <= 0) {
             throw new BusinessException("创建考试失败");
@@ -199,11 +214,11 @@ public class ExamServiceImpl implements ExamService {
             if (deptCode == null) {
                 throw new BusinessException("指定部门编码为空");
             }
-
             // 查询部门下的所有用户
             UserQuery userQuery = new UserQuery();
             userQuery.setDeptCode(deptCode);
-            List<User> userList = userService.loadDeptUserList(userQuery);
+            PaginationResultVO resultVO = userService.loadDeptUserList(userQuery);
+            List<User> userList = resultVO.getList();
             if (userList == null || userList.size() == 0) {
                 throw new BusinessException("该部门下没用户");
             }
@@ -221,9 +236,6 @@ public class ExamServiceImpl implements ExamService {
             }
         }
         String title = addExamDTO.getTitle();
-        if (title == null || "".equals(title)) {
-            throw new BusinessException("考试标题为空");
-        }
         Date startTime = addExamDTO.getStartTime();
         if (startTime == null || startTime.before(new Date())) {
             throw new BusinessException("考试开始时间为空/考试开始时间应该小于了当前时间");
@@ -266,10 +278,6 @@ public class ExamServiceImpl implements ExamService {
      * 根据Id查询
      */
     public ExamVO getExamById(String id) throws BusinessException {
-        if (id == null || "".equals(id)) {
-            throw new BusinessException("考试Id为空");
-        }
-
         Exam exam = examMapper.selectById(id);
         if (exam == null) {
             throw new BusinessException("考试信息为空");
@@ -293,13 +301,7 @@ public class ExamServiceImpl implements ExamService {
      */
     @Transactional
     public Boolean updateExamById(UpdateExamDTO updateExamDTO) throws BusinessException {
-        if (updateExamDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
         String examId = updateExamDTO.getId();
-        if (examId == null || "".equals(examId)) {
-            throw new BusinessException("缺少考试Id");
-        }
 
         // 获取未更新前的考试数据
         Exam oladExam = examMapper.selectById(examId);
@@ -310,21 +312,33 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = new Exam();
         BeanUtil.copyProperties(updateExamDTO, exam);
         exam.setUpdateTime(new Date());
-        // todo 判断是否需要阅卷
-//        // 获取相关试卷，要是没有客观题，则reviewQuire为0
-//        String paperId = addExamDTO.getPaperId();
-//        if(paperId==null || "".equals(paperId)){
-//            throw new BusinessException("关联试卷为空");
-//        }
-//        Paper paper = paperMapper.selectById(paperId);
-//        if(paper==null){
-//            throw new BusinessException("关联试卷为空");
-//        }
-//        paper
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        exam.setUpdateBy(loginUserInfo.getId());
+
+
+        Date updateStartTime = updateExamDTO.getStartTime();
+        Date updateEndTime = updateExamDTO.getEndTime();
+        // 判断考试是否已经开始
+        if (updateStartTime != null) {
+            boolean before = oldStartTime.before(new Date());
+            // 判断考试是否已经开始
+            if (before) {
+                throw new BusinessException("开始已经开始禁止修改");
+            }
+            // 判断新的开始时间和结束时间是否合法
+            if (updateEndTime == null || updateEndTime.before(updateStartTime)) {
+                throw new BusinessException("结束时间不合法");
+            }
+        }
+
+
+        // 更新考试信息
         Integer updateExamResult = examMapper.updateById(exam, examId);
         if (updateExamResult <= 0) {
             throw new BusinessException("更新考试失败");
         }
+
 
         // 2. 先删除所有关联用户的此次考试记录
         ExamRecordQuery examRecordQuery = new ExamRecordQuery();
@@ -333,7 +347,7 @@ public class ExamServiceImpl implements ExamService {
         if (examRecords != null && examRecords.size() != 0) {
             for (ExamRecord examRecord : examRecords) {
                 String examRecordId = examRecord.getId();
-                if (examRecordId == null || "".equals(examRecordId)) {
+                if (StrUtil.isEmpty(examRecordId)) {
                     throw new BusinessException("更新考试记录失败");
                 }
                 Integer deleteResult = examRecordMapper.deleteById(examRecordId);
@@ -341,7 +355,6 @@ public class ExamServiceImpl implements ExamService {
                     throw new BusinessException("更新考试记录失败");
                 }
             }
-
         }
         // 重新插入
         // 3. 查看开放权限
@@ -358,7 +371,6 @@ public class ExamServiceImpl implements ExamService {
                 examRecord.setId(examRecordId);
                 examRecord.setExamId(examId);
                 examRecord.setUserId(user.getId());
-                examRecord.setReviewUser(updateExamDTO.getCreateBy());
                 Integer addExamRecordResult = examRecordMapper.insert(examRecord);
                 if (addExamRecordResult <= 0) {
                     throw new BusinessException("创建用户考试记录失败");
@@ -391,7 +403,8 @@ public class ExamServiceImpl implements ExamService {
             // 查询部门下的所有用户
             UserQuery userQuery = new UserQuery();
             userQuery.setDeptCode(deptCode);
-            List<User> userList = userService.loadDeptUserList(userQuery);
+            PaginationResultVO resultVO = userService.loadDeptUserList(userQuery);
+            List<User> userList = resultVO.getList();
             if (userList == null || userList.size() == 0) {
                 throw new BusinessException("该部门下没用户");
             }
@@ -409,7 +422,7 @@ public class ExamServiceImpl implements ExamService {
             }
         }
         String title = updateExamDTO.getTitle();
-        if (title == null || "".equals(title)) {
+        if (StrUtil.isEmpty(title)) {
             throw new BusinessException("考试标题为空");
         }
 
@@ -422,12 +435,6 @@ public class ExamServiceImpl implements ExamService {
         Date endTime = updateExamDTO.getEndTime();
         if (endTime == null || !endTime.after(startTime)) {
             throw new BusinessException("考试结束时间为空/考试结束时间应大于开始时间");
-        }
-
-
-        // 判断考试是否结束
-        if (new Date().after(oldEndTime)) {
-            throw new BusinessException("考试已结束，修改无效");
         }
 
 
@@ -456,9 +463,8 @@ public class ExamServiceImpl implements ExamService {
         // 创建结束考试任务
         ResponseEntity<String> endResp = XxlJobUtil.addXxlJob(title, endTime, examId, "stopExam");
         JSONObject endRespObject = JSONUtil.parseObj(endResp.getBody());
-        // TODO: 2023-12-07 考虑剪建一个Exam和任务关联表，用于在删除/更新考试的时候，更改其对应的任务
-        System.out.println("创建开始考试任务：" + title + "  " + startRespObject);
-        System.out.println("创建结束考试人数：" + title + "  " + endRespObject);
+        logge.info("创建开始考试任务：" + title + "  " + startRespObject);
+        logge.info("创建结束考试人数：" + title + "  " + endRespObject);
     }
 
     /**
@@ -466,14 +472,24 @@ public class ExamServiceImpl implements ExamService {
      */
     @Transactional
     public Boolean deleteExamById(String examId) throws BusinessException {
-        if (examId == null || "".equals(examId)) {
-            throw new BusinessException("缺少参数");
-        }
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
         // 1. 查询考试信息
         Exam exam = examMapper.selectById(examId);
         if (exam == null) {
             throw new BusinessException("考试信息不存在");
         }
+
+        // 判断是否是自己创建的考试
+        if (!loginUserInfo.getId().equals(exam.getCreateBy())) {
+            // 判断是否是管理员
+            if (!"admin".equals(loginUserInfo.getRole())) {
+                throw new BusinessException("无权限删除");
+            }
+        }
+
+
         // 2. 判断考试是否开始或结束
         Date startTime = exam.getStartTime();
         Date endTime = exam.getEndTime();
@@ -511,12 +527,7 @@ public class ExamServiceImpl implements ExamService {
      * @return
      */
     @Override
-    public PaginationResultVO<ExamVO> loadDatalist(ExamQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
-
-
+    public PaginationResultVO<ExamVO> loadExamList(ExamQuery query) throws BusinessException {
         // 1. 查询相关考试
         PaginationResultVO<Exam> pageList = findListByPage(query);
 
@@ -563,9 +574,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamVO> getExamInfoByUserId(String userId) throws BusinessException {
-        if (userId == null) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 先查询创建的考试记录
         ExamRecordQuery examRecordQuery = new ExamRecordQuery();
         examRecordQuery.setUserId(userId);
@@ -580,7 +588,7 @@ public class ExamServiceImpl implements ExamService {
             String examId = examRecord.getExamId();
             ExamQuery examQuery = new ExamQuery();
             examQuery.setId(examId);
-            PaginationResultVO<ExamVO> examVOPaginationResultVO = loadDatalist(examQuery);
+            PaginationResultVO<ExamVO> examVOPaginationResultVO = loadExamList(examQuery);
             List<ExamVO> examVOS = examVOPaginationResultVO.getList();
             examVOList.addAll(examVOS);
         }
@@ -595,10 +603,6 @@ public class ExamServiceImpl implements ExamService {
      */
     @Override
     public PaginationResultVO<CorrectExamVO> getCorrectExam(ExamQuery examQuery) {
-        if (examQuery == null) {
-            throw new BusinessException("缺少参数");
-        }
-
         String createBy = examQuery.getCreateBy();
         if (createBy == null || "".equals(createBy)) {
             throw new BusinessException("缺少参数");
@@ -650,9 +654,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<CorrectExamVO> getCorrectExamByParam(ExamQuery query) {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 查询符合条件的考试
         ExamQuery examQuery = new ExamQuery();
         BeanUtil.copyProperties(query, examQuery);
@@ -768,9 +769,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<WrongQuVO> getExamQuAnalyse(String examId) throws BusinessException {
-        if (examId == null) {
-            throw new BusinessException("缺少考试Id");
-        }
         Exam exam = examMapper.selectById(examId);
         if (exam == null) {
             throw new BusinessException("该考试不存在");
@@ -778,7 +776,7 @@ public class ExamServiceImpl implements ExamService {
         String paperId = exam.getPaperId();
 
         // 获取考试关联试卷
-        if (paperId == null || "".equals(paperId.trim())) {
+        if (StrUtil.isEmpty(paperId)) {
             throw new BusinessException("考试未关联试卷");
         }
 
@@ -833,9 +831,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<WrongQuVO> getPaperQuAnalyse(String paperId) throws BusinessException {
-        if (paperId == null || "".equals(paperId.trim())) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 获取试卷信息
         Paper paper = paperMapper.selectById(paperId);
         if (paper == null) {

@@ -8,17 +8,17 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
-import com.jl.project.entity.dto.UpdateEmailDTO;
-import com.jl.project.entity.dto.UpdateUserDTO;
-import com.jl.project.entity.dto.UpdateUserPasswordDTO;
+import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.Department;
 import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.*;
+import com.jl.project.entity.query.DepartmentQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.query.TmplQuery;
+import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
-import com.jl.project.enums.ResponseCodeEnum;
 import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.DepartmentMapper;
@@ -28,6 +28,7 @@ import com.jl.project.service.DepartmentService;
 import com.jl.project.service.EmailService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.MD5Util;
+import com.jl.project.utils.UserInfoUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -41,7 +42,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -92,175 +92,6 @@ public class UserServiceImpl implements UserService {
     private String from;
 
     /**
-     * 根据条件查询列表
-     */
-    public List<User> findListByParam(UserQuery query) {
-        return this.userMapper.selectList(query);
-    }
-
-    /**
-     * 根据条件查询数量
-     */
-    public Integer findCountByParam(UserQuery query) {
-        return this.userMapper.selectCount(query);
-    }
-
-    /**
-     * 分页查询
-     */
-    public PaginationResultVO<User> findListByPage(UserQuery query) {
-        Integer count = this.findCountByParam(query);
-        Integer pageSize = query.getPageSize() == null ? PageSize.SIZE15.getSize() : query.getPageSize();
-        SimplePage page = new SimplePage(query.getPageNo(), count, pageSize);
-        query.setSimplePage(page);
-        List<User> list = this.findListByParam(query);
-        PaginationResultVO<User> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
-        return result;
-    }
-
-    /**
-     * 新增
-     */
-    @Override
-    public Boolean register(User bean) throws BusinessException {
-        // 1. 判断是否存在同名用户
-        UserQuery userQuery = new UserQuery();
-        userQuery.setUserName(bean.getUserName());
-        List<User> list = findListByParam(userQuery);
-        if (!list.isEmpty()) {
-            throw new BusinessException("用户名已存在");
-        }
-        // 2. 生成随机ID
-        bean.setId(IdUtil.simpleUUID().toString());
-
-        // 3. 处理密码相关（盐 + 密码）
-        String password = bean.getPassword();
-        String salt = MD5Util.getSalt(password);
-        String saltPassword = MD5Util.getMD5Encode(password, salt);
-        bean.setCreateTime(new Date());
-        bean.setPassword(saltPassword);
-        bean.setSalt(salt);
-
-        bean.setRole("student");
-
-        // 4. 查询部门信息
-        String deptCode = bean.getDeptCode();
-        if (deptCode == null || "".equals(deptCode)) {
-            throw new BusinessException("部门信息不存在");
-        }
-        DepartmentQuery departmentQuery = new DepartmentQuery();
-        departmentQuery.setDeptCode(deptCode);
-        List<Department> departments = departmentMapper.selectList(departmentQuery);
-        if (departments == null || departments.size() == 0) {
-            throw new BusinessException("部门信息不存在");
-        }
-        Department department = departments.get(0);
-        String deptName = department.getDeptName();
-        bean.setDeptText(deptName);
-
-        // todo 角色未设定
-        Integer result = userMapper.insert(bean);
-        return result > 0;
-    }
-
-    /**
-     * 批量新增
-     */
-    public Integer addBatch(List<User> listBean) {
-        if (listBean == null || listBean.isEmpty()) {
-            return 0;
-        }
-        return this.userMapper.insertBatch(listBean);
-    }
-
-    /**
-     * 批量新增或修改
-     */
-    public Integer addOrUpdateBatch(List<User> listBean) {
-        if (listBean == null || listBean.isEmpty()) {
-            return 0;
-        }
-        return this.userMapper.insertOrUpdateBatch(listBean);
-    }
-
-    /**
-     * 根据Id查询
-     */
-    public User getUserById(String id) {
-        return this.userMapper.selectById(id);
-    }
-
-    /**
-     * 根据Id更新
-     */
-    public Boolean updateUserById(UpdateUserDTO updateDeptDTO) throws BusinessException {
-        String id = updateDeptDTO.getId();
-        if (updateDeptDTO == null || id == null || updateDeptDTO.getUser() == null) {
-            throw new BusinessException("缺少参数");
-        }
-
-        // 1. 获取用户的信息
-        User user = updateDeptDTO.getUser();
-        String password = user.getPassword();
-        // 2. 判断是否需要修改密码
-        if (password != null && !"".equals(password.trim())) {
-            // 2.1 获取密码盐
-            User temp = userMapper.selectById(id);
-            if (temp == null) {
-                throw new BusinessException("更新失败");
-            }
-            String salt = temp.getSalt();
-            String encodePwd = MD5Util.getMD5Encode(password, salt);
-            // 2.2 修改密码
-            user.setPassword(encodePwd);
-        }
-
-        // 判断是否修改部门
-        User oldUser = userMapper.selectById(id);
-        String oldDeptCode = oldUser.getDeptCode();
-        String newDeptCode = user.getDeptCode();
-        if (oldDeptCode != newDeptCode) {
-            // 更新用户所属部门
-            DepartmentQuery departmentQuery = new DepartmentQuery();
-            departmentQuery.setDeptCode(newDeptCode);
-            List<Department> list = departmentMapper.selectList(departmentQuery);
-            if (list == null || list.size() == 0) {
-                throw new BusinessException("部门信息错误");
-            }
-            Department department = list.get(0);
-            user.setDeptText(department.getDeptName());
-        }
-
-        // 3. 添加更新日期
-        user.setUpdateTime(new Date());
-
-        // 4. 更新
-        Integer result = userMapper.updateById(user, id);
-
-        // 5. 更改缓存中的用户信息
-        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + id);
-        if (token != null) {
-            // 更新该登录用户缓存的信息
-            Gson gson = new Gson();
-            User afterUpdate = userMapper.selectById(id);
-            String json = gson.toJson(afterUpdate);
-            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
-        }
-        return result > 0;
-    }
-
-    /**
-     * 根据Id删除
-     */
-    public Boolean deleteUserById(String id) throws BusinessException {
-        if (id == null) {
-            throw new BusinessException("缺少参数");
-        }
-        Integer result = userMapper.deleteById(id);
-        return result > 0;
-    }
-
-    /**
      * 登录
      *
      * @param user
@@ -268,10 +99,7 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessException
      */
     @Override
-    public LoginResponseVo login(LoginQuery user) throws BusinessException {
-        if (user == null) {
-            throw new BusinessException("参数错误");
-        }
+    public LoginResponseVo login(LoginDTO user) throws BusinessException {
         // 1. 根据用户名查询用户
         UserQuery userQuery = new UserQuery();
         userQuery.setUserName(user.getUserName());
@@ -320,25 +148,226 @@ public class UserServiceImpl implements UserService {
         return loginResponseVo;
     }
 
+
+    /**
+     * 退出登录
+     *
+     * @return
+     */
+    @Override
+    public Boolean logout() {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null) {
+            return true;
+        }
+        // 清除token缓存
+        Boolean delete = stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
+        return delete;
+    }
+
+
+    /**
+     * 根据条件查询列表
+     */
+    public List<User> findListByParam(UserQuery query) {
+        return this.userMapper.selectList(query);
+    }
+
+    /**
+     * 根据条件查询数量
+     */
+    public Integer findCountByParam(UserQuery query) {
+        return this.userMapper.selectCount(query);
+    }
+
+    /**
+     * 分页查询
+     */
+    public PaginationResultVO<User> findListByPage(UserQuery query) {
+        Integer count = this.findCountByParam(query);
+        Integer pageSize = query.getPageSize() == null ? PageSize.SIZE15.getSize() : query.getPageSize();
+        SimplePage page = new SimplePage(query.getPageNo(), count, pageSize);
+        query.setSimplePage(page);
+        List<User> list = this.findListByParam(query);
+        PaginationResultVO<User> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
+        return result;
+    }
+
+    /**
+     * 新增
+     */
+    @Override
+    public Boolean register(AddUserDTO bean) throws BusinessException {
+        // 1. 判断是否存在同名用户
+        UserQuery userQuery = new UserQuery();
+        userQuery.setUserName(bean.getUserName());
+        List<User> list = findListByParam(userQuery);
+        if (!list.isEmpty()) {
+            throw new BusinessException("用户名已存在");
+        }
+        // 2. 生成随机ID
+        String userId = IdUtil.simpleUUID().toString();
+
+
+        // 3. 处理密码相关（盐 + 密码）
+        String password = bean.getPassword();
+        String salt = MD5Util.getSalt(password);
+        String saltPassword = MD5Util.getMD5Encode(password, salt);
+        // 这里的密码是加密之后的
+        bean.setPassword(saltPassword);
+
+
+        // 4. 查询部门信息
+        String deptCode = bean.getDeptCode();
+        if (deptCode == null || "".equals(deptCode)) {
+            throw new BusinessException("部门信息不存在");
+        }
+        DepartmentQuery departmentQuery = new DepartmentQuery();
+        departmentQuery.setDeptCode(deptCode);
+        List<Department> departments = departmentMapper.selectList(departmentQuery);
+        if (departments == null || departments.size() == 0) {
+            throw new BusinessException("部门信息不存在");
+        }
+        Department department = departments.get(0);
+        String deptText = department.getDeptName();
+
+
+        User user = new User();
+        BeanUtil.copyProperties(bean, user);
+        user.setId(userId);
+        user.setSalt(salt);
+        user.setDeptText(deptText);
+        user.setCreateTime(new Date());
+
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        LoginResponseVo createUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        if (createUserInfo == null) {
+            throw new BusinessException("缺少创建者信息");
+        }
+        user.setCreateBy(createUserInfo.getId());
+
+        Integer result = userMapper.insert(user);
+        return result > 0;
+    }
+
+    /**
+     * 批量新增
+     */
+    public Integer addBatch(List<User> listBean) {
+        if (listBean == null || listBean.isEmpty()) {
+            return 0;
+        }
+        return this.userMapper.insertBatch(listBean);
+    }
+
+    /**
+     * 批量新增或修改
+     */
+    public Integer addOrUpdateBatch(List<User> listBean) {
+        if (listBean == null || listBean.isEmpty()) {
+            return 0;
+        }
+        return this.userMapper.insertOrUpdateBatch(listBean);
+    }
+
+    /**
+     * 根据Id查询
+     */
+    public User getUserById(String id) {
+        return this.userMapper.selectById(id);
+    }
+
+    /**
+     * 根据Id更新
+     */
+    public Boolean updateUserById(UpdateUserDTO updateDeptDTO) throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        String id = updateDeptDTO.getId();
+
+        // 判断是否是本人
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        if (!id.equals(loginUserInfo.getId())) {
+            // 如果不是本人，再次得判断是否是管理员
+            String role = UserInfoUtil.getLoginUserRole(request, stringRedisTemplate);
+            if (!"admin".equals(role)) {
+                throw new BusinessException("无权限修改");
+            }
+        }
+
+        // 1. 获取用户的信息
+        User user = updateDeptDTO.getUser();
+        String password = user.getPassword();
+        // 2. 判断是否需要修改密码
+        if (password != null && !"".equals(password.trim())) {
+            // 2.1 获取密码盐
+            User temp = userMapper.selectById(id);
+            if (temp == null) {
+                throw new BusinessException("更新失败");
+            }
+            String salt = temp.getSalt();
+            String encodePwd = MD5Util.getMD5Encode(password, salt);
+            // 2.2 修改密码
+            user.setPassword(encodePwd);
+        }
+
+        // 判断是否修改部门
+        User oldUser = userMapper.selectById(id);
+        String oldDeptCode = oldUser.getDeptCode();
+        String newDeptCode = user.getDeptCode();
+        if (oldDeptCode != newDeptCode) {
+            // 更新用户所属部门
+            DepartmentQuery departmentQuery = new DepartmentQuery();
+            departmentQuery.setDeptCode(newDeptCode);
+            List<Department> list = departmentMapper.selectList(departmentQuery);
+            if (list == null || list.size() == 0) {
+                throw new BusinessException("部门信息错误");
+            }
+            Department department = list.get(0);
+            user.setDeptText(department.getDeptName());
+        }
+
+        // 3. 添加更新日期
+        user.setUpdateTime(new Date());
+
+        user.setUpdateBy(loginUserInfo.getId());
+
+        // 4. 更新
+        Integer result = userMapper.updateById(user, id);
+
+        // 5. 更改缓存中的用户信息
+        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + id);
+        if (token != null) {
+            // 更新该登录用户缓存的信息
+            Gson gson = new Gson();
+            User afterUpdate = userMapper.selectById(id);
+            String json = gson.toJson(afterUpdate);
+            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
+        }
+        return result > 0;
+    }
+
+    /**
+     * 根据Id删除
+     */
+    public Boolean deleteUserById(String id) throws BusinessException {
+        Integer result = userMapper.deleteById(id);
+        return result > 0;
+    }
+
+
     /**
      * 通过token获取登录用户信息
      *
      * @return
      */
     @Override
-    public User getLoginUserInfo() throws BusinessException {
+    public LoginResponseVo getLoginUserInfo() throws BusinessException {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String token = request.getHeader("Authorization");
-        if (token == null) {
-            throw new BusinessException(ResponseCodeEnum.CODE_401);
-        }
-        Gson gson = new Gson();
-        String jsonUser = stringRedisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
-        User user = gson.fromJson(jsonUser, User.class);
-        if (user == null) {
-            throw new BusinessException(ResponseCodeEnum.CODE_401);
-        }
-        return user;
+        return UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
     }
 
     /**
@@ -348,37 +377,15 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public List<User> loadDeptUserList(UserQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
-        // 1. 获取当前部门编号
-        String deptCode = query.getDeptCode();
+    public PaginationResultVO loadDeptUserList(UserQuery query) throws BusinessException {
+        // 获取当前部门编号（注意：这里使用右模糊查询）
+        String deptCode = query.getDeptCodeFuzzy();
         if (deptCode == null) {
-            return findListByParam(query);
+            return findListByPage(query);
         }
-
-        List<String> childrenList = new ArrayList<>();
-        childrenList.add(deptCode);
-        // 2. 获取所有子部门编号
-        departmentService.getChildrenDeptCode(childrenList, deptCode);
-        if (childrenList == null) {
-            throw new BusinessException("获取用户失败");
-        }
-
-        List<User> userList = new ArrayList<>();
-        // 3. 获取所有部门用户
-        for (String code : childrenList) {
-            query.setDeptCode(code); // 配合原来符合query要求的
-            List<User> list = userMapper.selectList(query);
-            if (list != null) {
-                for (User user : list) {
-                    userList.add(user);
-                }
-            }
-        }
-
-        return userList;
+        UserQuery userQuery = new UserQuery();
+        userQuery.setDeptCodeFuzzy(deptCode);
+        return findListByPage(userQuery);
     }
 
     /**
@@ -389,19 +396,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String uploadAvatar(MultipartFile file) throws BusinessException, IOException {
-        if (file == null) {
-            throw new BusinessException("文件为空");
-        }
-
         // 获取登录用户
-        User loginUserInfo = getLoginUserInfo();
-        if (loginUserInfo == null) {
-            throw new BusinessException("请重新登录");
-        }
+        LoginResponseVo loginUserInfo = getLoginUserInfo();
 
         String userId = loginUserInfo.getId();
         if (userId == null) {
-            throw new BusinessException("无登录状态，请重新登里");
+            throw new BusinessException("登录状态错误，请尝试重新登录");
         }
 
         //1、创建oss客户端连接
@@ -414,8 +414,9 @@ public class UserServiceImpl implements UserService {
         // 4. 获取后缀名
         String extName = FileUtil.extName(originFileName);
 
+        // 使用统一的后缀
         // 5. 拼接文件名
-        String realFileName = userId + "." + extName;
+        String realFileName = userId + "." + "jpg";
 
 
         // 6. 拼接dir根目录
@@ -444,22 +445,6 @@ public class UserServiceImpl implements UserService {
         return url;
     }
 
-    /**
-     * 退出登录
-     *
-     * @return
-     */
-    @Override
-    public Boolean logout() {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String authorization = request.getHeader("Authorization");
-        if (authorization == null) {
-            return true;
-        }
-        // 清除token缓存
-        Boolean delete = stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
-        return delete;
-    }
 
     /**
      * 获取用户总数
@@ -468,18 +453,23 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Integer getUserCount(UserQuery userQuery) throws BusinessException {
-        if (userQuery == null) {
-            throw new BusinessException("参数错误");
-        }
         Integer count = userMapper.selectCount(userQuery);
         return count;
     }
 
     @Override
     public Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
-        if (updateUserPasswordDTO == null) {
-            throw new BusinessException("缺少参数");
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        // 判断是否是原用户
+        if (!updateUserPasswordDTO.getUserId().equals(loginUserInfo.getId())) {
+            // 判断是否是管理员
+            if (!"admin".equals(loginUserInfo.getRole())) {
+                throw new BusinessException("无权限修改");
+            }
         }
+
 
         String oldPassword = updateUserPasswordDTO.getOldPassword();
         if (oldPassword == null || "".equals(oldPassword.trim())) {
@@ -512,7 +502,10 @@ public class UserServiceImpl implements UserService {
         String newMIxPassword = MD5Util.getMD5Encode(newPassword, user.getSalt());
         user.setPassword(newMIxPassword);
         user.setUpdateTime(new Date());
-        user.setUpdateBy(userId);
+        user.setUpdateBy(loginUserInfo.getId());
+
+        //  删除redis中缓存的信息（如果有）
+        stringRedisTemplate.delete(USER_PREFIX + TOKEN + loginUserInfo.getToken());
 
         Integer result = userMapper.updateById(user, userId);
         return result > 0;
@@ -520,34 +513,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean getEmailCode(String email) throws BusinessException {
-        if (email == null || "".equals(email)) {
-            throw new BusinessException("邮箱错误");
-        }
         emailService.sendEmailCode(email);
         return true;
     }
 
     @Override
     public Boolean updateUserEmail(UpdateEmailDTO updateEmailDTO) throws BusinessException {
-        if (updateEmailDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
         String userId = updateEmailDTO.getUserId();
-        if (userId == null || "".equals(userId.trim())) {
-            throw new BusinessException("缺少参数");
+        // 检测是否是本人
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        if (!userId.equals(loginUserInfo.getId())) {
+            throw new BusinessException("无权限操作");
         }
-
-
         String email = updateEmailDTO.getEmail();
-        if (email == null || "".equals(email.trim())) {
-            throw new BusinessException("请输入邮箱");
-        }
-
         String code = updateEmailDTO.getCode();
-        if (code == null || "".equals(code.trim())) {
-            throw new BusinessException("请输入验证码");
-        }
 
         // 获取验证码
         Boolean isRight = emailService.checkCode(email, code);

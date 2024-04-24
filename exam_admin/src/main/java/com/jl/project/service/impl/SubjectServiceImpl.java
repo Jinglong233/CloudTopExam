@@ -22,7 +22,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-;
 
 /**
  * @Description:学科表Service

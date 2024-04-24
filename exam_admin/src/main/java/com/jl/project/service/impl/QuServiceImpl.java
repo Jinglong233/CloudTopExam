@@ -2,6 +2,7 @@ package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.jl.project.entity.dto.AddQuAndAnswerDTO;
@@ -9,6 +10,7 @@ import com.jl.project.entity.dto.RandomSelectQuDTO;
 import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.WrongQuVO;
@@ -20,16 +22,23 @@ import com.jl.project.mapper.*;
 import com.jl.project.service.QuService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +49,6 @@ import java.util.stream.Collectors;
 
 import static com.jl.project.enums.QuType.SHORTANSWER;
 
-;
 
 /**
  * @Description:题目表Service
@@ -50,14 +58,16 @@ import static com.jl.project.enums.QuType.SHORTANSWER;
 @Service("quService")
 public class QuServiceImpl implements QuService {
 
+    private static final Logger logger = LoggerFactory.getLogger(QuServiceImpl.class);
+
     @Resource
     private QuMapper<Qu, QuQuery> quMapper;
 
     @Resource
-    private UserService userService;
+    private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
 
     @Resource
-    private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
+    private UserService userService;
 
 
     @Resource
@@ -70,6 +80,9 @@ public class QuServiceImpl implements QuService {
 
     @Resource
     private RepoMapper<Repo, RepoQuery> repoMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 根据条件查询列表
@@ -103,25 +116,42 @@ public class QuServiceImpl implements QuService {
      */
     @Transactional
     public Boolean add(AddQuAndAnswerDTO bean) throws BusinessException {
-        if (bean == null) {
-            throw new BusinessException("缺少参数");
-        }
         // 添加题目
         Qu qu = new Qu();
         BeanUtil.copyProperties(bean, qu);
         String quId = CommonUtil.getRandomId();
         qu.setId(quId);
         qu.setCreateTime(new Date());
-        qu.setCreateBy(userService.getLoginUserInfo().getId());
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        qu.setCreateBy(loginUserInfo.getId());
+
+        String repoId = qu.getRepoId();
+        Repo repo = repoMapper.selectById(repoId);
+        if (repo == null) {
+            throw new BusinessException("关联题库信息不存在");
+        }
+        qu.setRepoText(repo.getTitle());
         Integer insert = quMapper.insert(qu);
         if (insert <= 0) {
             throw new BusinessException("保存题目失败");
         }
         Integer quType = bean.getQuType();
+
+        if (!CommonUtil.isValidQuestionType(quType)) {
+            throw new BusinessException("题型不合法");
+        }
+
+        Integer level = bean.getLevel();
+        if (!CommonUtil.isValidLevelType(level)) {
+            throw new BusinessException("难度类型不合法");
+        }
+
         if (quType == SHORTANSWER.getValue()) {
             // 如果是简答题，题目分析就是答案，所以不用创建quAnswer
             return insert > 0;
         }
+
 
         // 获取选项列表，添加选项
         List<QuAnswer> quAnswerList = bean.getQuAnswerList();
@@ -147,19 +177,14 @@ public class QuServiceImpl implements QuService {
 
 
         // 更新关联题库数据
-        String repoId = qu.getRepoId();
-        Repo repo = repoMapper.selectById(repoId);
-        if (repo == null) {
-            throw new BusinessException("更新题库失败");
-        }
         repo.setUpdateTime(new Date());
-        repo.setUpdateBy(userService.getLoginUserInfo().getId());
+        repo.setUpdateBy(loginUserInfo.getId());
         if (SHORTANSWER.getValue() != quType) { // 不是简答题都为客观题
             repo.setSubCount(repo.getSubCount() + 1);
         } else {
             repo.setObjCount(repo.getObjCount() + 1);
         }
-        repo.setTotalCount(repo.getObjCount() + repo.getObjCount());
+        repo.setTotalCount(repo.getSubCount() + repo.getObjCount());
         Integer result = repoMapper.updateById(repo, repoId);
         if (result <= 0) {
             throw new BusinessException("更新题库失败");
@@ -191,9 +216,6 @@ public class QuServiceImpl implements QuService {
      * 根据Id查询
      */
     public QuAndAnswerVo getQuById(String id) throws BusinessException {
-        if (id == null) {
-            throw new BusinessException("缺少参数");
-        }
         QuAndAnswerVo quAndAnswerVo = new QuAndAnswerVo();
         Qu qu = quMapper.selectById(id);
         if (qu == null) {
@@ -223,32 +245,45 @@ public class QuServiceImpl implements QuService {
      */
     @Transactional
     public Boolean updateQuById(UpdateQuAndAnswerDTO bean) throws BusinessException {
-        if (bean == null) {
-            throw new BusinessException("缺少参数");
-        }
-
+//        说明：题目更新的时候，题目只会是相同题型的改变
         // 获取原有题库
         String quId = bean.getId();
         Qu oldQu = quMapper.selectById(quId);
         if (oldQu == null) {
             throw new BusinessException("更新的题目不存在");
         }
+
+        Integer newQuType = bean.getQuType();
+        // 如果更新题型，判断是否合法
+        if (newQuType != null && !CommonUtil.isValidQuestionType(newQuType)) {
+            throw new BusinessException("题型不合法");
+        }
+
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.getRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
+
         String oldRepoId = oldQu.getRepoId();
         String newRepoId = bean.getRepoId();
         // 如果两个repoId不相等，则代表题库发生修改
-        if (oldRepoId != newRepoId) {
+        if (!StrUtil.isEmpty(oldRepoId) && oldRepoId != newRepoId) {
+
             // 修改新题库相关信息
             Repo newRepo = repoMapper.selectById(newRepoId);
             if (newRepo == null) {
                 throw new BusinessException("找不到相关题库信息");
             }
             // 判断题型（主观题or客观题）
-            if (SHORTANSWER.getValue() != oldQu.getQuType()) { // 不是简答题都为客观题
+            if (SHORTANSWER.getValue() != oldQu.getQuType()) {
+                // 不是简答题都为客观题
                 newRepo.setSubCount(newRepo.getSubCount() + 1);
             } else {
                 newRepo.setObjCount(newRepo.getObjCount() + 1);
             }
-            newRepo.setTotalCount(newRepo.getTotalCount() + 1);
+            newRepo.setTotalCount(newRepo.getObjCount() + newRepo.getSubCount());
+            newRepo.setUpdateBy(loginUserInfo.getId());
+            newRepo.setUpdateTime(new Date());
             Integer updateRepo = repoMapper.updateById(newRepo, newRepoId);
             if (updateRepo <= 0) {
                 throw new BusinessException("更新题库失败");
@@ -265,7 +300,9 @@ public class QuServiceImpl implements QuService {
             } else {
                 oldRepo.setObjCount(oldRepo.getObjCount() - 1);
             }
-            oldRepo.setTotalCount(oldRepo.getTotalCount() - 1);
+            oldRepo.setTotalCount(oldRepo.getSubCount() + oldRepo.getObjCount());
+            oldRepo.setUpdateBy(loginUserInfo.getId());
+            oldRepo.setUpdateTime(new Date());
             updateRepo = repoMapper.updateById(oldRepo, oldRepoId);
             if (updateRepo <= 0) {
                 throw new BusinessException("更新题库失败");
@@ -276,15 +313,14 @@ public class QuServiceImpl implements QuService {
         Qu qu = new Qu();
         BeanUtil.copyProperties(bean, qu);
         qu.setUpdateTime(new Date());
-        if (quId == null) {
-            throw new BusinessException("更新题目失败");
-        }
+        qu.setUpdateBy(loginUserInfo.getId());
 
         // 更新题目
         Integer result = quMapper.updateById(qu, quId);
         if (result <= 0) {
             throw new BusinessException("更新题目失败");
         }
+
 
         // 提取选项
         List<QuAnswer> quAnswerList = bean.getQuAnswerList();
@@ -297,15 +333,40 @@ public class QuServiceImpl implements QuService {
                     quAnswer.setTag(Character.toString((char) (64 + quAnswerList.size())));
                     Integer add = quAnswerMapper.insert(quAnswer);
                     if (add <= 0) {
-                        throw new BusinessException("更新选项出错");
+                        continue;
                     }
-                    continue;
                 }
                 Integer integer = quAnswerMapper.updateById(quAnswer, quAnswerId);
                 if (integer <= 0) {
                     throw new BusinessException("更新选项出错");
                 }
             }
+            // 获取需要删除的集合
+            QuAnswerQuery quAnswerQuery = new QuAnswerQuery();
+            quAnswerQuery.setQuId(quId);
+            List<QuAnswer> oldQAnswerList = quAnswerMapper.selectList(quAnswerQuery);
+            if (oldQAnswerList != null && oldQAnswerList.size() != 0) {
+                // 获取现在的选项Id列表
+                Map<String, QuAnswer> nowIdList =
+                        quAnswerList.stream().collect(Collectors.toMap(QuAnswer::getId, item -> item));
+                if (nowIdList != null && nowIdList.size() != 0) {
+                    if (quAnswerList != null && quAnswerList.size() != 0) {
+                        // 遍历当前需要更新的quAnswerList
+                        for (QuAnswer quAnswer : oldQAnswerList) {
+                            boolean isDelete = nowIdList.containsKey(quAnswer.getId());
+                            // 如果不包含，则删除
+                            if (!isDelete) {
+                                Integer delete = quAnswerMapper.deleteById(quAnswer.getId());
+                                if (delete <= 0) {
+                                    logger.warn("更新删除：{} 失败", quAnswer.getContent());
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
         }
 
         return true;
@@ -316,12 +377,21 @@ public class QuServiceImpl implements QuService {
      */
     @Transactional
     public Boolean deleteQuById(String id) throws BusinessException {
-        if (id == null) {
-            throw new BusinessException("缺少参数");
-        }
-
         String quId = id;
         Qu qu = quMapper.selectById(quId);
+        if(qu==null){
+            throw new BusinessException("该题目不存在");
+        }
+
+        // 判断能否被删除
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        if(!loginUserInfo.getId().equals(qu.getCreateBy())){
+            if (!"admin".equals(loginUserInfo.getRole())){
+                throw new BusinessException("无权限删除");
+            }
+        }
+
         Integer quType = qu.getQuType();
         String repoId = qu.getRepoId();
         // 删除题目
@@ -379,28 +449,14 @@ public class QuServiceImpl implements QuService {
      */
     @Override
     public List<QuAndAnswerVo> randomSelectQu(RandomSelectQuDTO selectQuDTO) throws BusinessException {
-        if (selectQuDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
-
 
         List<String> excludes = selectQuDTO.getExcludes();
         if (excludes == null) {
             excludes = new ArrayList<String>();
         }
-
         String repoId = selectQuDTO.getRepoId();
-        if (repoId == null || "".equals(repoId)) {
-            throw new BusinessException("参数错误");
-        }
         Integer quType = selectQuDTO.getQuType();
-        if (quType == null) {
-            throw new BusinessException("参数错误");
-        }
         List<ClassfiySelect> levels = selectQuDTO.getLevels();
-        if (levels == null || levels.size() == 0) {
-            throw new BusinessException("参数错误");
-        }
 
 
         // 1. 获取对应题库对应题型的题目
@@ -471,10 +527,8 @@ public class QuServiceImpl implements QuService {
      * @return
      */
     @Override
-    public List<QuAndAnswerVo> loadDetailDataList(QuQuery query) {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
+    public List<QuAndAnswerVo> loadQuAndAnswerList(QuQuery query) {
+
         List<Qu> quList = quMapper.selectList(query);
         if (quList == null || quList.size() == 0) {
             return Collections.emptyList();
@@ -497,17 +551,11 @@ public class QuServiceImpl implements QuService {
      * @return
      */
     @Override
-    public List<QuAndAnswerVo> loadExcludeDataList(QuExcludeQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
+    public List<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query) throws BusinessException {
         List<String> excludes = query.getExcludes();
-        if (excludes == null) {
-            throw new BusinessException("缺少参数");
-        }
         QuQuery quQuery = new QuQuery();
         BeanUtil.copyProperties(query, quQuery);
-        List<QuAndAnswerVo> quAndAnswerVos = loadDetailDataList(quQuery);
+        List<QuAndAnswerVo> quAndAnswerVos = loadQuAndAnswerList(quQuery);
         if (quAndAnswerVos == null) {
             return Collections.emptyList();
         }
@@ -525,11 +573,7 @@ public class QuServiceImpl implements QuService {
      */
     @Override
     public Integer getQuCount(QuQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
-        Integer count = quMapper.selectCount(query);
-        return count;
+        return quMapper.selectCount(query);
     }
 
     /**
@@ -539,7 +583,7 @@ public class QuServiceImpl implements QuService {
      */
     @Override
     public void export(HttpServletResponse response) throws BusinessException, IOException {
-        List<QuAndAnswerVo> quAndAnswerVos = loadDetailDataList(new QuQuery());
+        List<QuAndAnswerVo> quAndAnswerVos = loadQuAndAnswerList(new QuQuery());
         if (quAndAnswerVos == null) {
             throw new BusinessException("没有数据");
         }
@@ -822,10 +866,6 @@ public class QuServiceImpl implements QuService {
 
     @Override
     public List<WrongQuVO> getWrongQu(WrongQuQuery query) {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
-
         String deptCode = query.getDeptCode();
         // 按照班级的
         if (deptCode != null && !"".equals(deptCode.trim())) {

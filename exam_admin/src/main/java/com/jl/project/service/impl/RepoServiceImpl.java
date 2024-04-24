@@ -1,6 +1,7 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.jl.project.entity.dto.AddRepoDTO;
 import com.jl.project.entity.dto.UpdateRepoDTO;
 import com.jl.project.entity.po.Department;
@@ -9,26 +10,31 @@ import com.jl.project.entity.po.Repo;
 import com.jl.project.entity.po.Subject;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.ClassfiyByQuTypeVO;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.enums.QuLevel;
 import com.jl.project.exception.BusinessException;
+import com.jl.project.mapper.DepartmentMapper;
 import com.jl.project.mapper.QuMapper;
 import com.jl.project.mapper.RepoMapper;
 import com.jl.project.mapper.SubjectMapper;
-import com.jl.project.service.DepartmentService;
 import com.jl.project.service.RepoService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-;
 
 /**
  * @Description:题库Service
@@ -45,8 +51,11 @@ public class RepoServiceImpl implements RepoService {
     private QuMapper<Qu, QuQuery> quMapper;
 
     @Resource
-    private DepartmentService departmentService;
+    private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
 
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private SubjectMapper<Subject, SubjectQuery> subjectMapper;
@@ -57,34 +66,36 @@ public class RepoServiceImpl implements RepoService {
      * 新增
      */
     public Boolean add(AddRepoDTO repoDTO) throws BusinessException {
-        if (repoDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
         Repo repo = new Repo();
         BeanUtil.copyProperties(repoDTO, repo);
         repo.setId(CommonUtil.getRandomId());
         // 1. 获取部门名称
         String deptCode = repoDTO.getDeptCode();
-        if (deptCode == null || "".equals(deptCode)) {
-            throw new BusinessException("题库所属部门为空");
-        }
+
         DepartmentQuery departmentQuery = new DepartmentQuery();
         departmentQuery.setDeptCode(deptCode);
-        List<Department> departmentList = departmentService.findListByParam(departmentQuery);
+        List<Department> departmentList = departmentMapper.selectList(departmentQuery);
         if (departmentList == null || departmentList.size() == 0) {
-            throw new BusinessException("题库所属部门为空");
+            throw new BusinessException("关联部门信息错误");
         }
         Department department = departmentList.get(0);
+        // 设置题库所属部分名称
         repo.setDeptText(department.getDeptName());
 
         // 2. 获取学科名称
         String subjectId = repoDTO.getSubjectId();
-        if (subjectId == null || "".equals(subjectId)) {
-            throw new BusinessException("题库所属学科为空");
-        }
         Subject subject = subjectMapper.selectById(subjectId);
+        if (subject == null) {
+            throw new BusinessException("关联学科信息错误");
+        }
         repo.setSubjectText(subject.getTitle());
         repo.setCreateTime(new Date());
+
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        repo.setCreateBy(loginUserInfo.getId());
+
         Integer result = repoMapper.insert(repo);
         return result > 0;
     }
@@ -93,14 +104,8 @@ public class RepoServiceImpl implements RepoService {
      * 根据Id删除
      */
     public Boolean deleteRepoById(String id) throws BusinessException {
-        if (id == null) {
-            throw new BusinessException("缺少参数");
-        }
         Integer result = repoMapper.deleteById(id);
-        if (result <= 0) {
-            return false;
-        }
-        return true;
+        return result > 0;
     }
 
     /**
@@ -159,10 +164,7 @@ public class RepoServiceImpl implements RepoService {
      * @return
      */
     @Override
-    public PaginationResultVO<Repo> loadDatalist(RepoQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
+    public PaginationResultVO<Repo> loadRepoList(RepoQuery query) throws BusinessException {
         PaginationResultVO<Repo> repos = findListByPage(query);
         return repos;
     }
@@ -218,51 +220,55 @@ public class RepoServiceImpl implements RepoService {
      * 根据Id查询
      */
     public Repo getRepoById(String id) {
-        return this.repoMapper.selectById(id);
+        return repoMapper.selectById(id);
     }
 
     /**
      * 根据Id更新
      */
     public Boolean updateRepoById(UpdateRepoDTO repoDTO) throws BusinessException {
-        if (repoDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
         Repo repo = repoDTO.getRepo();
         String id = repoDTO.getId();
-        if (repo == null || id == null) {
-            throw new BusinessException("缺少参数");
+        Repo oldRepo = repoMapper.selectById(id);
+
+        String newDeptCode = repo.getDeptCode();
+
+        // 判断是否修改部门
+        String oldDeptCode = oldRepo.getDeptCode();
+        if (!StrUtil.isEmpty(newDeptCode) && oldDeptCode != newDeptCode) {
+            // 更新题库所属部门
+            DepartmentQuery departmentQuery = new DepartmentQuery();
+            departmentQuery.setDeptCode(newDeptCode);
+            List<Department> list = departmentMapper.selectList(departmentQuery);
+            if (list == null || list.size() == 0) {
+                throw new BusinessException("部门信息错误");
+            }
+            Department department = list.get(0);
+            repo.setDeptText(department.getDeptName());
         }
-        // 1. 获取部门名称
-        String deptCode = repo.getDeptCode();
-        if (deptCode == null || "".equals(deptCode)) {
-            throw new BusinessException("题库所属部门为空");
-        }
-        DepartmentQuery departmentQuery = new DepartmentQuery();
-        departmentQuery.setDeptCode(deptCode);
-        List<Department> departmentList = departmentService.findListByParam(departmentQuery);
-        if (departmentList == null || departmentList.size() == 0) {
-            throw new BusinessException("题库所属部门为空");
-        }
-        Department department = departmentList.get(0);
-        repo.setDeptText(department.getDeptName());
+
 
         // 2. 获取学科名称
-        String subjectId = repo.getSubjectId();
-        if (subjectId == null || "".equals(subjectId)) {
-            throw new BusinessException("题库所属学科为空");
+        String newSubjectId = repo.getSubjectId();
+        String oldSubject = oldRepo.getSubjectId();
+        if (!StrUtil.isEmpty(newSubjectId) && newSubjectId != oldSubject) {
+            Subject subject = subjectMapper.selectById(newSubjectId);
+            if (subject == null) {
+                throw new BusinessException("关联的学科信息不存在");
+            }
+            repo.setSubjectText(subject.getTitle());
         }
-        Subject subject = subjectMapper.selectById(subjectId);
-        repo.setSubjectText(subject.getTitle());
 
-        repo.setUpdateBy(userService.getLoginUserInfo().getId());
+
+        HttpServletRequest request =
+                ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        repo.setUpdateBy(loginUserInfo.getId());
         repo.setUpdateTime(new Date());
 
         Integer result = repoMapper.updateById(repo, id);
-        if (result <= 0) {
-            return false;
-        }
-        return true;
+        return result > 0;
     }
 
 

@@ -1,13 +1,13 @@
 package com.jl.project.service;
 
-;
+
 import com.jl.project.entity.dto.AddRepoDTO;
 import com.jl.project.entity.dto.UpdateRepoDTO;
-import com.jl.project.entity.vo.ClassfiyByQuTypeVO;
-import com.jl.project.exception.BusinessException;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Repo;
 import com.jl.project.entity.query.RepoQuery;
+import com.jl.project.entity.vo.ClassfiyByQuTypeVO;
+import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.exception.BusinessException;
 
 import java.util.List;
 /**
@@ -70,5 +70,5 @@ public interface RepoService {
 	 */
     ClassfiyByQuTypeVO classifyByQuType(String repoId, Integer quType) throws BusinessException;
 
-	PaginationResultVO<Repo> loadDatalist(RepoQuery query);
+	PaginationResultVO<Repo> loadRepoList(RepoQuery query);
 }

@@ -1,10 +1,7 @@
 package com.jl.project.service;
 
-import com.jl.project.entity.dto.UpdateEmailDTO;
-import com.jl.project.entity.dto.UpdateUserDTO;
-import com.jl.project.entity.dto.UpdateUserPasswordDTO;
+import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.LoginQuery;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
@@ -39,7 +36,7 @@ public interface UserService {
     /**
      * 新增（注册）
      */
-    Boolean register(User bean) throws BusinessException;
+    Boolean register(AddUserDTO addUserDTO) throws BusinessException;
 
     /**
      * 批量新增
@@ -74,14 +71,14 @@ public interface UserService {
      * @return
      * @throws BusinessException
      */
-    LoginResponseVo login(LoginQuery user) throws BusinessException;
+    LoginResponseVo login(LoginDTO user) throws BusinessException;
 
     /**
      * 通过token获取登录用户信息
      *
      * @return
      */
-    User getLoginUserInfo() throws BusinessException;
+    LoginResponseVo getLoginUserInfo() throws BusinessException;
 
     /**
      * 获取部门所有人员
@@ -89,7 +86,7 @@ public interface UserService {
      * @param query
      * @return
      */
-    List<User> loadDeptUserList(UserQuery query) throws BusinessException;
+    PaginationResultVO loadDeptUserList(UserQuery query) throws BusinessException;
 
     /**
      * 头像上传

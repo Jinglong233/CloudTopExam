@@ -1,5 +1,6 @@
 package com.jl.project.service;
 
+
 import com.jl.project.entity.dto.AddExamDTO;
 import com.jl.project.entity.dto.UpdateExamDTO;
 import com.jl.project.entity.po.Exam;
@@ -12,7 +13,6 @@ import com.jl.project.entity.vo.WrongQuVO;
 import java.util.Date;
 import java.util.List;
 
-;
 
 /**
  * @Description:考试表Service
@@ -73,7 +73,7 @@ public interface ExamService {
      * @param query
      * @return
      */
-    PaginationResultVO<ExamVO> loadDatalist(ExamQuery query);
+    PaginationResultVO<ExamVO> loadExamList(ExamQuery query);
 
     /**
      * 获取服务端时间

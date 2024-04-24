@@ -1,5 +1,8 @@
 package com.jl.project.controller;
 
+
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddRepoDTO;
 import com.jl.project.entity.dto.UpdateRepoDTO;
 import com.jl.project.entity.po.Repo;
@@ -30,28 +33,31 @@ public class RepoController extends ABaseController {
     private RepoService repoService;
 
     /**
-     * 新增
+     * 添加题库
      */
     @RequestMapping("add")
-    public ResponseVO add(@RequestBody AddRepoDTO repoDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
+    public ResponseVO add(@RequestBody @VerifyParam AddRepoDTO repoDTO) throws BusinessException {
         Boolean result = repoService.add(repoDTO);
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 根据Id删除
+     * 根据Id删除题库
      */
     @RequestMapping("deleteRepoById")
-    public ResponseVO deleteRepoById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
+    public ResponseVO deleteRepoById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         Boolean result = repoService.deleteRepoById(id);
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 根据Id更新
+     * 根据Id更新题库
      */
     @RequestMapping("updateRepoById")
-    public ResponseVO updateRepoById(@RequestBody UpdateRepoDTO repoDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
+    public ResponseVO updateRepoById(@RequestBody @VerifyParam UpdateRepoDTO repoDTO) throws BusinessException {
         Boolean result = repoService.updateRepoById(repoDTO);
         return getSuccessResponseVO(result);
     }
@@ -62,21 +68,32 @@ public class RepoController extends ABaseController {
      * @return
      */
     @RequestMapping("classifyByQuType")
-    public ResponseVO classifyByQuType(@RequestBody Map<String, Object> request) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true)
+    public ResponseVO classifyByQuType(@RequestBody @VerifyParam Map<String, Object> request) throws BusinessException {
         String repoId = (String) request.get("repoId");
         Integer quType = (Integer) request.get("quType");
-        ClassfiyByQuTypeVO result = repoService.classifyByQuType(repoId,quType);
+        ClassfiyByQuTypeVO result = repoService.classifyByQuType(repoId, quType);
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 根据条件查询（因为涉及到递归遍历子目录，所以这里不涉及分页查询）
+     * 根据Id查询题库信息
      */
-    @RequestMapping("loadDataList")
-    public ResponseVO loadDatalist(@RequestBody RepoQuery query) throws BusinessException{
-        PaginationResultVO<Repo> result = repoService.loadDatalist(query);
+    @RequestMapping("getRepoById")
+    public ResponseVO getRepoById(@RequestBody @VerifyParam(require = true) String id) {
+        return getSuccessResponseVO(repoService.getRepoById(id));
+    }
+
+
+    /**
+     * 根据条件查询
+     */
+    @RequestMapping("loadRepoList")
+    public ResponseVO loadRepoList(@RequestBody RepoQuery query) throws BusinessException {
+        PaginationResultVO<Repo> result = repoService.loadRepoList(query);
         return getSuccessResponseVO(result);
     }
+//    下面接口未测试
 
     /**
      * 批量新增
@@ -92,14 +109,6 @@ public class RepoController extends ABaseController {
     @RequestMapping("addOrUpdateBatch")
     public ResponseVO addOrUpdateBatch(@RequestBody List<Repo> listBean) {
         return getSuccessResponseVO(this.repoService.addOrUpdateBatch(listBean));
-    }
-
-    /**
-     * 根据Id查询
-     */
-    @RequestMapping("getRepoById")
-    public ResponseVO getRepoById(String id) {
-        return getSuccessResponseVO(this.repoService.getRepoById(id));
     }
 
 

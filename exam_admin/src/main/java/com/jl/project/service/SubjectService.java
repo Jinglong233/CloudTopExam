@@ -1,12 +1,12 @@
 package com.jl.project.service;
 
-;
+
 import com.jl.project.entity.dto.AddSubjectDTO;
 import com.jl.project.entity.dto.UpdateSubjectDTO;
-import com.jl.project.entity.vo.SubjectTreeVO;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Subject;
 import com.jl.project.entity.query.SubjectQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.SubjectTreeVO;
 
 import java.util.List;
 /**
