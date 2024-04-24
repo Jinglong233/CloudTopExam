@@ -96,7 +96,7 @@
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import { getCorrectExam, getCorrectExamByParam } from '@/api/exam';
+  import { getCorrectExam } from '@/api/exam';
   import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { useUserStore } from '@/store';
   import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
@@ -123,7 +123,7 @@
   const ExamList = ref<CorrectExamVO[]>();
 
   // 查询表单
-  const examSearch = ref<ExamQuery>({});
+  const examSearch = ref<ExamQuery>({} as ExamQuery);
 
   const reloadCorrectExam = async (examQuery: ExamQuery) => {
     await getCorrectExam({ ...examQuery, createBy: userStore.id }).then(

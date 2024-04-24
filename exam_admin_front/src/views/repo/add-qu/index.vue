@@ -645,6 +645,7 @@
   import { useRouter } from 'vue-router';
   import { QuestionType } from '@/types/model/QuestionType';
   import { addQuAndQuAnswer } from '@/api/qu';
+  import { RepoQuery } from '@/types/model/query/RepoQuery';
 
   const activeKey = ref<number>();
 
@@ -675,8 +676,8 @@
 
   onMounted(async () => {
     // 获取题库列表
-    await getRepoList({}).then((res: any) => {
-      repoList.value = res.data;
+    await getRepoList({} as RepoQuery).then((res: any) => {
+      repoList.value = res.data.list;
     });
   });
 

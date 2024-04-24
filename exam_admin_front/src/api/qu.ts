@@ -21,15 +21,7 @@ export function addQuAndQuAnswer(quAndAnswerDTO: AddQuAndAnswerDTO) {
  * @param repo
  */
 export function getQuList(quQuery: QuQuery) {
-  return axios.post<Qu[]>('/api/qu/loadDataList', quQuery);
-}
-
-/**
- * 获取详细题目列表
- * @param quQuery
- */
-export function getQuDetailList(quQuery: QuQuery) {
-  return axios.post<Qu[]>('/api/qu/loadDetailDataList', quQuery);
+  return axios.post<Qu[]>('/api/qu/loadQuList', quQuery);
 }
 
 /**
@@ -37,7 +29,7 @@ export function getQuDetailList(quQuery: QuQuery) {
  * @param quQuery
  */
 export function getExluceQuDetailList(excludeQuery: QuExcludeQuery) {
-  return axios.post<Qu[]>('/api/qu/loadExcludeDataList', excludeQuery);
+  return axios.post<Qu[]>('/api/qu/loadExcludeQuAnAnswerList', excludeQuery);
 }
 
 /**

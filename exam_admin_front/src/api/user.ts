@@ -36,7 +36,7 @@ export function getUserInfo() {
  * 获取用户列表
  */
 export function getUserList(userQuery: UserQuery) {
-  return axios.post<User[]>('/api/user/loadDataList', userQuery);
+  return axios.post<User[]>('/api/user/loadUserList', userQuery);
 }
 
 /**

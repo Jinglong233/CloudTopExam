@@ -12,7 +12,7 @@ import { RandomSelectQuery } from '@/types/model/query/RandomSelectQuery';
  */
 // eslint-disable-next-line import/prefer-default-export
 export function getRepoList(repoQuery: RepoQuery) {
-  return axios.post<Repo[]>('/api/repo/loadDataList', repoQuery);
+  return axios.post<Repo[]>('/api/repo/loadRepoList', repoQuery);
 }
 
 /**

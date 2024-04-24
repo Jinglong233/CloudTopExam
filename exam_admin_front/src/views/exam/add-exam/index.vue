@@ -357,7 +357,8 @@
     openType: 0, // 开放权限默认为全部开放
     thanks: '感谢您的作答！',
     resultType: 0, // 显示结果类型默认为显示感谢文字
-    createBy: userStore.id,
+    lateMax: 0,
+    handMin: 0,
   });
 
   // 试卷信息

@@ -124,7 +124,7 @@
   import useLoading from '@/hooks/loading';
   import { useRoute, useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import { getCorrectExamByParam, getExamRecordByExamId } from '@/api/exam';
+  import { getExamRecordByExamId } from '@/api/exam';
   import { useUserStore } from '@/store';
   import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
   import { Message } from '@arco-design/web-vue';
@@ -151,7 +151,7 @@
   const ExamList = ref<CorrectUserExamUserVO[]>();
 
   // 查询表单
-  const correctSearch = ref<ExamRecordQuery>({});
+  const correctSearch = ref<ExamRecordQuery>({} as ExamRecordQuery);
 
   const reloadCorrectList = async (examRecordQuery: ExamRecordQuery) => {
     // 获取该考试对应的考试人员记录

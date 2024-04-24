@@ -552,7 +552,7 @@
   // 指定选题查询表单
   const appointSelectQuForm = ref<QuExcludeQuery>({
     excludes: [],
-  });
+  } as QuExcludeQuery);
 
   // 问题列表列
   const quColumns = ref<TableColumnData[]>([

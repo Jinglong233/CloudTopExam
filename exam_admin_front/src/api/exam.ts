@@ -17,7 +17,7 @@ import { ExamRecord } from '@/types/model/po/ExamRecord';
  */
 // eslint-disable-next-line import/prefer-default-export
 export function getExamList(examQuery: ExamQuery) {
-  return axios.post('/api/exam/loadDataList', examQuery);
+  return axios.post('/api/exam/loadExamList', examQuery);
 }
 
 /**
