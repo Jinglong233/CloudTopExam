@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.UpdateUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
@@ -27,21 +29,18 @@ public class UserAnswerController extends ABaseController {
 
 
     /**
-     * 新增
+     * 获取用户答案
      */
     @RequestMapping("getDataList")
-    public ResponseVO getDataList(@RequestBody UserAnswerQuery userAnswerQuery) {
-        List<UserAnswer> result = null;
-        try {
-            result = userAnswerService.findListByParam(userAnswerQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) throws BusinessException{
+        List<UserAnswer> result =  userAnswerService.findListByParam(userAnswerQuery);
         return getSuccessResponseVO(result);
     }
 
     // 根据Id更新
     @RequestMapping("updateById")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO updateById(@RequestBody UpdateUserAnswerDTO userAnswer) {
         Boolean result = null;
         try {

@@ -78,7 +78,7 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "注册")
     @RequestMapping("register")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true,checkParams = true)
     public ResponseVO register(@RequestBody @VerifyParam AddUserDTO addUserDTO) throws BusinessException {
         Boolean result = userService.register(addUserDTO);
         return getSuccessResponseVO(result, "添加成功");

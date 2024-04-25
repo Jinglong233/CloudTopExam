@@ -4,7 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import com.jl.project.entity.dto.AddGroupListDTO;
 import com.jl.project.entity.dto.AddPaperDTO;
 import com.jl.project.entity.dto.UpdatePaperAndQuDTO;
-import com.jl.project.entity.po.*;
+import com.jl.project.entity.po.Exam;
+import com.jl.project.entity.po.GlQu;
+import com.jl.project.entity.po.GroupList;
+import com.jl.project.entity.po.Paper;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.GroupListVO;
 import com.jl.project.entity.vo.PaginationResultVO;
@@ -12,16 +15,23 @@ import com.jl.project.entity.vo.PaperAndQuVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.*;
-import com.jl.project.service.DepartmentService;
+import com.jl.project.mapper.ExamMapper;
+import com.jl.project.mapper.GlQuMapper;
+import com.jl.project.mapper.GroupListMapper;
+import com.jl.project.mapper.PaperMapper;
 import com.jl.project.service.PaperService;
 import com.jl.project.service.QuService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -38,12 +48,14 @@ import java.util.stream.Collectors;
 public class PaperServiceImpl implements PaperService {
 
     @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
     private PaperMapper<Paper, PaperQuery> paperMapper;
 
     @Resource
     private UserService userService;
-    @Resource
-    private RepoMapper<Repo, RepoQuery> repoMapper;
+
 
     @Resource
     private GroupListMapper<GroupList, GroupListQuery> groupListMapper;
@@ -53,15 +65,10 @@ public class PaperServiceImpl implements PaperService {
     @Resource
     private QuService quService;
 
-    @Resource
-    private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
 
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
 
-
-    @Resource
-    private DepartmentService departmentService;
 
     /**
      * 根据条件查询列表
@@ -183,14 +190,8 @@ public class PaperServiceImpl implements PaperService {
      */
     @Transactional
     public Boolean updatePaperById(UpdatePaperAndQuDTO bean) throws BusinessException {
-        if (bean == null) {
-            throw new BusinessException("缺少参数");
-        }
         String paperId = bean.getId();
         AddPaperDTO updatePaperDTO = bean.getAddPaperDTO();
-        if (updatePaperDTO == null) {
-            throw new BusinessException("缺少试卷信息");
-        }
         // 1. 更新试卷
         Paper paper = new Paper();
         BeanUtil.copyProperties(updatePaperDTO, paper);
@@ -275,9 +276,20 @@ public class PaperServiceImpl implements PaperService {
      */
     @Transactional
     public Boolean deletePaperById(String paperId) {
-        if (paperId == null) {
-            throw new BusinessException("缺少参数");
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        Boolean admin = UserInfoUtil.isAdmin(request, stringRedisTemplate);
+        Paper paper = paperMapper.selectById(paperId);
+        if (paper == null) {
+            throw new BusinessException("试卷信息不存在");
         }
+
+        Boolean mySelf = UserInfoUtil.isMySelf(request, stringRedisTemplate, paper.getCreateBy());
+
+        if (!admin && !mySelf) {
+            throw new BusinessException("无权限删除");
+        }
+
+
         // 1. 查询试卷关联考试
         ExamQuery examQuery = new ExamQuery();
         examQuery.setPaperId(paperId);
@@ -330,9 +342,6 @@ public class PaperServiceImpl implements PaperService {
      */
     @Override
     public PaperAndQuVO getPaperDetailById(String id) throws BusinessException {
-        if (id == null || "".equals(id)) {
-            throw new BusinessException("缺少参数");
-        }
         String paperId = id;
         PaperAndQuVO paperAndQuVO = new PaperAndQuVO();
         // 1. 根据试卷ID获取试卷信息
@@ -402,7 +411,6 @@ public class PaperServiceImpl implements PaperService {
         }
         return findListByPage(query);
     }
-
 
 
 }

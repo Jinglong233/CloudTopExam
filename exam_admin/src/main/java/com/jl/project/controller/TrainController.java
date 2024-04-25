@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.Train;
 import com.jl.project.entity.query.TrainQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +29,7 @@ public class TrainController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO loadDatalist(TrainQuery query) {
 		return getSuccessResponseVO(trainService.findListByPage(query));
 	}
@@ -35,6 +38,7 @@ public class TrainController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO add(Train bean) {
 		return getSuccessResponseVO(this.trainService.add(bean));
 	}
@@ -43,6 +47,7 @@ public class TrainController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<Train> listBean) {
 		return getSuccessResponseVO(this.trainService.addBatch(listBean));
 	}
@@ -51,6 +56,7 @@ public class TrainController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<Train> listBean) {
 		return getSuccessResponseVO(this.trainService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +66,7 @@ public class TrainController extends ABaseController{
 	 */
 
 	@RequestMapping("getTrainById")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO getTrainById(String id) {
 		return getSuccessResponseVO(this.trainService.getTrainById(id));
 	}
@@ -68,6 +75,7 @@ public class TrainController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateTrainById")
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO updateTrainById(Train bean, String id) {
 		return getSuccessResponseVO(this.trainService.updateTrainById(bean, id));
 	}
@@ -76,7 +84,8 @@ public class TrainController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteTrainById")
-	public ResponseVO deleteTrainById(String id) {
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
+	public ResponseVO deleteTrainById(@RequestBody @VerifyParam(require = true) String id) {
 		this.trainService.deleteTrainById(id);
 		return getSuccessResponseVO(null);
 	}

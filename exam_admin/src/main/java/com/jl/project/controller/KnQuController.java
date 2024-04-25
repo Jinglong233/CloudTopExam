@@ -1,5 +1,6 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.KnQu;
 import com.jl.project.entity.query.KnQuQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +28,7 @@ public class KnQuController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO loadDatalist(KnQuQuery query) {
 		return getSuccessResponseVO(knQuService.findListByPage(query));
 	}
@@ -35,6 +37,7 @@ public class KnQuController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO add(KnQu bean) {
 		return getSuccessResponseVO(this.knQuService.add(bean));
 	}
@@ -43,6 +46,7 @@ public class KnQuController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<KnQu> listBean) {
 		return getSuccessResponseVO(this.knQuService.addBatch(listBean));
 	}
@@ -51,6 +55,7 @@ public class KnQuController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<KnQu> listBean) {
 		return getSuccessResponseVO(this.knQuService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +65,7 @@ public class KnQuController extends ABaseController{
 	 */
 
 	@RequestMapping("getKnQuById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO getKnQuById(String id) {
 		return getSuccessResponseVO(this.knQuService.getKnQuById(id));
 	}
@@ -68,6 +74,7 @@ public class KnQuController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateKnQuById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO updateKnQuById(KnQu bean, String id) {
 		return getSuccessResponseVO(this.knQuService.updateKnQuById(bean, id));
 	}
@@ -76,6 +83,7 @@ public class KnQuController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteKnQuById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO deleteKnQuById(String id) {
 		this.knQuService.deleteKnQuById(id);
 		return getSuccessResponseVO(null);

@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -12,12 +13,14 @@ public class UpdatePaperAndQuDTO {
      * 添加试卷对象DTO
      */
     @Schema(description = "添加试卷对象DTO")
+    @VerifyParam(require = true)
     private AddPaperDTO addPaperDTO;
 
     /**
      * id
      */
     @Schema(description = "id")
+    @VerifyParam(require = true)
     private String id;
 
     public AddPaperDTO getAddPaperDTO() {

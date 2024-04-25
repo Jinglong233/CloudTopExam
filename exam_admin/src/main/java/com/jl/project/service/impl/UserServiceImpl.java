@@ -354,6 +354,13 @@ public class UserServiceImpl implements UserService {
      * 根据Id删除
      */
     public Boolean deleteUserById(String id) throws BusinessException {
+        User user = userMapper.selectById(id);
+        if(user!=null){
+            // 判断要删除的用户是否是管理员
+            if("admin".equals(user.getRole())){
+                throw new BusinessException("无权限删除管理员");
+            }
+        }
         Integer result = userMapper.deleteById(id);
         return result > 0;
     }

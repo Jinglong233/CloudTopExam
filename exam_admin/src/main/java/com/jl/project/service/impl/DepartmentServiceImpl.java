@@ -8,15 +8,21 @@ import com.jl.project.entity.po.Department;
 import com.jl.project.entity.query.DepartmentQuery;
 import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.vo.DepartmentTreeVO;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.DepartmentMapper;
 import com.jl.project.service.DepartmentService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +37,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Resource
     private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     private static final String START_CHAR = "A";
 
@@ -104,9 +113,6 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     @Override
     public List<String> getChildDeptById(String parentId) {
-        if (parentId == null || "".equals(parentId)) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 获取该部门的Code
         Department department = departmentMapper.selectById(parentId);
         if (department == null) {
@@ -216,11 +222,7 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     @Override
     public Integer getDeptCount(DepartmentQuery departmentQuery) throws BusinessException {
-        if (departmentQuery == null) {
-            throw new BusinessException("缺少参数");
-        }
         Integer count = departmentMapper.selectCount(departmentQuery);
-
         return count;
     }
 
@@ -351,14 +353,11 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 根据Id更新
      */
     public Boolean updateDepartmentById(UpdateDeptDTO updateDeptDTO) throws BusinessException {
-        if (updateDeptDTO == null ||
-                updateDeptDTO.getDepartment() == null ||
-                updateDeptDTO.getId() == null) {
-            throw new BusinessException("缺少参数");
-        }
         Department department = updateDeptDTO.getDepartment();
         department.setUpdateTime(new Date());
-        // todo 缺少修改人
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        department.setUpdateBy(loginUserInfo.getId());
         Integer integer = departmentMapper.updateById(department, updateDeptDTO.getId());
         return integer > 0;
     }
@@ -367,9 +366,6 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 根据Id删除
      */
     public Boolean deleteDepartmentById(String id) throws BusinessException {
-        if (id == null) {
-            throw new BusinessException("缺少参数");
-        }
         // 1. 获取该部门的编码
         Department department = getDepartmentById(id);
         String deptCode = department.getDeptCode();

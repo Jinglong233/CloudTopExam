@@ -1,10 +1,10 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.MsgUser;
 import com.jl.project.entity.query.MsgUserQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
-import com.jl.project.exception.BusinessException;
 import com.jl.project.service.MsgUserService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,13 +29,9 @@ public class MsgUserController extends ABaseController{
 	 * 查询未读消息的数量
 	 */
 	@RequestMapping("getMyUnreadCount")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO getMyUnreadCount(@RequestBody MsgUserQuery query) {
-		Integer result = null;
-		try {
-			result = msgUserService.getMyUnreadCount(query);
-		} catch (BusinessException e) {
-			return getErrorResponseVO(null,e.getCode(),e.getMessage());
-		}
+		Integer result = msgUserService.getMyUnreadCount(query);
 		return getSuccessResponseVO(result);
 	}
 
@@ -44,13 +40,9 @@ public class MsgUserController extends ABaseController{
 	 * 分页查询消息
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO loadDatalist(@RequestBody MsgUserQuery query) {
-		PaginationResultVO result = null;
-		try {
-			result = msgUserService.loadDatalist(query);
-		} catch (BusinessException e) {
-			return getErrorResponseVO(null,e.getCode(),e.getMessage());
-		}
+		PaginationResultVO result =  msgUserService.loadDatalist(query);
 		return getSuccessResponseVO(result);
 	}
 
@@ -58,6 +50,7 @@ public class MsgUserController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO add(MsgUser bean) {
 		return getSuccessResponseVO(this.msgUserService.add(bean));
 	}
@@ -66,6 +59,7 @@ public class MsgUserController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<MsgUser> listBean) {
 		return getSuccessResponseVO(this.msgUserService.addBatch(listBean));
 	}
@@ -74,6 +68,7 @@ public class MsgUserController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<MsgUser> listBean) {
 		return getSuccessResponseVO(this.msgUserService.addOrUpdateBatch(listBean));
 	}
@@ -83,6 +78,7 @@ public class MsgUserController extends ABaseController{
 	 */
 
 	@RequestMapping("getMsgUserById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO getMsgUserById(String id) {
 		return getSuccessResponseVO(this.msgUserService.getMsgUserById(id));
 	}
@@ -91,6 +87,7 @@ public class MsgUserController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateMsgUserById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO updateMsgUserById(MsgUser bean, String id) {
 		return getSuccessResponseVO(this.msgUserService.updateMsgUserById(bean, id));
 	}
@@ -99,6 +96,7 @@ public class MsgUserController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteMsgUserById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO deleteMsgUserById(String id) {
 		this.msgUserService.deleteMsgUserById(id);
 		return getSuccessResponseVO(null);

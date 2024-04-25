@@ -114,11 +114,6 @@ public class ExamRecordServiceImpl implements ExamRecordService {
      * 根据Id更新
      */
     public Boolean updateExamRecordById(UpdateExamRecordDTO updateExamRecordDTO) throws BusinessException {
-        if (updateExamRecordDTO == null
-                || updateExamRecordDTO.getId() == null
-                || updateExamRecordDTO.getExamRecord() == null) {
-            throw new BusinessException("缺少参数");
-        }
         String id = updateExamRecordDTO.getId();
         ExamRecord examRecord = updateExamRecordDTO.getExamRecord();
         Integer handState = examRecord.getHandState();
@@ -194,9 +189,6 @@ public class ExamRecordServiceImpl implements ExamRecordService {
 
     @Override
     public PaginationResultVO<ExamRecordVO> loadDatalist(ExamRecordQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少查询参数");
-        }
         PaginationResultVO<ExamRecord> paginationResultVO = findListByPage(query);
         PaginationResultVO<ExamRecordVO> resultVO = new PaginationResultVO<>();
         BeanUtil.copyProperties(paginationResultVO, resultVO);

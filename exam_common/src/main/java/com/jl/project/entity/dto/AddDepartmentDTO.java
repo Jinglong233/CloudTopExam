@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -24,6 +25,7 @@ public class AddDepartmentDTO {
      * 部门名称
      */
     @Schema(description = "部门名称")
+    @VerifyParam(require = true)
     private String deptName;
 
     public String getParentCode() {

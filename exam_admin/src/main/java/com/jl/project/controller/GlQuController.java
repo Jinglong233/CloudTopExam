@@ -1,5 +1,6 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.GlQu;
 import com.jl.project.entity.query.GlQuQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +28,7 @@ public class GlQuController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO loadDatalist(GlQuQuery query) {
 		return getSuccessResponseVO(glQuService.findListByPage(query));
 	}
@@ -35,6 +37,7 @@ public class GlQuController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO add(GlQu bean) {
 		return getSuccessResponseVO(this.glQuService.add(bean));
 	}
@@ -43,6 +46,7 @@ public class GlQuController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<GlQu> listBean) {
 		return getSuccessResponseVO(this.glQuService.addBatch(listBean));
 	}
@@ -51,6 +55,7 @@ public class GlQuController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<GlQu> listBean) {
 		return getSuccessResponseVO(this.glQuService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +65,7 @@ public class GlQuController extends ABaseController{
 	 */
 
 	@RequestMapping("getGlQuById")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO getGlQuById(String id) {
 		return getSuccessResponseVO(this.glQuService.getGlQuById(id));
 	}
@@ -68,6 +74,7 @@ public class GlQuController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateGlQuById")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO updateGlQuById(GlQu bean, String id) {
 		return getSuccessResponseVO(this.glQuService.updateGlQuById(bean, id));
 	}

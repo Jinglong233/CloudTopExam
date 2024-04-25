@@ -1,5 +1,6 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.Msg;
 import com.jl.project.entity.query.MsgQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +28,7 @@ public class MsgController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO loadDatalist(MsgQuery query) {
 		return getSuccessResponseVO(msgService.findListByPage(query));
 	}
@@ -35,6 +37,7 @@ public class MsgController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO add(Msg bean) {
 		return getSuccessResponseVO(this.msgService.add(bean));
 	}
@@ -43,6 +46,7 @@ public class MsgController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<Msg> listBean) {
 		return getSuccessResponseVO(this.msgService.addBatch(listBean));
 	}
@@ -51,6 +55,7 @@ public class MsgController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<Msg> listBean) {
 		return getSuccessResponseVO(this.msgService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +65,7 @@ public class MsgController extends ABaseController{
 	 */
 
 	@RequestMapping("getMsgById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO getMsgById(String id) {
 		return getSuccessResponseVO(this.msgService.getMsgById(id));
 	}
@@ -68,6 +74,7 @@ public class MsgController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateMsgById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO updateMsgById(Msg bean, String id) {
 		return getSuccessResponseVO(this.msgService.updateMsgById(bean, id));
 	}
@@ -76,6 +83,7 @@ public class MsgController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteMsgById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
 	public ResponseVO deleteMsgById(String id) {
 		this.msgService.deleteMsgById(id);
 		return getSuccessResponseVO(null);

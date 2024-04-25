@@ -8,6 +8,7 @@ import com.jl.project.entity.po.Subject;
 import com.jl.project.entity.query.DepartmentQuery;
 import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.SubjectQuery;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.SubjectTreeVO;
 import com.jl.project.enums.PageSize;
@@ -16,9 +17,14 @@ import com.jl.project.mapper.DepartmentMapper;
 import com.jl.project.mapper.SubjectMapper;
 import com.jl.project.service.SubjectService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +36,9 @@ import java.util.stream.Collectors;
  */
 @Service("subjectService")
 public class SubjectServiceImpl implements SubjectService {
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private SubjectMapper<Subject, SubjectQuery> subjectMapper;
@@ -76,6 +85,11 @@ public class SubjectServiceImpl implements SubjectService {
         BeanUtil.copyProperties(addSubjectDTO, subject);
         subject.setId(subjectId);
         subject.setCreateTime(new Date());
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        subject.setCreateBy(loginUserInfo.getId());
+
         String parentId = addSubjectDTO.getParentId();
         // 如果没有parentId，则说明是添加顶层学科
         if (parentId == null || "".equals(parentId)) {
@@ -146,16 +160,12 @@ public class SubjectServiceImpl implements SubjectService {
      * 根据Id更新
      */
     public Boolean updateSubjectById(UpdateSubjectDTO updateSubjectDTO) throws BusinessException {
-        if (updateSubjectDTO == null) {
-            throw new BusinessException("缺少参数");
-        }
-
         Subject subject = updateSubjectDTO.getSubject();
         String subjectId = updateSubjectDTO.getId();
-        if (subjectId == null || subject == null) {
-            throw new BusinessException("缺少参数");
-        }
         subject.setUpdateTime(new Date());
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        subject.setUpdateBy(loginUserInfo.getId());
 
         // 判断是否同级有同名学科
         String title = subject.getTitle();
@@ -165,7 +175,7 @@ public class SubjectServiceImpl implements SubjectService {
         List<Subject> subjectList = findListByParam(subjectQuery);
         if (subjectList != null && subjectList.size() != 0) {
             for (Subject subject1 : subjectList) {
-                if (subject1.getTitle().equals(title)) {
+                if (subject1.getTitle().equals(title) && !subject1.getId().equals(subject.getId())) {
                     throw new BusinessException("同级存在同级学科");
                 }
             }

@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -11,12 +12,14 @@ public class UpdateDeptSortDTO {
      * 部门ID
      */
     @Schema(description = "部门ID")
+    @VerifyParam(require = true)
     String deptId;
 
     /**
      * 排序方式（1：上移 0：下移）
      */
     @Schema(description = "排序方式（1：上移 0：下移）")
+    @VerifyParam(require = true)
     Integer sort;
 
     public String getDeptId() {

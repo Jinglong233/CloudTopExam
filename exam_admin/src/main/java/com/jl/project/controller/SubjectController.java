@@ -1,6 +1,8 @@
 package com.jl.project.controller;
 
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddSubjectDTO;
 import com.jl.project.entity.dto.UpdateSubjectDTO;
 import com.jl.project.entity.po.Subject;
@@ -32,6 +34,7 @@ public class SubjectController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO loadDatalist(@RequestBody SubjectQuery query) {
 		return getSuccessResponseVO(this.subjectService.findListByPage(query));
 	}
@@ -40,6 +43,7 @@ public class SubjectController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO add(@RequestBody AddSubjectDTO addSubjectDTO) throws BusinessException {
 		Boolean result = subjectService.add(addSubjectDTO);
 		return getSuccessResponseVO(result);
@@ -50,6 +54,7 @@ public class SubjectController extends ABaseController{
 	 * 获取学科树列表
 	 */
 	@RequestMapping("treeList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO treeList() throws BusinessException {
 		List<SubjectTreeVO> result = subjectService.treeList();
 		return getSuccessResponseVO(result);
@@ -59,6 +64,7 @@ public class SubjectController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<Subject> listBean) {
 		return getSuccessResponseVO(this.subjectService.addBatch(listBean));
 	}
@@ -67,6 +73,7 @@ public class SubjectController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<Subject> listBean) {
 		return getSuccessResponseVO(this.subjectService.addOrUpdateBatch(listBean));
 	}
@@ -76,6 +83,7 @@ public class SubjectController extends ABaseController{
 	 */
 
 	@RequestMapping("getSubjectById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO getSubjectById(String id) {
 		return getSuccessResponseVO(this.subjectService.getSubjectById(id));
 	}
@@ -84,7 +92,8 @@ public class SubjectController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateSubjectById")
-	public ResponseVO updateSubjectById(@RequestBody UpdateSubjectDTO subjectDTO) throws BusinessException{
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
+	public ResponseVO updateSubjectById(@RequestBody @VerifyParam(require = true) UpdateSubjectDTO subjectDTO) throws BusinessException{
 		Boolean result = subjectService.updateSubjectById(subjectDTO);
 		return getSuccessResponseVO(result);
 	}
@@ -93,7 +102,8 @@ public class SubjectController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteSubjectById")
-	public ResponseVO deleteSubjectById(@RequestBody String id) throws BusinessException{
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
+	public ResponseVO deleteSubjectById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException{
 		Boolean result = subjectService.deleteSubjectById(id);
 		return getSuccessResponseVO(result);
 	}

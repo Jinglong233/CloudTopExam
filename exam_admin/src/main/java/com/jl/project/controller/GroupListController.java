@@ -1,5 +1,6 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.GroupList;
 import com.jl.project.entity.query.GroupListQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +28,7 @@ public class GroupListController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO loadDatalist(GroupListQuery query) {
 		return getSuccessResponseVO(groupListService.findListByPage(query));
 	}
@@ -35,6 +37,7 @@ public class GroupListController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO add(GroupList bean) {
 		return getSuccessResponseVO(this.groupListService.add(bean));
 	}
@@ -43,6 +46,7 @@ public class GroupListController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<GroupList> listBean) {
 		return getSuccessResponseVO(this.groupListService.addBatch(listBean));
 	}
@@ -51,6 +55,7 @@ public class GroupListController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<GroupList> listBean) {
 		return getSuccessResponseVO(this.groupListService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +65,7 @@ public class GroupListController extends ABaseController{
 	 */
 
 	@RequestMapping("getGroupListById")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO getGroupListById(String id) {
 		return getSuccessResponseVO(this.groupListService.getGroupListById(id));
 	}
@@ -68,6 +74,7 @@ public class GroupListController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateGroupListById")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO updateGroupListById(GroupList bean, String id) {
 		return getSuccessResponseVO(this.groupListService.updateGroupListById(bean, id));
 	}
@@ -76,6 +83,7 @@ public class GroupListController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteGroupListById")
+	@GlobalInterceptor(checkLogin = true, checkParams = true)
 	public ResponseVO deleteGroupListById(String id) {
 		this.groupListService.deleteGroupListById(id);
 		return getSuccessResponseVO(null);

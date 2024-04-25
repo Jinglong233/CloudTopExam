@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddPaperDTO;
 import com.jl.project.entity.dto.UpdatePaperAndQuDTO;
 import com.jl.project.entity.po.Paper;
@@ -32,7 +34,8 @@ public class PaperController extends ABaseController {
      * 根据Id查询试卷详细信息
      */
     @RequestMapping("getPaperDetailById")
-    public ResponseVO getPaperDetailById(@RequestBody String id) {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getPaperDetailById(@RequestBody @VerifyParam(require = true) String id) {
         PaperAndQuVO result = paperService.getPaperDetailById(id);
         return getSuccessResponseVO(result);
     }
@@ -42,7 +45,8 @@ public class PaperController extends ABaseController {
      * 根据Id更新
      */
     @RequestMapping("updatePaperById")
-    public ResponseVO updatePaperById(@RequestBody UpdatePaperAndQuDTO bean) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO updatePaperById(@RequestBody @VerifyParam UpdatePaperAndQuDTO bean) throws BusinessException {
         Boolean result = paperService.updatePaperById(bean);
         return getSuccessResponseVO(result);
     }
@@ -51,7 +55,8 @@ public class PaperController extends ABaseController {
      * 根据Id删除
      */
     @RequestMapping("deletePaperById")
-    public ResponseVO deletePaperById(@RequestBody String id) {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO deletePaperById(@RequestBody @VerifyParam(require = true) String id) {
         Boolean result = paperService.deletePaperById(id);
         return getSuccessResponseVO(result);
     }
@@ -61,6 +66,7 @@ public class PaperController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO add(@RequestBody AddPaperDTO paperDTO) throws BusinessException {
         Boolean result = paperService.add(paperDTO);
         return getSuccessResponseVO(result);
@@ -71,6 +77,7 @@ public class PaperController extends ABaseController {
      * 根据条件分页查询
      */
     @RequestMapping("loadDataList")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO loadDatalist(@RequestBody PaperQuery query) throws BusinessException {
         PaginationResultVO<Paper> result = paperService.loadDatalist(query);
         return getSuccessResponseVO(result);
@@ -81,6 +88,7 @@ public class PaperController extends ABaseController {
      * 批量新增
      */
     @RequestMapping("addBatch")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO addBatch(@RequestBody List<Paper> listBean) {
         return getSuccessResponseVO(this.paperService.addBatch(listBean));
     }
@@ -89,6 +97,7 @@ public class PaperController extends ABaseController {
      * 批量新增或修改
      */
     @RequestMapping("addOrUpdateBatch")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO addOrUpdateBatch(@RequestBody List<Paper> listBean) {
         return getSuccessResponseVO(this.paperService.addOrUpdateBatch(listBean));
     }
@@ -98,7 +107,8 @@ public class PaperController extends ABaseController {
      */
 
     @RequestMapping("getPaperById")
-    public ResponseVO getPaperById(String id) {
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
+    public ResponseVO getPaperById(@RequestBody @VerifyParam(require = true) String id) {
         return getSuccessResponseVO(this.paperService.getPaperById(id));
     }
 
@@ -107,6 +117,7 @@ public class PaperController extends ABaseController {
      */
 
     @RequestMapping("paperCount")
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO getPaperCount(@RequestBody PaperQuery paperQuery) throws BusinessException {
         Integer result = paperService.getPaperCount(paperQuery);
         return getSuccessResponseVO(result);

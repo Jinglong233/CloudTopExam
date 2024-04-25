@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.ExamRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -11,10 +12,12 @@ public class UpdateExamRecordDTO{
 
     // 考试记录
     @Schema(description = "考试记录")
+    @VerifyParam(require = true)
     private ExamRecord examRecord;
 
     // 考试记录的Id
     @Schema(description = "考试记录的Id")
+    @VerifyParam(require = true)
     private String id;
 
     public ExamRecord getExamRecord() {

@@ -1,5 +1,6 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.query.TmplQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,6 +28,7 @@ public class TmplController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO loadDatalist(TmplQuery query) {
 		return getSuccessResponseVO(tmplService.findListByPage(query));
 	}
@@ -35,6 +37,7 @@ public class TmplController extends ABaseController{
 	 * 新增
 	 */
 	@RequestMapping("add")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO add(Tmpl bean) {
 		return getSuccessResponseVO(this.tmplService.add(bean));
 	}
@@ -43,6 +46,7 @@ public class TmplController extends ABaseController{
 	 * 批量新增
 	 */
 	@RequestMapping("addBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO addBatch(@RequestBody List<Tmpl> listBean) {
 		return getSuccessResponseVO(this.tmplService.addBatch(listBean));
 	}
@@ -51,6 +55,7 @@ public class TmplController extends ABaseController{
 	 * 批量新增或修改
 	 */
 	@RequestMapping("addOrUpdateBatch")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO addOrUpdateBatch(@RequestBody List<Tmpl> listBean) {
 		return getSuccessResponseVO(this.tmplService.addOrUpdateBatch(listBean));
 	}
@@ -60,6 +65,7 @@ public class TmplController extends ABaseController{
 	 */
 
 	@RequestMapping("getTmplById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO getTmplById(String id) {
 		return getSuccessResponseVO(this.tmplService.getTmplById(id));
 	}
@@ -68,6 +74,7 @@ public class TmplController extends ABaseController{
 	 * 根据Id更新
 	 */
 	@RequestMapping("updateTmplById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO updateTmplById(Tmpl bean, String id) {
 		return getSuccessResponseVO(this.tmplService.updateTmplById(bean, id));
 	}
@@ -76,6 +83,7 @@ public class TmplController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteTmplById")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
 	public ResponseVO deleteTmplById(String id) {
 		this.tmplService.deleteTmplById(id);
 		return getSuccessResponseVO(null);

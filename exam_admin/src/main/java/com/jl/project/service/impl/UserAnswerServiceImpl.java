@@ -3,15 +3,23 @@ package com.jl.project.service.impl;
 
 import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.dto.UpdateUserAnswerDTO;
-import com.jl.project.entity.po.*;
-import com.jl.project.entity.query.*;
+import com.jl.project.entity.po.Exam;
+import com.jl.project.entity.po.ExamRecord;
+import com.jl.project.entity.po.QuAnswer;
+import com.jl.project.entity.po.UserAnswer;
+import com.jl.project.entity.query.ExamQuery;
+import com.jl.project.entity.query.ExamRecordQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.GroupListVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.PaperAndQuVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.*;
+import com.jl.project.mapper.ExamMapper;
+import com.jl.project.mapper.ExamRecordMapper;
+import com.jl.project.mapper.UserAnswerMapper;
 import com.jl.project.service.UserAnswerService;
 import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
@@ -30,8 +38,6 @@ public class UserAnswerServiceImpl implements UserAnswerService {
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
 
-    @Resource
-    private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
 
     @Resource
     private ExamRecordMapper<ExamRecord, ExamRecordQuery> examRecordMapper;
@@ -39,16 +45,11 @@ public class UserAnswerServiceImpl implements UserAnswerService {
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
 
-    @Resource
-    private QuMapper<Qu, QuMapper> quMapper;
 
     /**
      * 根据条件查询列表
      */
     public List<UserAnswer> findListByParam(UserAnswerQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
-        }
         List<UserAnswer> list = userAnswerMapper.selectList(query);
         return list;
     }
