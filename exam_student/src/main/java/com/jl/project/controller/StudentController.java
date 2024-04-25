@@ -2,7 +2,7 @@ package com.jl.project.controller;
 
 import com.jl.project.entity.dto.UpdateUserDTO;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.LoginQuery;
+import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
@@ -36,7 +36,7 @@ public class StudentController extends ABaseController {
      */
     @ApiOperation(value = "学生登录")
     @RequestMapping("login")
-    public ResponseVO login(@RequestBody LoginQuery user) throws BusinessException {
+    public ResponseVO login(@RequestBody LoginDTO user) throws BusinessException {
         LoginResponseVo result = studentService.login(user);
         return getSuccessResponseVO(result, "登录成功");
     }

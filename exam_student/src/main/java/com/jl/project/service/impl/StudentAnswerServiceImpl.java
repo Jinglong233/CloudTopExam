@@ -9,7 +9,7 @@ import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.QuService;
 import com.jl.project.service.StudentAnswerService;
-import com.jl.project.strategy.StrategyContext;
+import com.jl.project.strategy.JudeProblemStrategyContext;
 import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +52,7 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
 
 
     @Resource
-    private StrategyContext strategyContext;
+    private JudeProblemStrategyContext strategyContext;
 
 
     /**

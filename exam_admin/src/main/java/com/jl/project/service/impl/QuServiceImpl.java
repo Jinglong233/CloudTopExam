@@ -20,7 +20,6 @@ import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.QuService;
-import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
 import com.jl.project.utils.UserInfoUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -66,8 +65,12 @@ public class QuServiceImpl implements QuService {
     @Resource
     private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
 
+
     @Resource
-    private UserService userService;
+    private KnMapper<Kn, KnQuery> knMapper;
+
+    @Resource
+    private KnQuMapper<KnQu, KnQuQuery> knQuMapper;
 
 
     @Resource
@@ -379,15 +382,15 @@ public class QuServiceImpl implements QuService {
     public Boolean deleteQuById(String id) throws BusinessException {
         String quId = id;
         Qu qu = quMapper.selectById(quId);
-        if(qu==null){
+        if (qu == null) {
             throw new BusinessException("该题目不存在");
         }
 
         // 判断能否被删除
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        if(!loginUserInfo.getId().equals(qu.getCreateBy())){
-            if (!"admin".equals(loginUserInfo.getRole())){
+        if (!loginUserInfo.getId().equals(qu.getCreateBy())) {
+            if (!"admin".equals(loginUserInfo.getRole())) {
                 throw new BusinessException("无权限删除");
             }
         }
@@ -428,7 +431,7 @@ public class QuServiceImpl implements QuService {
                 }
                 repo.setTotalCount(repo.getSubCount() + repo.getObjCount());
                 repo.setUpdateTime(new Date());
-                repo.setUpdateBy(userService.getLoginUserInfo().getId());
+                repo.setUpdateBy(loginUserInfo.getId());
                 Integer update = repoMapper.updateById(repo, repoId);
                 if (update <= 0) {
                     throw new BusinessException("更新题库失败");
@@ -631,6 +634,9 @@ public class QuServiceImpl implements QuService {
             throw new BusinessException("请选择需要导入的题库");
         }
 
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
 
         //获取工作簿
         Workbook book = null;
@@ -725,7 +731,44 @@ public class QuServiceImpl implements QuService {
             // 答案
             String answer = row.getCell(11).getStringCellValue();
 
+            // 知识点
+            String knowledge = row.getCell(13).getStringCellValue();
+            if (!StrUtil.isEmpty(knowledge)) {
+                String knId = null;
+                KnQuery knQuery = new KnQuery();
+                knQuery.setContent(knowledge.trim());
+                List<Kn> list = knMapper.selectList(knQuery);
+                // 查知识点是否已经存在
+                if (list != null && list.size() != 0) {
+                    Kn kn = list.get(0);
+                    knId = kn.getId();
+                } else {
+                    // 不存在则直接创建
+                    Kn kn = new Kn();
+                    knId = CommonUtil.getRandomId();
+                    kn.setContent(knowledge);
+                    kn.setCreateBy(loginUserInfo.getId());
+                    kn.setCreateTime(new Date());
+                    kn.setId(knId);
+                    Integer insert = knMapper.insert(kn);
+                    if (insert <= 0) {
+                        logger.info("知识点：{},创建失败", knowledge);
+                    }
+                }
+                // 创建问题知识点关联
+                KnQu knQu = new KnQu();
+                knQu.setId(CommonUtil.getRandomId());
+                knQu.setQuId(quId);
+                knQu.setKnId(knId);
+                // 插入
+                Integer insert = knQuMapper.insert(knQu);
+                if (insert <= 0) {
+                    logger.info("知识点：{},和题目：{},关联失败", knowledge, content);
+                }
+            }
 
+
+            // 选项等...
             if (!quType.equals(QuType.JUDGE.getType())) { // 判断题的excel选项都为空，所以得在外层做判断
                 // 选项
                 for (int j = 3; j <= 10; j++) {

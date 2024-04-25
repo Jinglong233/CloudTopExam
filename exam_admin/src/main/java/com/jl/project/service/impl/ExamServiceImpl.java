@@ -193,17 +193,17 @@ public class ExamServiceImpl implements ExamService {
             }
         } else if (OpenType.MEMBER.getValue() == openType) { // 指定人员
             // 获取指定人员列表，添加考试记录
-            List<User> userList = addExamDTO.getUserList();
+            List<String> userList = addExamDTO.getUserList();
             if (userList == null || userList.size() == 0) {
                 throw new BusinessException("指定人员列表为空");
             }
-            for (User user : userList) {
+            for (String userId : userList) {
                 ExamRecord examRecord = new ExamRecord();
                 String examRecordId = CommonUtil.getRandomId();
                 examRecord.setId(examRecordId);
                 examRecord.setExamId(examId);
-                examRecord.setUserId(user.getId());
-                examRecord.setReviewUser(user.getId());
+                examRecord.setUserId(userId);
+                examRecord.setReviewUser(userId);
                 Integer addExamRecordResult = examRecordMapper.insert(examRecord);
                 if (addExamRecordResult <= 0) {
                     throw new BusinessException("创建用户考试记录失败");
@@ -378,17 +378,17 @@ public class ExamServiceImpl implements ExamService {
             }
         } else if (OpenType.MEMBER.getValue() == openType) { // 指定人员
             // 获取指定人员列表，添加考试记录
-            List<User> userList = updateExamDTO.getUserList();
+            List<String> userList = updateExamDTO.getUserList();
             if (userList == null || userList.size() == 0) {
                 throw new BusinessException("指定人员列表为空");
             }
-            for (User user : userList) {
+            for (String userId : userList) {
                 ExamRecord examRecord = new ExamRecord();
                 String examRecordId = CommonUtil.getRandomId();
                 examRecord.setId(examRecordId);
                 examRecord.setExamId(examId);
-                examRecord.setUserId(user.getId());
-                examRecord.setReviewUser(user.getId());
+                examRecord.setUserId(userId);
+                examRecord.setReviewUser(userId);
                 Integer addExamRecordResult = examRecordMapper.insert(examRecord);
                 if (addExamRecordResult <= 0) {
                     throw new BusinessException("创建用户考试记录失败");

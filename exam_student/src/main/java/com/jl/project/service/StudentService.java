@@ -2,7 +2,7 @@ package com.jl.project.service;
 
 import com.jl.project.entity.dto.UpdateUserDTO;
 import com.jl.project.entity.po.User;
-import com.jl.project.entity.query.LoginQuery;
+import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.exception.BusinessException;
@@ -53,7 +53,7 @@ public interface StudentService {
      * @return
      * @throws BusinessException
      */
-    LoginResponseVo login(LoginQuery user) throws BusinessException;
+    LoginResponseVo login(LoginDTO user) throws BusinessException;
 
     /**
      * 通过token获取登录用户信息

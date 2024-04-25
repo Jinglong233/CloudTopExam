@@ -12,7 +12,7 @@ import com.jl.project.entity.dto.UpdateUserDTO;
 import com.jl.project.entity.po.Department;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.DepartmentQuery;
-import com.jl.project.entity.query.LoginQuery;
+import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.enums.ResponseCodeEnum;
@@ -204,7 +204,7 @@ public class StudentServiceImpl implements StudentService {
      * @throws BusinessException
      */
     @Override
-    public LoginResponseVo login(LoginQuery user) throws BusinessException {
+    public LoginResponseVo login(LoginDTO user) throws BusinessException {
         if (user == null) {
             throw new BusinessException("参数错误");
         }

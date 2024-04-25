@@ -2,7 +2,6 @@ package com.jl.project.entity.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jl.project.annotation.VerifyParam;
-import com.jl.project.entity.po.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -117,17 +116,16 @@ public class UpdateExamDTO{
 
 
     @Schema(hidden = true)
-    private List<User> userList;
+    private List<String> userList;
 
 
-    public List<User> getUserList() {
+    public List<String> getUserList() {
         return userList;
     }
 
-    public void setUserList(List<User> userList) {
+    public void setUserList(List<String> userList) {
         this.userList = userList;
     }
-
 
     public String getPaperId() {
         return paperId;
