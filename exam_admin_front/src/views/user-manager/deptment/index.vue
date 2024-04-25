@@ -165,7 +165,6 @@
             style="width: 200px"
             allow-clear
             placeholder="请选择角色"
-            @change="searchUserList"
           >
             <a-option value="student">学生</a-option>
             <a-option value="teacher">教师</a-option>
@@ -182,12 +181,10 @@
             placeholder="请选择部门"
             style="width: 200px"
             allow-clear
-            @change="searchUserList"
           />
           <a-input
             v-model="userSearch.userNameFuzzy"
             placeholder="搜索用户名"
-            @input="searchUserList"
           />
         </a-space>
         <template #footer>
@@ -320,7 +317,7 @@
   const userList = ref<[]>();
 
   // 用户筛选表单
-  const userSearch = ref<UserQuery>({});
+  const userSearch = ref<UserQuery>({} as UserQuery);
 
   // 加载用户列表
   const reloadUserList = async (userQuery: UserQuery) => {
@@ -367,8 +364,8 @@
   // 抽屉开关
   const userVisible = ref(false);
 
-  const deptRef = ref({});
-  const deptUpdateRef = ref({});
+  const deptRef = ref();
+  const deptUpdateRef = ref();
 
   const department = ref<AddDepartmentDTO>({});
   const updateDept = ref<UpdateDeptDTO>({
@@ -459,7 +456,6 @@
 
   // 删除部门确认
   const deleteOk = async () => {
-    console.log('deleteDept.value', deleteDept.value);
     await deleteDeptById(deleteDept.value).then(async (res: any) => {
       if (res.data === true) {
         await reloadData();

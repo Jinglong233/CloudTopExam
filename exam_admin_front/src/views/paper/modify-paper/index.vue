@@ -106,15 +106,16 @@
                   />
                 </a-form-item>
                 <a-form-item label="试卷分类" :style="{ width: '600px' }">
-                  <a-select
+                  <a-tree-select
                     v-model="updatePaperForm.deptCode"
                     placeholder="请选择试卷分类"
-                  >
-                    <a-option>Beijing</a-option>
-                    <a-option>Shanghai</a-option>
-                    <a-option>Guangzhou</a-option>
-                    <a-option disabled>Disabled</a-option>
-                  </a-select>
+                    :data="deptTree"
+                    :field-names="{
+                      key: 'deptCode',
+                      title: 'deptName',
+                      children: 'children',
+                    }"
+                  />
                 </a-form-item>
               </a-space>
             </a-col>
@@ -439,6 +440,9 @@
   import { QuExcludeQuery } from '@/types/model/query/QuExcludeQuery';
   import { QuAndAnswerVO } from '@/types/model/vo/QuAndAnswerVO';
   import { getPaperDetail, updatePaperById } from '@/api/paper';
+  import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
+  import { getDeptTree } from '@/api/department';
+  import { RepoQuery } from '@/types/model/query/RepoQuery';
   import { getQuestionTypeName } from '../../../utils/common';
 
   const { t } = useI18n();
@@ -448,6 +452,9 @@
 
   // 题库列表
   const repoList = ref<Repo[]>();
+
+  // 部门树
+  const deptTree = ref<DepartmentTreeVO[]>([]);
 
   // 题目列表
   const quList = ref<Qu[]>();
@@ -524,7 +531,7 @@
   ]);
 
   onMounted(async () => {
-    await getRepoList({}).then((res: any) => {
+    await getRepoList({} as RepoQuery).then((res: any) => {
       repoList.value = res.data;
     });
     const paperId = route.query.id;
@@ -533,6 +540,10 @@
     }
     await getPaperDetail(paperId as string).then((res: any) => {
       updatePaperForm.value = res.data;
+    });
+
+    await getDeptTree().then((res: any) => {
+      deptTree.value = res.data;
     });
   });
 
@@ -559,9 +570,6 @@
   // 添加题目
   const addItem = async (type: number, index: number) => {
     addTypeVisible.value = true;
-    console.log('12333');
-    console.log('type', type);
-    console.log('index', index);
     if (updatePaperForm.value.joinType === 0) {
       // 给获取大题表单题型赋值（因为之前被清空）
       randomSelectQuForm.value.quType = type;

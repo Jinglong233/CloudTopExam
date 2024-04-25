@@ -7,5 +7,5 @@ export interface UpdateExamDTO extends Exam {
    */
   id?: string;
 
-  userList?: User[];
+  userList?: string[];
 }

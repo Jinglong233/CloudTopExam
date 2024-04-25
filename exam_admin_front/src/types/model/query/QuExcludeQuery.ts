@@ -4,5 +4,5 @@ export interface QuExcludeQuery extends QuQuery {
   /**
    * 排除列表
    */
-  excludes: string[];
+  excludes?: string[];
 }

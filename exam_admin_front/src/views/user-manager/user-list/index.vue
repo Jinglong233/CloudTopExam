@@ -159,21 +159,22 @@
                 >
                   {{ $t('userList.columns.delete') }}
                 </a-button>
-                <!--删除确认框-->
-                <a-modal
-                  :visible="deleteUserVisible"
-                  @ok="deleteOk(record.id)"
-                  @cancel="deleteUserVisible = false"
-                >
-                  <template #title> 删除提醒 </template>
-                  <div> 确认删除该用户？ </div>
-                </a-modal>
               </a-space>
+              <!--删除确认框-->
+              <a-modal
+                :visible="deleteUserVisible"
+                @ok="deleteOk(record.id)"
+                @cancel="deleteUserVisible = false"
+              >
+                <template #title> 删除提醒 </template>
+                <div> 确认删除该用户？ </div>
+              </a-modal>
             </template>
           </a-table>
         </a-card>
       </a-col>
     </a-row>
+
     <!--查看用户信息模态框-->
     <a-modal
       width="auto"
@@ -310,68 +311,6 @@
                 />
               </a-form-item>
             </a-col>
-            <a-col :span="12">
-              <a-form-item field="updateBy" label="更新人" disabled>
-                <a-input v-model="userInfoForm.updateBy" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item field="avatar" label="头像">
-                <a-upload
-                  ref="avatarRef"
-                  :auto-upload="false"
-                  action="http://localhost:8088/api/user/upload/avatar"
-                  :file-list="file ? [file] : []"
-                  :show-file-list="false"
-                  @change="onChange"
-                  @progress="onProgress"
-                >
-                  <template #upload-button>
-                    <div
-                      :class="`arco-upload-list-item${
-                        file && file.status === 'error'
-                          ? ' arco-upload-list-item-error'
-                          : ''
-                      }`"
-                    >
-                      <div
-                        v-if="file && file.url"
-                        class="arco-upload-list-picture custom-upload-avatar"
-                      >
-                        <img :src="file.url" alt="加载失败" />
-                        <div class="arco-upload-list-picture-mask">
-                          <IconEdit />
-                        </div>
-                        <a-progress
-                          v-if="
-                            file.status === 'uploading' && file.percent < 100
-                          "
-                          :percent="file.percent"
-                          type="circle"
-                          size="mini"
-                          :style="{
-                            position: 'absolute',
-                            left: '50%',
-                            top: '50%',
-                            transform: 'translateX(-50%) translateY(-50%)',
-                          }"
-                        />
-                      </div>
-                      <div v-else class="arco-upload-picture-card">
-                        <div class="arco-upload-picture-card-text">
-                          <IconPlus />
-                          <div style="margin-top: 10px; font-weight: 600"
-                            >Upload</div
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </a-upload>
-              </a-form-item>
-            </a-col>
           </a-row>
         </a-form>
       </div>
@@ -432,7 +371,11 @@
               </a-form-item>
             </a-col>
             <a-col :span="12">
-              <a-form-item field="password" label="密码">
+              <a-form-item
+                field="password"
+                label="密码"
+                :rules="[{ required: true, message: '密码不能为空' }]"
+              >
                 <a-input v-model="addUserForm.password" />
               </a-form-item>
             </a-col>
@@ -462,25 +405,6 @@
           </a-row>
           <a-row :gutter="16">
             <a-col :span="12">
-              <a-form-item field="createTime" label="创建时间">
-                <a-time-picker
-                  v-model="addUserForm.createTime"
-                  format="YYYY-MM-DD hh:mm:ss"
-                  disabled
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item field="state" label="状态">
-                <a-select v-model="addUserForm.state">
-                  <a-option :value="0">正常</a-option>
-                  <a-option :value="1">禁用</a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row :gutter="16">
-            <a-col :span="12">
               <a-form-item
                 field="realName"
                 label="真实姓名"
@@ -498,81 +422,6 @@
               </a-form-item>
             </a-col>
           </a-row>
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item field="updateTime" label="最近更新时间">
-                <a-time-picker
-                  v-model="addUserForm.updateTime"
-                  disabled
-                  format="YYYY-MM-DD hh:mm:ss"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item field="updateBy" label="更新人" disabled>
-                <a-input v-model="addUserForm.updateBy" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item field="avatar" label="头像">
-                <a-upload
-                  ref="avatarRef"
-                  :auto-upload="false"
-                  action="http://localhost:8088/api/user/upload/avatar"
-                  :file-list="file ? [file] : []"
-                  :show-file-list="false"
-                  @change="onChange"
-                  @progress="onProgress"
-                >
-                  <template #upload-button>
-                    /* eslint-disable */
-                    <div
-                      :class="`arco-upload-list-item${
-                        file && file.status === 'error'
-                          ? ' arco-upload-list-item-error'
-                          : ''
-                      }`"
-                    >
-                      /* eslint-enable */
-                      <div
-                        v-if="file && file.url"
-                        class="arco-upload-list-picture custom-upload-avatar"
-                      >
-                        <img :src="file.url" />
-                        <div class="arco-upload-list-picture-mask">
-                          <IconEdit />
-                        </div>
-                        <a-progress
-                          v-if="
-                            file.status === 'uploading' && file.percent < 100
-                          "
-                          :percent="file.percent"
-                          type="circle"
-                          size="mini"
-                          :style="{
-                            position: 'absolute',
-                            left: '50%',
-                            top: '50%',
-                            transform: 'translateX(-50%) translateY(-50%)',
-                          }"
-                        />
-                      </div>
-                      <div v-else class="arco-upload-picture-card">
-                        <div class="arco-upload-picture-card-text">
-                          <IconPlus />
-                          <div style="margin-top: 10px; font-weight: 600"
-                            >Upload</div
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </a-upload>
-              </a-form-item>
-            </a-col>
-          </a-row>
         </a-form>
       </div>
     </a-modal>
@@ -580,13 +429,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref, toRaw, watch } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import {
     addUser,
     deleteUserByIb,
-    getDeptUserList,
     getUserList,
     updateUserById,
   } from '@/api/user';
@@ -619,7 +467,7 @@
   const searchTree = ref<DepartmentQuery>({});
 
   // 查询表单
-  const userSearch = ref<UserQuery>({});
+  const userSearch = ref<UserQuery>({} as UserQuery);
 
   // 用户列表
   const userList = ref<UserDetailVO[]>([]);

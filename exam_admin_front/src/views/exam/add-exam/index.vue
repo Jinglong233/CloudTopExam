@@ -171,7 +171,6 @@
                       style="width: 200px"
                       allow-clear
                       placeholder="请选择角色"
-                      @change="searchUserList"
                     >
                       <a-option value="student">学生</a-option>
                       <a-option value="teacher">教师</a-option>
@@ -188,12 +187,10 @@
                       placeholder="请选择部门"
                       style="width: 200px"
                       allow-clear
-                      @change="searchUserList"
                     />
                     <a-input
                       v-model="userSearch.userNameFuzzy"
                       placeholder="搜索用户名"
-                      @input="searchUserList"
                     />
                     <a-typography-text>
                       已选择{{ addExamForm.userList.length }}人
@@ -400,7 +397,7 @@
   // 分页信息
   const pageInfo = ref<SimplePage>({
     pageNo: 1,
-    pageSize: 2,
+    pageSize: 5,
     pageTotal: 0,
     total: 0,
   });
@@ -447,6 +444,9 @@
       // 重置指定部门
       addExamForm.value.deptCode = '';
       await reloadUserList(pageInfo.value);
+      await getDeptTree().then((res: any) => {
+        deptTree.value = res.data;
+      });
     } else if (value === 2) {
       // 切换开放权限，清空用户列表
       addExamForm.value.userList = [];
@@ -465,29 +465,20 @@
   // 显示考试结果按钮改变
   const resultTypeChange = (value: any) => {};
 
-  // 搜索用户
-  const searchUserList = async () => {
-    await getDeptUserList(userSearch.value).then((res: any) => {
-      userList.value = res.data;
-    });
-  };
-
   // 问题列表行被选择时触发
   const userTableRowSelect = (rowKeys: any, rowKey: any, record: User) => {
     if (!addExamForm.value.userList) {
       addExamForm.value.userList = [];
     }
     const isInclude = addExamForm.value.userList?.some(
-      (user: User) => user.id === rowKey
+      (userId: string) => userId === rowKey
     );
     if (!isInclude) {
-      addExamForm.value.userList.push(record);
+      addExamForm.value.userList.push(rowKey);
     } else {
       // 移除取消选中的用户
-      addExamForm.value.userList = removeObjByProperty(
-        addExamForm.value.userList,
-        'id',
-        rowKey
+      addExamForm.value.userList = addExamForm.value.userList.filter(
+        (item) => item !== rowKey
       );
     }
   };
@@ -553,16 +544,13 @@
             await addExam(addExamForm.value).then((res: any) => {
               if (res.data === true) {
                 Message.success({
-                  content: '考试创建成功',
+                  content: '创建成功',
+                  duration: 2000,
                 });
                 router.back();
-              } else {
-                Message.error({
-                  content: '考试创建失败',
-                });
               }
-              saveLoading.value = false;
             });
+            saveLoading.value = false;
           } else {
             // 校验未通过
             activeKey.value = 1;
@@ -571,7 +559,10 @@
         }
       );
     } catch {
+      saveLoading.value = false;
       console.log();
+    } finally {
+      saveLoading.value = false;
     }
   };
 

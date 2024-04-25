@@ -48,7 +48,7 @@ axios.interceptors.response.use(
         content: res.info,
         duration: 2000,
       });
-      return null;
+      return res;
     }
     if (res.code === 200) {
       return res;

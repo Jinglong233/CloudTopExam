@@ -9,7 +9,11 @@
           class="general-card"
           :title="t('menu.exam.addExam')"
         >
-          <a-tabs direction="vertical">
+          <a-tabs
+            direction="vertical"
+            :active-key="activeKey"
+            @change="panelChange"
+          >
             <a-tab-pane key="1" title="基础设置">
               <a-form
                 ref="updateExamFormRef"
@@ -215,6 +219,7 @@
                   <a-table
                     v-if="updateExamForm.openType === 1"
                     ref="tableRef"
+                    v-model:selectedKeys="updateExamForm.userList"
                     :table-layout-fixed="true"
                     row-key="id"
                     style="margin-top: 20px"
@@ -223,8 +228,35 @@
                     :row-selection="{
                       type: 'checkbox',
                     }"
+                    :pagination="{
+                      showTotal: true,
+                      showPageSize: true,
+                      total: pageInfo.total,
+                      pageSize: pageInfo.pageSize,
+                      current: pageInfo.pageNo,
+                    }"
+                    :scroll="{ x: 100, y: 400 }"
+                    @page-change="pageChange"
+                    @page-size-change="pageSizeChange"
                     @select="userTableRowSelect"
                   >
+                    <template #role="{ record }">
+                      <a-tag v-if="record.role === 'student'" color="green"
+                        >学生</a-tag
+                      >
+                      <a-tag v-if="record.role === 'teacher'" color="skyblue"
+                        >教师</a-tag
+                      >
+                      <a-tag v-if="record.role === 'admin'" color="orange"
+                        >管理员</a-tag
+                      >
+                    </template>
+                    <template #state="{ record }">
+                      <a-tag v-if="record.state === 0" color="green"
+                        >正常</a-tag
+                      >
+                      <a-tag v-if="record.state === 1" color="red">异常</a-tag>
+                    </template>
                   </a-table>
                 </template>
                 <template v-if="updateExamForm.openType === 2">
@@ -314,21 +346,46 @@
   import { UserQuery } from '@/types/model/query/UserQuery';
   import { getDeptTree } from '@/api/department';
   import { getDeptUserList, getUserList } from '@/api/user';
-  import { AddExamDTO } from '@/types/model/dto/AddExamDTO';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { User } from '@/types/model/po/User';
   import { Message, ValidatedError } from '@arco-design/web-vue';
   import { range } from 'lodash';
   import { useUserStore } from '@/store';
-  import { addExam, getExamById, updateExamById } from '@/api/exam';
+  import { getExamById, getExamRecord, updateExamById } from '@/api/exam';
   import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
+  import { SimplePage } from '@/types/model/po/SimplePage';
+  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import { removeObjByProperty } from '@/utils/common';
+  import { ExamRecord } from '@/types/model/po/ExamRecord';
 
   const { t } = useI18n();
 
   const route = useRoute();
   const router = useRouter();
   const userStore = useUserStore();
-  const updateExamFormRef = ref({});
+  const updateExamFormRef = ref();
+
+  // 更新考试按钮加载
+  const updateLoading = ref(false);
+  // 当前的活动面板
+  const activeKey = ref();
+
+  // 分页信息
+  const pageInfo = ref<SimplePage>({
+    pageNo: 1,
+    pageSize: 5,
+    pageTotal: 0,
+    total: 0,
+  });
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    pageInfo.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    pageInfo.value.pageSize = pageSize;
+  };
 
   // 添加考试表单
   const updateExamForm = ref<UpdateExamDTO>({
@@ -353,20 +410,35 @@
     },
     {
       title: t('department.userColumns.deptCode'),
-      dataIndex: 'deptCode',
+      dataIndex: 'deptText',
     },
     {
-      title: t('department.userColumns.roles'),
-      dataIndex: 'roles',
+      title: t('department.userColumns.role'),
+      dataIndex: 'role',
+      slotName: 'role',
     },
     {
       title: t('department.userColumns.state'),
       dataIndex: 'state',
+      slotName: 'state',
     },
   ]);
-
   // 用户筛选表单
-  const userSearch = ref<UserQuery>({});
+  const userSearch = ref<UserQuery>({} as UserQuery);
+
+  // 用户列表数据
+  const userList = ref<User[]>([]);
+
+  // 加载用户列表
+  const reloadUserList = async (userQuery: UserQuery) => {
+    await getUserList(userQuery).then((res: any) => {
+      userList.value = res.data.list;
+      pageInfo.value.total = res.data.totalCount;
+      pageInfo.value.pageSize = res.data.pageSize;
+      pageInfo.value.pageNo = res.data.pageNo;
+      pageInfo.value.pageTotal = res.data.pageTotal;
+    });
+  };
 
   onMounted(async () => {
     // 获取考试信息
@@ -375,8 +447,23 @@
       router.back();
     }
     updateExamForm.value.id = examId as string;
-    await getExamById(examId as string).then((res: any) => {
+    await reloadUserList(pageInfo.value);
+    await getExamById(examId as string).then(async (res: any) => {
       updateExamForm.value = res.data;
+      // 判断开放类型
+      if (updateExamForm.value.openType === 1) {
+        // 指定人员需要获取选定的人员列表
+        await getExamRecord({ examId } as ExamRecordQuery).then((r: any) => {
+          if (r.data) {
+            updateExamForm.value.userList = r.data.list.map(
+              (examRecord: ExamRecord) => examRecord.userId
+            );
+          }
+        });
+      } else if (updateExamForm.value.openType === 2) {
+        // 指定部门需要获取部门的deptCode
+        console.log('2', updateExamForm.value.openType);
+      }
     });
     // 获取试卷信息
     await getPaperDetail(updateExamForm.value.paperId as string).then(
@@ -384,10 +471,17 @@
         paperInfo.value = res.data;
       }
     );
+
+    // 加载部门列表树
+    await getDeptTree().then((res: any) => {
+      deptTree.value = res.data;
+    });
   });
 
-  // 用户列表数据
-  const userList = ref<User[]>([]);
+  // tab变化
+  const panelChange = (index: any) => {
+    activeKey.value = index;
+  };
 
   // 开放权限按钮改变
   const openTypeChange = async (value: any) => {
@@ -395,8 +489,10 @@
       // 重置指定部门
       updateExamForm.value.deptCode = '';
       // 加载用户列表
-      await getUserList({}).then((res: any) => {
-        userList.value = res.data.list;
+      await reloadUserList(pageInfo.value);
+      // 加载部门列表树
+      await getDeptTree().then((res: any) => {
+        deptTree.value = res.data;
       });
     } else if (value === 2) {
       // 切换开放权限，清空用户列表
@@ -440,12 +536,20 @@
 
   // 问题列表行被选择时触发
   const userTableRowSelect = (rowKeys: any, rowKey: any, record: User) => {
-    updateExamForm.value.userList = [];
-    userList.value?.forEach((user: User) => {
-      if (rowKeys.includes(user.id)) {
-        updateExamForm.value.userList?.push(user);
-      }
-    });
+    if (!updateExamForm.value.userList) {
+      updateExamForm.value.userList = [];
+    }
+    const isInclude = updateExamForm.value.userList?.some(
+      (userId: string) => userId === rowKey
+    );
+    if (!isInclude) {
+      updateExamForm.value.userList.push(rowKey);
+    } else {
+      // 移除取消选中的用户
+      updateExamForm.value.userList = updateExamForm.value.userList.filter(
+        (item) => item !== rowKey
+      );
+    }
   };
 
   // 保存考试
@@ -457,49 +561,67 @@
       ) {
         Message.warning({
           content: '请选择考试人员',
+          duration: 2000,
         });
-        throw new Error('请选择考试人员');
+        return;
       }
+      // 判断指定部门情况下未选择部门的情况
       if (
         updateExamForm.value.openType === 2 &&
         (updateExamForm.value.deptCode === '' || !updateExamForm.value.deptCode)
       ) {
         Message.warning({
           content: '请选择部门',
+          duration: 2000,
         });
-        throw new Error('请选择部门');
+        return;
+      }
+
+      // 判断考试结束显示样式
+      if (
+        updateExamForm.value.resultType === 0 ||
+        updateExamForm.value.resultType === 1
+      ) {
+        if (updateExamForm.value.thanks?.trim().length === 0) {
+          Message.warning({
+            content: '请输入感谢语',
+            duration: 2000,
+          });
+          activeKey.value = 3;
+          return;
+        }
       }
 
       // 检验表单
       updateExamFormRef.value.validate(
         async (errors: undefined | Record<string, ValidatedError>) => {
           if (!errors) {
-            // 判断时间
-            if (
-              !dayjs(updateExamForm.value.startTime).isBefore(
-                dayjs(updateExamForm.value.endTime)
-              )
-            ) {
+            // 校验通过
+            // 判断时间差
+            const { startTime } = updateExamForm.value;
+            const { endTime } = updateExamForm.value;
+            if (!dayjs(startTime).isBefore(dayjs(endTime))) {
               Message.warning({
                 content: '考试开始时间必须小于结束时间',
+                duration: 2000,
               });
-              throw new Error('考试开始时间必须小于结束时间');
+              throw new Error();
             }
-            console.log('通过');
+            updateLoading.value = true;
+            // 提交表单
             await updateExamById(updateExamForm.value).then((res: any) => {
-              if (res.data === true) {
+              if (res.data && res.data === true) {
                 Message.success({
                   content: '考试更新成功',
+                  duration: 2000,
                 });
                 router.back();
-              } else {
-                Message.error({
-                  content: '考试更新失败',
-                });
               }
             });
           } else {
-            console.log('失败');
+            // 校验未通过
+            activeKey.value = 1;
+            throw new Error();
           }
         }
       );
@@ -520,6 +642,18 @@
       deep: true,
       immediate: true,
     }
+  );
+
+  // 监视查询数据及其页码变化
+  watch(
+    [pageInfo.value, userSearch.value],
+    async (
+      [newPageInfo, oldPageInfo],
+      [newUserRecordSearch, oldUserRecordSearch]
+    ) => {
+      await reloadUserList({ ...pageInfo.value, ...userSearch.value });
+    },
+    { deep: true }
   );
 </script>
 

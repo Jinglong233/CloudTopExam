@@ -663,6 +663,7 @@
   import { UpdateQuAndAnswerDTO } from '@/types/model/dto/UpdateQuAndAnswerDTO';
   import { Repo } from '@/types/model/po/Repo';
   import { useUserStore } from '@/store';
+  import { RepoQuery } from '@/types/model/query/RepoQuery';
 
   const userStore = useUserStore();
   const route = useRoute();
@@ -703,8 +704,8 @@
 
   onMounted(async () => {
     // 获取题库列表
-    await getRepoList({}).then((res: any) => {
-      repoList.value = res.data;
+    await getRepoList({} as RepoQuery).then((res: any) => {
+      repoList.value = res.data.list;
     });
 
     // 获取题目Id

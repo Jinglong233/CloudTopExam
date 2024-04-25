@@ -1,12 +1,5 @@
 import axios from 'axios';
-import { ExamQuery } from '@/types/model/query/ExamQuery';
-import { AddExamDTO } from '@/types/model/dto/AddExamDTO';
 // eslint-disable-next-line import/namespace
-import { ExamVO } from '@/types/model/vo/ExamVO';
-
-import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
-import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
-import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
 import { UserAnswerQuery } from '@/types/model/query/UserAnswerQuery';
 import { UpdateUserAnswerDTO } from '@/types/model/dto/UpdateUserAnswerDTO';
 

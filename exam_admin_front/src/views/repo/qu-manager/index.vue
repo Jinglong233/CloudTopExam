@@ -169,6 +169,7 @@
   import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
   import { useUserStore } from '@/store';
   import { SimplePage } from '@/types/model/po/SimplePage';
+  import { RepoQuery } from '@/types/model/query/RepoQuery';
   import { getQuestionTypeName } from '../../../utils/common';
 
   const { loading, setLoading } = useLoading(true);
@@ -207,8 +208,8 @@
   // 获取题库列表
   const reloadRepoList = async () => {
     setLoading(true);
-    await getRepoList({}).then((res: any) => {
-      repoList.value = res.data;
+    await getRepoList({} as RepoQuery).then((res: any) => {
+      repoList.value = res.data.list;
       setLoading(false);
     });
   };

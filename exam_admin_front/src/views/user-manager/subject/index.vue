@@ -109,7 +109,12 @@
           <a-form-item>
             <a-space>
               <a-button @click="updateCancel">取消</a-button>
-              <a-button type="primary" html-type="updateOk">更新</a-button>
+              <a-button
+                type="primary"
+                html-type="updateOk"
+                :loading="updateLoad"
+                >更新</a-button
+              >
             </a-space>
           </a-form-item>
         </a-form>
@@ -231,8 +236,8 @@
   // 部门树
   const deptTree = ref<[]>();
 
-  // 用户筛选表单
-  const userSearch = ref<UserQuery>({});
+  // 更新加载开关
+  const updateLoad = ref(false);
 
   const reloadData = async () => {
     await getSubjectTree().then((res: any) => {
@@ -259,22 +264,16 @@
   // 删除学科开关
   const deleteDeptVisible = ref(false);
 
-  // 抽屉开关
-  const userVisible = ref(false);
-
   const subjectRef = ref({});
   const subjectUpdateRef = ref({});
 
   const userStore = useUserStore();
-  const subject = ref<AddSubjectDTO>({
-    createBy: userStore.id,
-  });
+  const subject = ref<AddSubjectDTO>({});
   const updateSubjectForm = ref<UpdateSubjectDTO>({
     subject: {
       title: '',
       description: '',
       deptCode: '',
-      updateBy: userStore.id,
     },
   });
   const deleteSubjectForm = ref<string>();
@@ -292,6 +291,7 @@
     updateSubjectForm.value = {
       id: record.id,
       subject: {
+        id: record.id,
         title: record.title,
         deptCode: record.deptCode,
         deptText: record.deptText,
@@ -308,10 +308,14 @@
   };
 
   // 查询学科
-  const searchSubject = async () => {
-    await loadDataList(searchSubjectForm.value).then((res: any) => {
-      data.value = res.data.list;
-    });
+  const searchSubject = async (value: string) => {
+    if (value === '') {
+      await reloadData();
+    } else {
+      await loadDataList(searchSubjectForm.value).then((res: any) => {
+        data.value = res.data.list;
+      });
+    }
   };
 
   // 添加学科确认
@@ -339,19 +343,11 @@
   // 更新学科确认
   const updateOk = async ({ values, errors }: any) => {
     if (!errors) {
+      updateLoad.value = true;
       await updateSubjectById(updateSubjectForm.value).then(
         async (res: any) => {
-          if (res.data === true) {
-            Message.success({
-              content: '更新成功',
-            });
-            await reloadData();
-          } else {
-            Message.error({
-              content: '更新失败',
-            });
-            await reloadData();
-          }
+          updateLoad.value = false;
+          await reloadData();
         }
       );
       updateDeptVisible.value = false;
@@ -393,30 +389,10 @@
     searchKey: string,
     nodeData: DepartmentTreeVO
   ): boolean => {
-    // console.log('searchKey', searchKey);
-    // console.log('nodeData', nodeData.deptLevel);
-    // if (nodeData.deptLevel === 1) {
-    //   return true;
-    // }
+    if (nodeData.deptLevel === 1) {
+      return true;
+    }
     return false;
-  };
-
-  // 打开抽屉的时候加载当前学科下的所有用户列表
-  const loadUserList = async (deptCode: string) => {
-    // userSearch.value.deptCode = deptCode;
-    // userSearch.value.userNameFuzzy = '';
-    // userSearch.value.role = '';
-    // await getDeptUserList(userSearch.value).then((res: any) => {
-    //   userList.value = res.data;
-    // });
-    // userVisible.value = true;
-  };
-
-  // 搜索用户
-  const searchUserList = async () => {
-    // await getDeptUserList(userSearch.value).then((res: any) => {
-    //   userList.value = res.data;
-    // });
   };
 </script>
 
