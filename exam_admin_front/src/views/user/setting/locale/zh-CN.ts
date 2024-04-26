@@ -1,5 +1,6 @@
 export default {
   'menu.user.setting': '用户设置',
+  'menu.user.retrievePassword': '找回密码',
   'userSetting.menu.title.info': '个人信息',
   'userSetting.menu.title.account': '账号设置',
   'userSetting.menu.title.password': '密码',

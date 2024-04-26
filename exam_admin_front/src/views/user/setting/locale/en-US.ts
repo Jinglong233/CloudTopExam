@@ -1,5 +1,8 @@
+import { retrievePassword } from '@/api/user';
+
 export default {
   'menu.user.setting': 'User Setting',
+  'menu.user.retrievePassword': 'Retrieve Password',
   'userSetting.menu.title.info': 'Personal Information',
   'userSetting.menu.title.account': 'Account Setting',
   'userSetting.menu.title.password': 'Password',

@@ -5,8 +5,8 @@ import { UserQuery } from '@/types/model/query/UserQuery';
 import { User } from '@/types/model/po/User';
 import { UpdateUserDTO } from '@/types/model/dto/UpdateUserDTO';
 import { UpdateUserPasswordDTO } from '@/types/model/dto/UpdateUserPasswordDTO';
-import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
-import { UpdateEmailDTO } from '@/types/model/dto/UpdateEmailDTO';
+import { CheckEmailCodeDTO } from '@/types/model/dto/CheckEmailCodeDTO';
+import { RetrievePasswordDTO } from '@/types/model/dto/RetrievePasswordDTO';
 
 export interface LoginData {
   userName: string;
@@ -93,10 +93,17 @@ export function updateUserPassword(
 }
 
 /**
- * 发送验证码
+ * 发送解绑邮箱验证码
  */
-export function getEmailCode(email: string) {
-  return axios.post<boolean>('/api/user/getEmailCode', email, {
+export function getUnBindEmailCode() {
+  return axios.post<boolean>('/api/user/getUnBindEmailCode');
+}
+
+/**
+ * 获取绑定邮箱验证码
+ */
+export function getBindEmailCode(email: string) {
+  return axios.post<boolean>('/api/user/getBindEmailCode', email, {
     headers: {
       'Content-Type': 'text/plain',
     },
@@ -104,8 +111,34 @@ export function getEmailCode(email: string) {
 }
 
 /**
- * 更新绑定邮箱
+ * 绑定邮箱
  */
-export function updateUserEmail(updateEmailDTO: UpdateEmailDTO) {
-  return axios.post<boolean>('/api/user/updateUserEmail', updateEmailDTO);
+export function bindUserEmail(checkEmailCodeDTO: CheckEmailCodeDTO) {
+  return axios.post<boolean>('/api/user/bindUserEmail', checkEmailCodeDTO);
+}
+
+/**
+ * 解绑邮箱
+ */
+export function unBindUserEmail(checkEmailCodeDTO: CheckEmailCodeDTO) {
+  return axios.post<boolean>('/api/user/unBindUserEmail', checkEmailCodeDTO);
+}
+
+/**
+ * 获取找回密码邮箱验证码
+ */
+export function getRetrievePasswordCode(
+  retrievePasswordDTO: RetrievePasswordDTO
+) {
+  return axios.post<boolean>(
+    '/api/user/getRetrievePasswordCode',
+    retrievePasswordDTO
+  );
+}
+
+/**
+ * 找回密码
+ */
+export function retrievePassword(retrievePasswordDTO: RetrievePasswordDTO) {
+  return axios.post<boolean>('/api/user/retrievePassword', retrievePasswordDTO);
 }

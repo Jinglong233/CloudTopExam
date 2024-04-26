@@ -5,7 +5,7 @@
         alt="logo"
         src="//p3-armor.byteimg.com/tos-cn-i-49unhts6dw/dfdba5317c0c20ce20e64fac803d52bc.svg~tplv-49unhts6dw-image.image"
       />
-      <div class="logo-text">Arco Design Pro</div>
+      <div class="logo-text">Cloud Top Exam</div>
     </div>
     <LoginBanner />
     <div class="content">

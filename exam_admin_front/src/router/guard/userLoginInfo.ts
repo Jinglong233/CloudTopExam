@@ -26,7 +26,7 @@ export default function setupUserLoginInfoGuard(router: Router) {
         }
       }
     } else {
-      if (to.name === 'login') {
+      if (to.name === 'login' || to.name === 'RetrievePassword') {
         next();
         return;
       }

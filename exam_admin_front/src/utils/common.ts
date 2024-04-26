@@ -91,3 +91,19 @@ export function removeObjByProperty(
   // 转换代理对象为普通数组
   return temp.map((obj: any) => ({ ...obj }));
 }
+
+/**
+ * 隐藏邮箱
+ * @param email
+ */
+export function maskEmail(email: string) {
+  if (!email) {
+    return '';
+  }
+  const [localPart, domain] = email.split('@');
+  const maskedLocalPart =
+    localPart.slice(0, 2) +
+    '*'.repeat(Math.max(0, localPart.length - 4)) +
+    localPart.slice(-2);
+  return `${maskedLocalPart}@${domain}`;
+}

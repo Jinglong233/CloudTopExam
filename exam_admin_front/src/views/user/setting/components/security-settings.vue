@@ -14,7 +14,7 @@
             </a-typography-paragraph>
           </div>
           <div class="operation">
-            <a-link @click="startUpdate('password')">
+            <a-link @click="startBind('password')">
               {{ $t('userSetting.SecuritySettings.button.update') }}
             </a-link>
           </div>
@@ -35,7 +35,7 @@
             </a-typography-paragraph>
           </div>
           <div class="operation">
-            <a-link @click="startUpdate('phone')">
+            <a-link @click="startBind('phone')">
               {{ $t('userSetting.SecuritySettings.button.update') }}
             </a-link>
           </div>
@@ -51,25 +51,30 @@
         </template>
         <template #description>
           <div class="content">
-            <a-typography-paragraph class="tip">
+            <a-typography-paragraph v-if="!userStore.email" class="tip">
               {{ $t('userSetting.SecuritySettings.placeholder.email') }}
+            </a-typography-paragraph>
+            <a-typography-paragraph v-else>
+              已绑定：{{ maskEmail(userStore.email) }}
             </a-typography-paragraph>
           </div>
           <div class="operation">
-            <a-link @click="startUpdate('email')">
-              {{ $t('userSetting.SecuritySettings.button.update') }}
+            <a-link v-if="!userStore.email" @click="startBind('email')">
+              绑定
             </a-link>
+            <a-link v-else @click="startUnBind('email')"> 解绑 </a-link>
           </div>
         </template>
       </a-list-item-meta>
     </a-list-item>
   </a-list>
+  <!--绑定对话框-->
   <a-modal
-    :visible="modalVisible"
-    ok-text="确认修改"
+    :visible="bindVisible"
+    ok-text="确认绑定"
     :ok-loading="loading"
-    @cancel="modalVisible = false"
-    @ok="confirmUpdate"
+    @cancel="bindVisible = false"
+    @ok="confirmBind"
   >
     <template #title>
       <template v-if="currentIndex === 'password'">修改密码</template>
@@ -101,74 +106,117 @@
         />
       </a-form-item>
     </a-form>
+    <!--手机相关-->
     <a-form v-if="currentIndex === 'phone'"></a-form>
+    <!--邮箱相关-->
     <a-form
       v-if="currentIndex === 'email'"
       ref="emailRef"
       :model="bindEmailForm"
     >
-      <div v-if="userStore.email">
-        <a-row>
-          <a-space>
-            {{ userStore.email }}
-          </a-space>
-        </a-row>
-        <a-row>
+      <a-row>
+        <a-space> 您还未绑定邮箱 </a-space>
+      </a-row>
+      <a-row>
+        <a-form-item
+          :rules="[
+            { required: true, message: '邮箱不能为空' },
+            { type: 'email', message: '请输入正确的邮箱地址' },
+          ]"
+        >
+          <a-input v-model="bindEmailForm.email" placeholder="请输入QQ邮箱" />
+        </a-form-item>
+        <a-form-item
+          :rules="[
+            { required: true, message: '验证码不能为空' },
+            { type: 'number', length: 5 },
+          ]"
+        >
           <a-input-search
+            v-model="bindEmailForm.code"
             :style="{ width: '320px' }"
             placeholder="请输入邮箱验证码"
-            button-text="获取验证码"
             search-button
-          />
-        </a-row>
-      </div>
-      <div v-else>
-        <a-row>
-          <a-space> 您还未绑定邮箱 </a-space>
-        </a-row>
-        <a-row>
-          <a-form-item
-            :rules="[
-              { required: true, message: '邮箱不能为空' },
-              { type: 'email', message: '请输入正确的邮箱地址' },
-            ]"
+            button-text="获取验证码"
+            :loading="getCodeLoading"
+            :button-props="{
+              disabled: setCode,
+            }"
+            @search="sendBindEmailCode"
           >
-            <a-input v-model="bindEmailForm.email" placeholder="请输入QQ邮箱" />
-          </a-form-item>
-          <a-form-item
-            :rules="[
-              { required: true, message: '验证码不能为空' },
-              { type: 'number', length: 5 },
-            ]"
-          >
-            <a-input-search
-              v-model="bindEmailForm.code"
-              :style="{ width: '320px' }"
-              placeholder="请输入邮箱验证码"
-              search-button
-              button-text="获取验证码"
-              :button-props="{
-                disabled: setCode,
+            <template #button-icon>
+              <a-countdown
+                v-if="setCode"
+                :value="Date.now() + 60000"
+                format="ss"
+                :now="Date.now()"
+                :value-style="{
+                  color: '#f2f3f5',
+                  fontSize: '15px',
+                }"
+                @finish="setCode = false"
+              />
+            </template>
+          </a-input-search>
+        </a-form-item>
+      </a-row>
+    </a-form>
+  </a-modal>
+
+  <!--解绑对话框-->
+  <a-modal
+    :visible="unBindVisible"
+    ok-text="确认解绑"
+    :ok-loading="loading"
+    @cancel="unBindVisible = false"
+    @ok="confirmUnBind"
+  >
+    <template #title>
+      <template v-if="currentIndex === 'password'">修改密码</template>
+      <template v-if="currentIndex === 'phone'">修改手机号</template>
+      <template v-if="currentIndex === 'email'">修改/绑定邮箱</template>
+    </template>
+    <!--手机相关-->
+    <a-form v-if="currentIndex === 'phone'"></a-form>
+    <!--邮箱相关-->
+    <a-form
+      v-if="currentIndex === 'email'"
+      ref="unBindEmailRef"
+      :model="bindEmailForm"
+    >
+      <a-row>
+        <a-space>
+          {{ maskEmail(userStore.email) }}
+        </a-space>
+      </a-row>
+      <a-row>
+        <a-input-search
+          v-model="bindEmailForm.code"
+          :style="{ width: '320px' }"
+          placeholder="请输入邮箱验证码"
+          search-button
+          button-text="获取验证码"
+          :button-props="{
+            disabled: setCode,
+          }"
+          :loading="getCodeLoading"
+          @search="sendUnBindEmailCode"
+        >
+          <template #button-icon>
+            <a-countdown
+              v-if="setCode"
+              :value="Date.now() + 60000"
+              format="ss"
+              :now="Date.now()"
+              :value-style="{
+                color: '#f2f3f5',
+                fontSize: '15px',
               }"
-              @search="sendCode"
-            >
-              <template #button-icon>
-                <a-countdown
-                  v-if="setCode"
-                  :value="Date.now() + 60000"
-                  format="ss"
-                  :now="Date.now()"
-                  :value-style="{
-                    color: '#f2f3f5',
-                    fontSize: '15px',
-                  }"
-                  @finish="setCode = false"
-                />
-              </template>
-            </a-input-search>
-          </a-form-item>
-        </a-row>
-      </div>
+              @finish="setCode = false"
+            />
+          </template>
+        </a-input-search>
+      </a-row>
     </a-form>
   </a-modal>
 </template>
@@ -177,26 +225,32 @@
   import { ref } from 'vue';
   import { Message, ValidatedError } from '@arco-design/web-vue';
   import {
-    getEmailCode,
-    updateUserEmail,
+    bindUserEmail,
+    getBindEmailCode,
+    getUnBindEmailCode,
+    unBindUserEmail,
     updateUserPassword,
   } from '@/api/user';
   import { useUserStore } from '@/store';
   import useUser from '@/hooks/user';
   import { useRouter } from 'vue-router';
+  import { maskEmail } from '@/utils/common';
 
   const userStore = useUserStore();
   const router = useRouter();
 
-  const modalVisible = ref(false);
+  const bindVisible = ref(false);
+  const unBindVisible = ref(false);
   const currentIndex = ref();
   const passwordRef = ref();
   const emailRef = ref();
+  const unBindEmailRef = ref();
 
   // 发送验证码禁用状态
   const setCode = ref(false);
 
   const loading = ref(false);
+  const getCodeLoading = ref(false);
 
   const updatePasswordForm = ref({
     oldPassword: '',
@@ -208,9 +262,22 @@
     email: userStore.email,
     code: '',
   });
-  const startUpdate = (index: string) => {
+
+  // 重置所状态
+  const resetAllState = () => {
+    bindEmailForm.value.email = '';
+    bindEmailForm.value.code = '';
+    setCode.value = false;
+    loading.value = false;
+  };
+
+  const startBind = (index: string) => {
     currentIndex.value = index;
-    modalVisible.value = true;
+    bindVisible.value = true;
+  };
+  const startUnBind = (index: string) => {
+    currentIndex.value = index;
+    unBindVisible.value = true;
   };
 
   const passwordRules = {
@@ -219,26 +286,42 @@
     confirmPassword: { required: true, message: '确认密码为空' },
   };
 
-  // 发送验证码
-  const sendCode = async () => {
-    setCode.value = true;
+  // 获取邮箱绑定验证码
+  const sendBindEmailCode = async () => {
+    getCodeLoading.value = true;
     // 发送验证码
-    await getEmailCode(bindEmailForm.value.email as string).then((res: any) => {
+    await getBindEmailCode(bindEmailForm.value.email as string).then(
+      (res: any) => {
+        if (res.data === true) {
+          Message.success({
+            content: '验证码发送成功',
+            duration: 2000,
+          });
+          setCode.value = true;
+        }
+      }
+    );
+    getCodeLoading.value = false;
+  };
+
+  // 获取邮箱解绑验证码
+  const sendUnBindEmailCode = async () => {
+    getCodeLoading.value = true;
+
+    // 发送验证码
+    await getUnBindEmailCode().then((res: any) => {
       if (res.data === true) {
         Message.success({
           content: '验证码发送成功',
           duration: 2000,
         });
-      } else {
-        Message.error({
-          content: res.info,
-          duration: 2000,
-        });
+        setCode.value = true;
       }
     });
+    getCodeLoading.value = false;
   };
 
-  const confirmUpdate = () => {
+  const confirmBind = () => {
     // 修改密码的
     if (currentIndex.value === 'password') {
       // 先校验表单
@@ -285,19 +368,18 @@
       );
     }
 
-    // 修改/绑定邮箱的
+    // 绑定邮箱的
     if (currentIndex.value === 'email') {
       if (userStore.email) {
         // 修改邮箱的
       } else {
         // 绑定邮箱的
-        // 先校验表单
         emailRef.value.validate(
           async (errors: undefined | Record<string, ValidatedError>) => {
             if (!errors) {
+              loading.value = true;
               // 校验通过
-              await updateUserEmail({
-                userId: userStore.id,
+              await bindUserEmail({
                 email: bindEmailForm.value.email,
                 code: bindEmailForm.value.code,
               }).then((res: any) => {
@@ -306,7 +388,8 @@
                     content: '绑定成功',
                     duration: 2000,
                   });
-                  modalVisible.value = false;
+                  bindVisible.value = false;
+                  resetAllState();
                   userStore.reloadState();
                 } else {
                   Message.error({
@@ -315,12 +398,49 @@
                   });
                 }
               });
+              loading.value = false;
             } else {
               // 校验失败
             }
           }
         );
       }
+    }
+  };
+
+  const confirmUnBind = () => {
+    // 解绑邮箱的
+    if (currentIndex.value === 'email') {
+      unBindEmailRef.value.validate(
+        async (errors: undefined | Record<string, ValidatedError>) => {
+          if (!errors) {
+            // 校验通过
+            loading.value = true;
+            await unBindUserEmail({
+              email: userStore.email,
+              code: bindEmailForm.value.code,
+            }).then((res: any) => {
+              if (res.data === true) {
+                Message.success({
+                  content: '解绑成功',
+                  duration: 2000,
+                });
+                unBindVisible.value = false;
+                resetAllState();
+                userStore.reloadState();
+              } else {
+                Message.error({
+                  content: res.info,
+                  duration: 2000,
+                });
+              }
+            });
+            loading.value = false;
+          } else {
+            // 校验失败
+          }
+        }
+      );
     }
   };
 </script>

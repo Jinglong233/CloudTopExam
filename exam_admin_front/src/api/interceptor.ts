@@ -15,6 +15,7 @@ if (import.meta.env.VITE_API_BASE_URL) {
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 }
 
+// 请求拦截器
 axios.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     const token = getToken();
