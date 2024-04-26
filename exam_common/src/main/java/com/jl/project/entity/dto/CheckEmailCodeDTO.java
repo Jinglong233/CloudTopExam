@@ -5,40 +5,22 @@ import com.jl.project.enums.VerifyRegexEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * 更新绑定邮箱
+ * 检验验证码传输对象
  */
-@Schema(description = "更新绑定邮箱")
-public class UpdateEmailDTO {
-
-    /**
-     * 用户Id
-     */
-    @Schema(description = "用户Id")
-    @VerifyParam(require = true)
-    private String userId;
-
-
+@Schema(description = "检验验证码传输对象")
+public class CheckEmailCodeDTO {
     /**
      * 邮箱
      */
     @Schema(description = "邮箱")
-    @VerifyParam(require = true,regex = VerifyRegexEnum.EMAIL)
+    @VerifyParam(require = true, regex = VerifyRegexEnum.EMAIL)
     private String email;
-
     /**
      * 验证码
      */
     @Schema(description = "验证码")
     @VerifyParam(require = true)
     private String code;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public String getEmail() {
         return email;

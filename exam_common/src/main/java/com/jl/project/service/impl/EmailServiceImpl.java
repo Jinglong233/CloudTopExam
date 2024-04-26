@@ -80,7 +80,7 @@ public class EmailServiceImpl implements EmailService {
         // 需要将此验证码存到redis
         Boolean ifAbsent = stringRedisTemplate.opsForValue().setIfAbsent(MailConstant.CODE_PREFIX + email, code, 1, TimeUnit.MINUTES);
         if (!ifAbsent) {
-            throw new BusinessException("请输入正确验证码");
+            throw new BusinessException("验证码已发送");
         }
         // 发送验证码
         sendMail(mailContent, javaMailSender, from);
@@ -178,6 +178,8 @@ public class EmailServiceImpl implements EmailService {
         if (!rightCode.equals(code)) {
             throw new BusinessException("邮箱验证码不正确");
         }
+        // 移除该验证码
+        stringRedisTemplate.delete(MailConstant.CODE_PREFIX + email);
         return true;
     }
 

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
@@ -355,9 +356,9 @@ public class UserServiceImpl implements UserService {
      */
     public Boolean deleteUserById(String id) throws BusinessException {
         User user = userMapper.selectById(id);
-        if(user!=null){
+        if (user != null) {
             // 判断要删除的用户是否是管理员
-            if("admin".equals(user.getRole())){
+            if ("admin".equals(user.getRole())) {
                 throw new BusinessException("无权限删除管理员");
             }
         }
@@ -519,43 +520,167 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean getEmailCode(String email) throws BusinessException {
-        emailService.sendEmailCode(email);
+    public Boolean getUnBindEmailCode() throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        emailService.sendEmailCode(loginUserInfo.getEmail());
         return true;
     }
 
     @Override
-    public Boolean updateUserEmail(UpdateEmailDTO updateEmailDTO) throws BusinessException {
+    public Boolean getBindEmailCode(String email) throws BusinessException {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
-        String userId = updateEmailDTO.getUserId();
-        // 检测是否是本人
         LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        if (!userId.equals(loginUserInfo.getId())) {
-            throw new BusinessException("无权限操作");
+        // 检验登录用户是否已经绑定邮箱
+        UserQuery userQuery = new UserQuery();
+        userQuery.setEmail(email);
+        User user = userMapper.selectById(loginUserInfo.getId());
+        if (user == null) {
+            throw new BusinessException("该用户信息有误，请联系管理员");
         }
-        String email = updateEmailDTO.getEmail();
-        String code = updateEmailDTO.getCode();
 
-        // 获取验证码
-        Boolean isRight = emailService.checkCode(email, code);
+        String oldEmail = user.getEmail();
+        if (!StrUtil.isEmpty(oldEmail)) {
+            throw new BusinessException("您已绑定邮箱");
+        }
 
+
+        // 查询该邮箱是否被注册过
+        userQuery.setEmail(email);
+        List<User> list = userMapper.selectList(userQuery);
+        if (list != null && list.size() != 0) {
+            throw new BusinessException("该邮箱已被绑定");
+        }
+
+        // 发送验证码
+        return emailService.sendEmailCode(email);
+    }
+
+
+    @Override
+    public Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO) {
+        String password = retrievePasswordDTO.getPassword();
+        if (StrUtil.isEmpty(password)) {
+            throw new BusinessException("密码为空");
+        }
+        // 获取邮箱+用户名（唯一凭证）
+        String email = retrievePasswordDTO.getEmail();
+        if (StrUtil.isEmpty(email)) {
+            throw new BusinessException("邮箱信息为空，请尝试重新操作");
+        }
+        String userName = retrievePasswordDTO.getUserName();
+        if (StrUtil.isEmpty(userName)) {
+            throw new BusinessException("用户名为空，请尝试重新操作");
+        }
+
+        UserQuery userQuery = new UserQuery();
+        userQuery.setEmail(email);
+        userQuery.setUserName(userName);
+        List<User> userList = userMapper.selectList(userQuery);
+        if (userList == null || userList.size() == 0) {
+            throw new BusinessException("用户信息不存在");
+        }
+        User user = userList.get(0);
+        String newPassword = MD5Util.getMD5Encode(password, user.getSalt());
+        user.setPassword(newPassword);
+        Integer result = userMapper.updateById(user, user.getId());
+        if (result <= 0) {
+            throw new BusinessException("更新密码失败");
+        }
+        // 更新redis中的信息
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+        return true;
+    }
+
+    @Override
+    public Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
+        Boolean isRight =
+                emailService.checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
         if (!isRight) {
             throw new BusinessException("验证码错误");
         }
 
-        // 查询该邮箱是否被注册过
-        UserQuery userQuery = new UserQuery();
-        userQuery.setEmail(email);
-        List<User> list = userMapper.selectList(userQuery);
-        if (!list.isEmpty()) {
-            throw new BusinessException("该邮箱已被绑定");
+        // 更新该用户的邮箱
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        String userId = loginUserInfo.getId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("当前登录用户信息有误");
         }
-        User user = new User();
-        user.setId(userId);
-        user.setEmail(email);
+        user.setEmail(checkEmailCodeDTO.getEmail());
+
         Integer result = userMapper.updateById(user, userId);
-        return result > 0;
+        if (result <= 0) {
+            throw new BusinessException("邮箱绑定失败");
+        }
+
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+
+        return true;
+    }
+
+    @Override
+    public Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO) {
+        // 校验用户
+        String userName = retrievePasswordDTO.getUserName();
+        UserQuery userQuery = new UserQuery();
+        userQuery.setUserName(userName);
+        userQuery.setRole(RoleType.ADMIN.getValue());
+        List<User> list = userMapper.selectList(userQuery);
+        if (list == null || list.size() == 0) {
+            throw new BusinessException("该用户不存在");
+        }
+
+
+        // 校验邮箱
+        User user = list.get(0);
+        String email = user.getEmail();
+        if (StrUtil.isEmpty(email)) {
+            throw new BusinessException("该用户没有绑定邮箱");
+        }
+        String toEmail = retrievePasswordDTO.getEmail();
+        if (!toEmail.equals(email)) {
+            throw new BusinessException("输入的邮箱有误");
+        }
+        // 发送验证码
+        return emailService.sendEmailCode(email);
+
+    }
+
+    @Override
+    public Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
+        Boolean isRight =
+                emailService.checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
+        if (!isRight) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 更新该用户的邮箱
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        String userId = loginUserInfo.getId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("当前登录用户信息有误");
+        }
+        user.setEmail("");
+
+        Integer result = userMapper.updateById(user, userId);
+        if (result <= 0) {
+            throw new BusinessException("邮箱解绑失败");
+        }
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+
+        return true;
     }
 
 

@@ -110,7 +110,15 @@ public interface UserService {
 
     Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO);
 
-    Boolean getEmailCode(String email);
+    Boolean getUnBindEmailCode();
 
-    Boolean updateUserEmail(UpdateEmailDTO updateEmailDTO);
+    Boolean getBindEmailCode(String email);
+
+    Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO);
+
+    Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
+
+    Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO);
+
+    Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
 }

@@ -78,7 +78,7 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "注册")
     @RequestMapping("register")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true,checkParams = true)
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
     public ResponseVO register(@RequestBody @VerifyParam AddUserDTO addUserDTO) throws BusinessException {
         Boolean result = userService.register(addUserDTO);
         return getSuccessResponseVO(result, "添加成功");
@@ -164,7 +164,7 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "获取用户总数")
     @RequestMapping("userCount")
-    @GlobalInterceptor(checkAdmin = true, checkParams = true)
+    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
     public ResponseVO getUserCount(@RequestBody @VerifyParam(require = true) UserQuery userQuery) throws BusinessException {
         Integer result = userService.getUserCount(userQuery);
         return getSuccessResponseVO(result);
@@ -177,7 +177,7 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "修改用户密码")
     @RequestMapping("updateUserPassword")
-    @GlobalInterceptor(checkLogin = true)
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
     public ResponseVO updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
         Boolean result = userService.updateUserPassword(updateUserPasswordDTO);
         return getSuccessResponseVO(result);
@@ -188,25 +188,79 @@ public class UserController extends ABaseController {
      *
      * @return
      */
-    @ApiOperation(value = "获取邮箱验证码")
-    @RequestMapping("getEmailCode")
+    @ApiOperation(value = "获取解绑邮箱验证码")
+    @RequestMapping("getUnBindEmailCode")
     @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getEmailCode(@RequestBody @VerifyParam(require = true,
-            regex = VerifyRegexEnum.EMAIL) String email) throws BusinessException {
-        Boolean result = userService.getEmailCode(email);
+    public ResponseVO getUnBindEmailCode() throws BusinessException {
+        Boolean result = userService.getUnBindEmailCode();
         return getSuccessResponseVO(result);
     }
 
     /**
-     * 更新/绑定邮箱
+     * 获取绑定邮箱验证码
      *
      * @return
      */
-    @ApiOperation(value = "更新/绑定邮箱")
-    @RequestMapping("updateUserEmail")
+    @ApiOperation(value = "获取绑定邮箱验证码")
+    @RequestMapping("getBindEmailCode")
     @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO updateUserEmail(@RequestBody @VerifyParam(require = true) UpdateEmailDTO updateEmailDTO) throws BusinessException {
-        Boolean result = userService.updateUserEmail(updateEmailDTO);
+    public ResponseVO getBindEmailCode(@RequestBody @VerifyParam(require = true, regex = VerifyRegexEnum.EMAIL) String email) throws BusinessException {
+        Boolean result = userService.getBindEmailCode(email);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 绑定邮箱
+     *
+     * @return
+     */
+    @ApiOperation(value = "绑定邮箱操作")
+    @RequestMapping("bindUserEmail")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO bindUserEmail(@RequestBody @VerifyParam CheckEmailCodeDTO checkEmailCodeDTO) throws BusinessException {
+        Boolean result = userService.bindUserEmail(checkEmailCodeDTO);
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 解绑邮箱操作
+     *
+     * @return
+     */
+    @ApiOperation(value = "解绑邮箱操作")
+    @RequestMapping("unBindUserEmail")
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO unBindUserEmail(@RequestBody @VerifyParam CheckEmailCodeDTO checkEmailCodeDTO) throws BusinessException {
+        Boolean result = userService.unBindUserEmail(checkEmailCodeDTO);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 获取找回密码邮箱验证码
+     * @param retrievePasswordDTO
+     * @return
+     * @throws BusinessException
+     */
+    @ApiOperation(value = "获取找回密码邮箱验证码")
+    @RequestMapping("getRetrievePasswordCode")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
+    public ResponseVO getRetrievePasswordCode(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+        Boolean result = userService.getRetrievePasswordCode(retrievePasswordDTO);
+        return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 找回密码
+     *
+     * @return
+     */
+    @ApiOperation(value = "找回密码")
+    @RequestMapping("retrievePassword")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
+    public ResponseVO retrievePassword(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+        Boolean result = userService.retrievePassword(retrievePasswordDTO);
         return getSuccessResponseVO(result);
     }
 

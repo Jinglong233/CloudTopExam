@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.enums.ResponseCodeEnum;
+import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -57,7 +58,7 @@ public class UserInfoUtil {
      */
     public static Boolean isAdmin(HttpServletRequest request, StringRedisTemplate redisTemplate) {
         String loginUserRole = getLoginUserRole(request, redisTemplate);
-        return "admin".equals(loginUserRole);
+        return RoleType.ADMIN.getValue().equals(loginUserRole);
     }
 
 
@@ -90,4 +91,20 @@ public class UserInfoUtil {
         return false;
     }
 
+
+    /**
+     * 更新redis中当前登录用户的信息
+     *
+     * @param request
+     * @param redisTemplate
+     * @param user
+     */
+    public static void refreshRedisUserInfo(HttpServletRequest request, StringRedisTemplate redisTemplate, LoginResponseVo user) {
+        String token = request.getHeader("Authorization");
+        user.setToken(token);
+        // 更新该登录用户缓存的信息
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+        redisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
+    }
 }
