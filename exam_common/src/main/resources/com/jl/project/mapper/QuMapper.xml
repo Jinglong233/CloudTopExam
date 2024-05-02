@@ -362,6 +362,8 @@
 		from qu where id=#{id}
 	</select>
 
+
+
 	<!--根据Id更新-->
 	<update id="updateById" parameterType="com.jl.project.entity.po.Qu">
 		update qu
@@ -410,5 +412,17 @@
 	<delete id="deleteById">
 		delete from qu where id=#{id}
 	</delete>
+
+
+	<!-- 根据给定的题目列表返回对应的问题列表（排除填空和简答） -->
+	<select id="getQuListByIds" resultType="com.jl.project.entity.po.Qu">
+        SELECT * FROM qu
+        WHERE id IN
+        <foreach collection="quIds" item="quId" open="(" separator="," close=")">
+            #{quId}
+        </foreach>
+		AND qu_type != 5
+    	AND qu_type != 4
+    </select>
 </mapper>
 

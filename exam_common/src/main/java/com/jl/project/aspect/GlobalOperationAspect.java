@@ -64,9 +64,9 @@ public class GlobalOperationAspect {
             }
 
 
-            // 校验登录
-            if (interceptor.checkLogin() || interceptor.checkAdmin()) {
-                checkLogin(interceptor.checkAdmin());
+            // 校验登录（同时也检测了管理员、学生）
+            if (interceptor.checkLogin() || interceptor.checkAdmin() || interceptor.checkStudent()) {
+                checkLogin(interceptor.checkAdmin(),interceptor.checkStudent());
             }
 
             // 校验参数
@@ -87,10 +87,12 @@ public class GlobalOperationAspect {
 
     /**
      * 检查是否登录
-     * @param checkAdmin 是否需要管理员身份
+     *
+     * @param checkAdmin   是否需要管理员身份
+     * @param checkStudent 是否需要学生身份
      * @throws BusinessException
      */
-    private void checkLogin(Boolean checkAdmin) throws BusinessException {
+    private void checkLogin(Boolean checkAdmin, Boolean checkStudent) throws BusinessException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader("Authorization");
         if (StrUtil.isEmpty(token)) {
@@ -116,11 +118,17 @@ public class GlobalOperationAspect {
         if (checkAdmin && !"admin".equals(user.getRole())) {
             throw new BusinessException(ResponseCodeEnum.CODE_404);
         }
+
+        // 检验是否需要学生身份
+        if (checkStudent && !"student".equals(user.getRole())) {
+            throw new BusinessException(ResponseCodeEnum.CODE_404);
+        }
     }
 
 
     /**
      * 校验参数
+     *
      * @param m
      * @param arguments
      * @throws BusinessException

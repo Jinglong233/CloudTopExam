@@ -30,4 +30,11 @@ public @interface GlobalInterceptor {
      */
     boolean checkAdmin() default false;
 
+
+    /**
+     * 校验学生
+     *
+     * @return
+     */
+    boolean checkStudent() default false;
 }

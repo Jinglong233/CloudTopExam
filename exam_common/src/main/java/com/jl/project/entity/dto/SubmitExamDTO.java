@@ -1,5 +1,6 @@
 package com.jl.project.entity.dto;
 
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.Qu;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -14,6 +15,7 @@ public class SubmitExamDTO {
      * 考试记录Id
      */
     @Schema(description = "考试记录Id")
+    @VerifyParam(require = true)
     private String examRecordId;
     /**
      * 题目列表

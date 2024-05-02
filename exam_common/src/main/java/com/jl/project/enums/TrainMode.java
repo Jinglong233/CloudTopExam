@@ -2,6 +2,8 @@ package com.jl.project.enums;
 
 public enum TrainMode {
 
+    INTELLIGENT("智能推荐", 0),
+
 
     SEQUENCE("顺序训练", 1),
 

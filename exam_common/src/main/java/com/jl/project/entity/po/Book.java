@@ -36,6 +36,15 @@ public class Book implements Serializable{
 	@Schema(description = "答错次数")
 	private Integer wrongCount;
 
+	public Book() {
+	}
+
+	public Book(String userId, String quId, Integer wrongCount) {
+		this.userId = userId;
+		this.quId = quId;
+		this.wrongCount = wrongCount;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -70,7 +79,11 @@ public class Book implements Serializable{
 
 	@Override
 	public String toString() {
-		return "ID:" + (id == null ? "空" : id) + ",用户ID:" + (userId == null ? "空" : userId) + ",题目ID:" + (quId == null ? "空" : quId) + ",答错次数:" + (wrongCount == null ? "空" : wrongCount) ;
+		return "Book{" +
+				"id='" + id + '\'' +
+				", userId='" + userId + '\'' +
+				", quId='" + quId + '\'' +
+				", wrongCount=" + wrongCount +
+				'}';
 	}
-
 }

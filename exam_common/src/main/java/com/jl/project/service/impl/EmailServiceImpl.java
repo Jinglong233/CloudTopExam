@@ -1,14 +1,19 @@
 package com.jl.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.jl.project.constant.MailConstant;
+import com.jl.project.entity.dto.CheckEmailCodeDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.EmailService;
 import com.jl.project.utils.CommonUtil;
 import com.jl.project.utils.MailUtil;
 import com.jl.project.utils.StringTools;
+import com.jl.project.utils.UserInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +21,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -172,7 +180,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Boolean checkCode(String email, String code) {
         String rightCode = stringRedisTemplate.opsForValue().get(MailConstant.CODE_PREFIX + email);
-        if(rightCode==null){
+        if (rightCode == null) {
             throw new BusinessException("验证码失效");
         }
         if (!rightCode.equals(code)) {
@@ -183,5 +191,103 @@ public class EmailServiceImpl implements EmailService {
         return true;
     }
 
+
+    @Override
+    public Boolean getUnBindEmailCode() throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        sendEmailCode(loginUserInfo.getEmail());
+        return true;
+    }
+
+    @Override
+    public Boolean getBindEmailCode(String email) throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        // 检验登录用户是否已经绑定邮箱
+        UserQuery userQuery = new UserQuery();
+        userQuery.setEmail(email);
+        User user = userMapper.selectById(loginUserInfo.getId());
+        if (user == null) {
+            throw new BusinessException("该用户信息有误，请联系管理员");
+        }
+
+        String oldEmail = user.getEmail();
+        if (!StrUtil.isEmpty(oldEmail)) {
+            throw new BusinessException("您已绑定邮箱");
+        }
+
+
+        // 查询该邮箱是否被注册过
+        userQuery.setEmail(email);
+        List<User> list = userMapper.selectList(userQuery);
+        if (list != null && list.size() != 0) {
+            throw new BusinessException("该邮箱已被绑定");
+        }
+
+        // 发送验证码
+        return sendEmailCode(email);
+    }
+
+
+    @Override
+    public Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
+        Boolean isRight = checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
+        if (!isRight) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 更新该用户的邮箱
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        String userId = loginUserInfo.getId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("当前登录用户信息有误");
+        }
+        user.setEmail(checkEmailCodeDTO.getEmail());
+
+        Integer result = userMapper.updateById(user, userId);
+        if (result <= 0) {
+            throw new BusinessException("邮箱绑定失败");
+        }
+
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+
+        return true;
+    }
+
+
+
+    @Override
+    public Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
+        Boolean isRight = checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
+        if (!isRight) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 更新该用户的邮箱
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        String userId = loginUserInfo.getId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("当前登录用户信息有误");
+        }
+        user.setEmail("");
+
+        Integer result = userMapper.updateById(user, userId);
+        if (result <= 0) {
+            throw new BusinessException("邮箱解绑失败");
+        }
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+
+        return true;
+    }
 
 }

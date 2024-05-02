@@ -1,5 +1,7 @@
 package com.jl.project.service;
 
+import com.jl.project.entity.dto.CheckEmailCodeDTO;
+import com.jl.project.entity.dto.RetrievePasswordDTO;
 import com.jl.project.entity.po.Exam;
 
 /**
@@ -33,4 +35,13 @@ public interface EmailService {
      * @return
      */
     Boolean checkCode(String email, String emailCode);
+
+    Boolean getUnBindEmailCode();
+
+    Boolean getBindEmailCode(String email);
+
+    Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
+
+    Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
+
 }
