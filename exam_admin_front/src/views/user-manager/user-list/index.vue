@@ -254,11 +254,7 @@
               </a-form-item>
             </a-col>
             <a-col :span="12">
-              <a-form-item
-                field="email"
-                label="邮箱"
-                :rules="[{ required: false, type: 'email' }]"
-              >
+              <a-form-item field="email" label="邮箱">
                 <a-input v-model="userInfoForm.email" />
               </a-form-item>
             </a-col>
@@ -435,7 +431,7 @@
   import {
     addUser,
     deleteUserByIb,
-    getUserList,
+    getDeptUserList,
     updateUserById,
   } from '@/api/user';
   import { UserQuery } from '@/types/model/query/UserQuery';
@@ -499,7 +495,8 @@
   const reloadUserList = async (userQuery: UserQuery) => {
     setLoading(true);
     permission.addRoleToQuery(userQuery);
-    await getUserList(userQuery).then((res: any) => {
+    // await getUserList(userQuery).then((res: any) => {
+    await getDeptUserList(userQuery).then((res: any) => {
       userList.value = res.data.list;
       pageInfo.value.total = res.data.totalCount;
       pageInfo.value.pageSize = res.data.pageSize;
@@ -591,17 +588,13 @@
   const handleView = (record: any) => {
     checkUserInfoVisible.value = true;
     userInfoForm.value = { ...record };
-    userInfoForm.value.password = '';
+    userInfoForm.value.password = undefined;
   };
 
-  // 头像上传组件引用
-  const avatarRef = ref();
   // 确认更改用户信息
   const handleOk = async () => {
     userInfoRef.value.validate().then(async (errors: any) => {
       if (!errors) {
-        // 上传头像
-        avatarRef.value.submit();
         userInfoForm.value.updateBy = userStore.id as string;
         // 更新用户信息
         await updateUserById({
@@ -609,6 +602,10 @@
           id: userInfoForm.value.id,
         }).then(async (res: any) => {
           if (res.data === true) {
+            Message.success({
+              content: '更新成功',
+              duration: 2000,
+            });
             checkUserInfoVisible.value = false;
             await reloadUserList({ ...pageInfo.value, ...userSearch.value });
           }
@@ -618,9 +615,6 @@
           content: '检验失败',
         });
       }
-      Message.error({
-        content: `错误信息：${errors}`,
-      });
     });
   };
 
@@ -669,25 +663,14 @@
     addUserVisible.value = false;
   };
 
-  watch(
-    userSearch.value,
-    async () => {
-      if (Array.isArray(userSearch.value.deptCodeFuzzy)) {
-        const code = userSearch.value.deptCodeFuzzy?.[0];
-        userSearch.value.deptCodeFuzzy = code;
-      }
-      /* await getDeptUserList(userSearch.value).then((res: any) => {
-        userList.value = res.data;
-      });
-      setLoading(false); */
-    },
-    { deep: true, immediate: true }
-  );
-
   // 监视查询数据及其页码变化
   watch(
     [pageInfo.value, userSearch.value],
     async ([newPageInfo, oldPageInfo], [newUserSearch, oldUserSearch]) => {
+      if (Array.isArray(userSearch.value.deptCodeFuzzy)) {
+        const code = userSearch.value.deptCodeFuzzy?.[0];
+        userSearch.value.deptCodeFuzzy = code;
+      }
       await reloadUserList({ ...pageInfo.value, ...userSearch.value });
     },
     { deep: true }

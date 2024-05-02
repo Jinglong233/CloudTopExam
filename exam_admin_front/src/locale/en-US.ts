@@ -18,7 +18,7 @@ import localeUserSetting from '@/views/user/setting/locale/en-US';
 
 import localeCorrectManager from '@/views/paper/correct-manager/locale/en-US';
 import localeUserManager from '@/views/user-manager/user-list/locale/en-US';
-import localeDepartment from '@/views/user-manager/deptment/locale/en-US';
+import localeDepartment from '@/views/user-manager/department/locale/en-US';
 import localeSubject from '@/views/user-manager/subject/locale/en-US';
 
 import localeQu from '@/views/repo/repo-manager/locale/en-US';

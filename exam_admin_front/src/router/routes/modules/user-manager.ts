@@ -25,7 +25,7 @@ const userManager: AppRouteRecordRaw = {
     {
       path: 'department', // The midline path complies with SEO specifications
       name: 'Department',
-      component: () => import('@/views/user-manager/deptment/index.vue'),
+      component: () => import('@/views/user-manager/department/index.vue'),
       meta: {
         locale: 'menu.userManager.department',
         requiresAuth: true,

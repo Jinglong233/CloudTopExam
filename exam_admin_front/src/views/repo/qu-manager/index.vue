@@ -14,7 +14,6 @@
           :placeholder="$t('quManager.placeholder.content')"
           style="width: 250px"
           :allow-clear="true"
-          @change="handleChange"
         />
         <!--题型-->
         <a-select
@@ -22,7 +21,6 @@
           :placeholder="$t('quManager.placeholder.quType')"
           allow-clear
           style="width: 250px"
-          @change="handleChange"
         >
           <a-option value="1">单选题</a-option>
           <a-option value="2">多选题</a-option>
@@ -37,7 +35,6 @@
           :placeholder="$t('quManager.placeholder.repo')"
           allow-clear
           style="width: 250px"
-          @change="handleChange"
         >
           <a-option v-for="repo in repoList" :key="repo.id" :value="repo.id">
             {{ repo.title }}
@@ -196,7 +193,7 @@
   const repoList = ref<Repo[]>([]);
 
   // 查询表单
-  const quSearch = ref<QuQuery>({});
+  const quSearch = ref<QuQuery>({} as QuQuery);
 
   // 选择的上传题库
   const uploadRepo = ref<string>('');
@@ -331,7 +328,6 @@
       content: '上传成功',
       duration: 2000,
     });
-    console.log('success', item);
   };
   // 文件上传失败回调函数
   const handleError = (item: FileItem) => {
@@ -339,7 +335,6 @@
       content: '上传失败',
       duration: 2000,
     });
-    console.log('error', item);
   };
 
   // 题目批量导入选择的题库改变的时候触发
@@ -347,21 +342,11 @@
     uploadRepo.value = repo;
   };
 
-  // 监视查询数据及其页码变化
-  /* watch(
-    [pageInfo.value, quSearch.value],
-    async ([newPageInfo, oldPageInfo], [newQuSearch, oldQuSearch]) => {
-      await reloadQuList({ ...pageInfo.value, ...quSearch.value });
-    }
-  ); */
-
   watch(pageInfo.value, async (newValue, oldValue) => {
-    console.log('pageInfo');
     await reloadQuList({ ...pageInfo.value, ...quSearch.value });
   });
 
   watch(quSearch.value, async (newValue, oldValue) => {
-    console.log('quSearch');
     await reloadQuList({ ...pageInfo.value, ...quSearch.value });
   });
 </script>

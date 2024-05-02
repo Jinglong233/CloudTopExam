@@ -19,7 +19,7 @@ import localeUserSetting from '@/views/user/setting/locale/zh-CN';
 import localeCorrectManager from '@/views/paper/correct-manager/locale/zh-CN';
 
 import localeUserManager from '@/views/user-manager/user-list/locale/zh-CN';
-import localeDepartment from '@/views/user-manager/deptment/locale/zh-CN';
+import localeDepartment from '@/views/user-manager/department/locale/zh-CN';
 import localeSubject from '@/views/user-manager/subject/locale/zh-CN';
 
 import localeQu from '@/views/repo/repo-manager/locale/zh-CN';

@@ -11,6 +11,6 @@
   "menuWidth": 220,
   "globalSettings": true,
   "device": "desktop",
-  "tabBar": true,
+  "tabBar": false,
   "menuFromServer": false
 }

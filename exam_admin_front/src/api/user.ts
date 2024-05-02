@@ -96,14 +96,14 @@ export function updateUserPassword(
  * 发送解绑邮箱验证码
  */
 export function getUnBindEmailCode() {
-  return axios.post<boolean>('/api/user/getUnBindEmailCode');
+  return axios.post<boolean>('/api/email/getUnBindEmailCode');
 }
 
 /**
  * 获取绑定邮箱验证码
  */
 export function getBindEmailCode(email: string) {
-  return axios.post<boolean>('/api/user/getBindEmailCode', email, {
+  return axios.post<boolean>('/api/email/getBindEmailCode', email, {
     headers: {
       'Content-Type': 'text/plain',
     },
@@ -114,14 +114,14 @@ export function getBindEmailCode(email: string) {
  * 绑定邮箱
  */
 export function bindUserEmail(checkEmailCodeDTO: CheckEmailCodeDTO) {
-  return axios.post<boolean>('/api/user/bindUserEmail', checkEmailCodeDTO);
+  return axios.post<boolean>('/api/email/bindUserEmail', checkEmailCodeDTO);
 }
 
 /**
  * 解绑邮箱
  */
 export function unBindUserEmail(checkEmailCodeDTO: CheckEmailCodeDTO) {
-  return axios.post<boolean>('/api/user/unBindUserEmail', checkEmailCodeDTO);
+  return axios.post<boolean>('/api/email/unBindUserEmail', checkEmailCodeDTO);
 }
 
 /**

@@ -18,7 +18,6 @@
                 :style="{ width: '250px' }"
                 placeholder="请选择学科"
                 allow-clear
-                @change="handleChange"
               />
               <!--部门搜索-->
               <a-tree-select
@@ -46,7 +45,6 @@
                 v-model="searchForm.titleFuzzy"
                 placeholder="输入题库名称搜索"
                 style="width: 240px; position: absolute; top: 60px; right: 20px"
-                @input="handleChange"
               />
             </a-space>
           </a-row>

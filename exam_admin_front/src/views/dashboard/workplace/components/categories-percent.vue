@@ -41,7 +41,6 @@
     return {
       legend: {
         left: 'center',
-        data: ['男', '女', '未知'],
         bottom: 0,
         icon: 'circle',
         itemWidth: 8,

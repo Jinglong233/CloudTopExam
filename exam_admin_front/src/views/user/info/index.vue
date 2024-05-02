@@ -8,18 +8,12 @@
           <a-grid-item :span="24">
             <MyExam />
           </a-grid-item>
-          <a-grid-item :span="24">
-            <LatestActivity />
-          </a-grid-item>
         </a-grid>
       </div>
       <div class="content-right">
         <a-grid :cols="24" :row-gap="16">
           <a-grid-item :span="24">
             <MyPaper />
-          </a-grid-item>
-          <a-grid-item class="panel" :span="24">
-            <LatestNotification />
           </a-grid-item>
         </a-grid>
       </div>
@@ -29,9 +23,7 @@
 
 <script lang="ts" setup>
   import UserInfoHeader from './components/user-info-header.vue';
-  import LatestNotification from './components/latest-notification.vue';
   import MyExam from './components/my-exam.vue';
-  import LatestActivity from './components/latest-activity.vue';
   import MyPaper from './components/my-paper.vue';
 </script>
 

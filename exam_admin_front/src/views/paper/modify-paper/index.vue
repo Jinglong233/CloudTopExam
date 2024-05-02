@@ -92,7 +92,6 @@
         </a-layout-sider>
       </a-affix>
       <!--问题预览部分-->
-
       <a-layout-content style="margin: 0 15px">
         <!--添加大题标头-->
         <a-card>
@@ -329,7 +328,7 @@
             抽取
             <a-input-number
               v-model="randomSelectQuForm.levels[0].num"
-              :max="randomSelectQuForm.levels[0].quCount"
+              :max="Number(randomSelectQuForm.levels[0].quCount)"
               :min="0"
               :style="{ width: '200px' }"
               :default-value="0"
@@ -346,7 +345,7 @@
             抽取
             <a-input-number
               v-model="randomSelectQuForm.levels[1].num"
-              :max="randomSelectQuForm.levels[1].quCount"
+              :max="Number(randomSelectQuForm.levels[1].quCount)"
               :min="0"
               :style="{ width: '200px' }"
               :default-value="0"
@@ -532,7 +531,7 @@
 
   onMounted(async () => {
     await getRepoList({} as RepoQuery).then((res: any) => {
-      repoList.value = res.data;
+      repoList.value = res.data.list;
     });
     const paperId = route.query.id;
     if (!paperId) {

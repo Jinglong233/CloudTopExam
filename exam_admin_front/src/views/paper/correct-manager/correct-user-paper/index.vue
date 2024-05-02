@@ -68,6 +68,7 @@
       <!--问题预览部分（看所有题）-->
       <template v-if="!subView">
         <a-col :span="15">
+          <a-alert banner center>错题的统计以第一次手动批阅的结果为准</a-alert>
           <template v-for="(qu, outIndex) in allQuestion" :key="outIndex">
             <a-card class="general-card">
               <!--问题部分-->
@@ -274,6 +275,7 @@
       <!--问题预览部分（只看主观题）-->
       <template v-else>
         <a-col :span="15">
+          <a-alert banner center>错题的统计以第一次手动批阅的结果为准</a-alert>
           <template v-for="(qu, outIndex) in allQuestion" :key="outIndex">
             <a-card
               v-if="qu.quType === QuestionType.SHORTANSWER"
@@ -496,9 +498,8 @@
               examRecordInfo.totalScore
             }}</a-typography-text>
             <a-divider />
-            <a-divider />
             <a-typography-title :heading="6">仅看主观题</a-typography-title>
-            <a-switch v-model="subView" @change="subViewSwitch" />
+            <a-switch v-model="subView" />
             <a-divider />
             <a-button type="primary" @click="submitCorrect">提交阅卷</a-button>
           </a-space>
@@ -552,7 +553,7 @@
     await getExamRecord({
       id: examRecordId,
     } as ExamRecordQuery).then((res: any) => {
-      examRecordInfo.value = res.data[0] as ExamRecord;
+      examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
 
     // 获取该场考试信息
@@ -606,7 +607,7 @@
     await getExamRecord({
       id: examRecordInfo.value.id,
     } as ExamRecordQuery).then((res: any) => {
-      examRecordInfo.value = res.data[0] as ExamRecord;
+      examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
   };
 
@@ -740,11 +741,6 @@
           params: {
             examId: exam.value.id,
           },
-        });
-      } else {
-        Message.error({
-          content: '提交失败',
-          duration: 2000,
         });
       }
     });

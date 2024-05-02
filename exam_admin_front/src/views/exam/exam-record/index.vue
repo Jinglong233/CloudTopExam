@@ -124,7 +124,7 @@
   const ExamRecordList = ref<ExamRecordVO[]>();
 
   // 查询表单
-  const examRecordSearch = ref<ExamRecordQuery>({});
+  const examRecordSearch = ref<ExamRecordQuery>({} as ExamRecordQuery);
 
   // 获取考试列表
   const reloadExamList = async (examRecordQuery: ExamRecordQuery) => {
@@ -141,7 +141,8 @@
   onMounted(async () => {
     examId.value = route.params.examId;
     if (examId.value) {
-      await reloadExamList({ examId: examId.value, ...pageInfo.value });
+      await reloadExamList({ ...examRecordSearch.value, ...pageInfo.value });
+      examRecordSearch.value.examId = examId.value;
     } else {
       router.back();
     }

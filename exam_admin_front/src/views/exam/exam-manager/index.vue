@@ -81,6 +81,7 @@
         <template #openType="{ record }">
           <template v-if="record.openType === 0">完全公开</template>
           <template v-if="record.openType === 1">指定学生</template>
+          <template v-if="record.openType === 2">指定部门</template>
         </template>
 
         <template #examTime="{ record }">
