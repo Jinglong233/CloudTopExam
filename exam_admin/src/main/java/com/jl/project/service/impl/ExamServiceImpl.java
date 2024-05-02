@@ -58,6 +58,9 @@ public class ExamServiceImpl implements ExamService {
     @Resource
     private UserMapper<User, UserQuery> userMapper;
 
+    @Resource
+    private BookMapper<Book, BookQuery> bookMapper;
+
 
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
@@ -216,7 +219,7 @@ public class ExamServiceImpl implements ExamService {
             }
             // 查询部门下的所有用户
             UserQuery userQuery = new UserQuery();
-            userQuery.setDeptCode(deptCode);
+            userQuery.setDeptCodeFuzzy(deptCode);
             PaginationResultVO resultVO = userService.loadDeptUserList(userQuery);
             List<User> userList = resultVO.getList();
             if (userList == null || userList.size() == 0) {
@@ -724,7 +727,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public void stopExam() {
         String examId = XxlJobHelper.getJobParam();
-        if (examId == null || "".equals(examId)) {
+        if (StrUtil.isEmpty(examId)) {
             throw new BusinessException("考试Id为空");
         }
         // 1. 获取考试
@@ -734,10 +737,9 @@ public class ExamServiceImpl implements ExamService {
         // 2. 更新考试信息
         Integer integer = examMapper.updateById(exam, examId);
         if (integer <= 0) {
-            System.out.println("更改考试状态失败");
+            logge.info("更改考试状态失败");
         } else {
-            System.out.println("更改考试状态成功");
-
+            logge.info("更改考试状态成功");
             // 3. 获取该考试考生的一些考试记录信息
             ExamRecordQuery examRecordQuery = new ExamRecordQuery();
             examRecordQuery.setExamId(examId);
@@ -758,12 +760,85 @@ public class ExamServiceImpl implements ExamService {
                         if (result <= 0) {
                             throw new BusinessException("更新考试记录失败");
                         }
+                    } else if (examRecord.getState() == ExamRecordStateType.UNCOMPLETED.getValue()) { // 未完成状态
+                        // 判断试卷是否需要批阅
+                        Integer reviewQuire = exam.getReviewQuire();
+                        // 只处理不需要批阅的
+                        if (reviewQuire == 0) {
+                            // 设置已处理状态
+                            examRecord.setHandState(1);
+                            UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+                            userAnswerQuery.setUserId(examRecord.getUserId());
+                            userAnswerQuery.setExamRecordId(examRecord.getId());
+                            List<UserAnswer> list = userAnswerMapper.selectList(userAnswerQuery);
+                            Integer totalScore = 0;
+                            if (list != null && list.size() != 0) {
+                                for (UserAnswer userAnswer : list) {
+                                    // 获取得分
+                                    totalScore += userAnswer.getScore();
+
+                                    // 判断是否答对
+                                    Integer isRight = userAnswer.getIsRight();
+                                    if (isRight == 0) {
+                                        updateBookData(userAnswer);
+                                    }
+                                }
+                            }
+                            examRecord.setTotalScore(totalScore);
+                            // 判断是否通过
+                            Integer qualifyScore = exam.getQualifyScore();
+                            if (qualifyScore < totalScore) {
+                                examRecord.setPassed(1);
+                            } else {
+                                examRecord.setPassed(0);
+                            }
+                            // 修改批阅时间
+                            examRecord.setReviewTime(new Date());
+
+                            // 更新
+                            Integer result = examRecordMapper.updateById(examRecord, examRecord.getId());
+                            if (result <= 0) {
+                                throw new BusinessException("更新考试记录失败");
+                            }
+                        }
 
                     }
 
                 }
             }
 
+        }
+    }
+
+    /**
+     * 根据用户答案更新错题本数据
+     *
+     * @param userAnswer
+     */
+    private void updateBookData(UserAnswer userAnswer) {
+        // 答错更新错题本数据
+        BookQuery bookQuery = new BookQuery();
+        bookQuery.setQuId(userAnswer.getQuId());
+        bookQuery.setUserId(userAnswer.getUserId());
+        List<Book> bookList = bookMapper.selectList(bookQuery);
+        if (bookList != null && bookList.size() != 0) {
+            // 存在，则直接进行更改
+            Book book = bookList.get(0);
+            book.setWrongCount(book.getWrongCount() + 1);
+            Integer update = bookMapper.updateById(book, book.getId());
+            if (update <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        } else {
+            Book book = new Book();
+            book.setId(CommonUtil.getRandomId());
+            book.setQuId(userAnswer.getQuId());
+            book.setUserId(userAnswer.getUserId());
+            book.setWrongCount(1);
+            Integer insert = bookMapper.insert(book);
+            if (insert <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
         }
     }
 

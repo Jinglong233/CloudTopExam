@@ -4,21 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.jl.project.entity.dto.UpdateExamRecordDTO;
-import com.jl.project.entity.po.Exam;
-import com.jl.project.entity.po.ExamRecord;
-import com.jl.project.entity.po.Paper;
-import com.jl.project.entity.po.User;
+import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.CorrectUserExamUserVO;
 import com.jl.project.entity.vo.ExamRecordVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.ExamMapper;
-import com.jl.project.mapper.ExamRecordMapper;
-import com.jl.project.mapper.PaperMapper;
-import com.jl.project.mapper.UserMapper;
+import com.jl.project.mapper.*;
 import com.jl.project.service.ExamRecordService;
+import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,7 +38,13 @@ public class ExamRecordServiceImpl implements ExamRecordService {
     private UserMapper<User, UserQuery> userMapper;
 
     @Resource
+    private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
+
+    @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
+
+    @Resource
+    private BookMapper<Book, BookQuery> bookMapper;
 
 
     @Resource
@@ -114,14 +115,38 @@ public class ExamRecordServiceImpl implements ExamRecordService {
      * 根据Id更新
      */
     public Boolean updateExamRecordById(UpdateExamRecordDTO updateExamRecordDTO) throws BusinessException {
+        // 由于系统设计原因，提交阅卷使用的是这个接口
+        // 所以手动阅卷的时候，需要在这里更新错题本数据
         String id = updateExamRecordDTO.getId();
         ExamRecord examRecord = updateExamRecordDTO.getExamRecord();
         Integer handState = examRecord.getHandState();
+
+        // 首先拿到原来的记录数据
+        ExamRecord oldRecord = examRecordMapper.selectById(id);
+        if (oldRecord == null) {
+            throw new BusinessException("考试记录不存在");
+        }
+
+        UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+        // 如果批阅状态是未处理，并且此次提交的数据是批阅状态更改的请求
+        if (oldRecord.getHandState() == 0 && handState == 1) {
+            // 获取关联的所有答题记录
+            userAnswerQuery.setUserId(oldRecord.getUserId());
+            userAnswerQuery.setExamRecordId(oldRecord.getId());
+            List<UserAnswer> list = userAnswerMapper.selectList(userAnswerQuery);
+            if (list != null && list.size() != 0) {
+                for (UserAnswer userAnswer : list) {
+                    updateBookData(userAnswer);
+                }
+            }
+        }
+
+
         if (handState == 1) {
             examRecord.setReviewTime(new Date());
         }
-
         Integer result = examRecordMapper.updateById(examRecord, id);
+
         return result > 0;
     }
 
@@ -219,4 +244,36 @@ public class ExamRecordServiceImpl implements ExamRecordService {
         return resultVO;
     }
 
+
+    /**
+     * 根据用户答案更新错题本数据
+     *
+     * @param userAnswer
+     */
+    private void updateBookData(UserAnswer userAnswer) {
+        // 答错更新错题本数据
+        BookQuery bookQuery = new BookQuery();
+        bookQuery.setQuId(userAnswer.getQuId());
+        bookQuery.setUserId(userAnswer.getUserId());
+        List<Book> bookList = bookMapper.selectList(bookQuery);
+        if (bookList != null && bookList.size() != 0) {
+            // 存在，则直接进行更改
+            Book book = bookList.get(0);
+            book.setWrongCount(book.getWrongCount() + 1);
+            Integer update = bookMapper.updateById(book, book.getId());
+            if (update <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        } else {
+            Book book = new Book();
+            book.setId(CommonUtil.getRandomId());
+            book.setQuId(userAnswer.getQuId());
+            book.setUserId(userAnswer.getUserId());
+            book.setWrongCount(1);
+            Integer insert = bookMapper.insert(book);
+            if (insert <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        }
+    }
 }

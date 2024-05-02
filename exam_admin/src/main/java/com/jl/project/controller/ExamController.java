@@ -75,8 +75,6 @@ public class ExamController extends ABaseController {
     }
 
 
-    // TODO: 2024-04-24  修改考试信息的时候，当开放类型是 制定部门 的时候，需要根据ExamId获取userList
-
     /**
      * 根据Id更新
      */

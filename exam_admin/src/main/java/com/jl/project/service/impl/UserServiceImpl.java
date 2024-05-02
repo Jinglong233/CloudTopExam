@@ -11,11 +11,9 @@ import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.Department;
-import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.DepartmentQuery;
 import com.jl.project.entity.query.SimplePage;
-import com.jl.project.entity.query.TmplQuery;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
@@ -23,17 +21,13 @@ import com.jl.project.enums.PageSize;
 import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.DepartmentMapper;
-import com.jl.project.mapper.TmplMapper;
 import com.jl.project.mapper.UserMapper;
-import com.jl.project.service.DepartmentService;
 import com.jl.project.service.EmailService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.MD5Util;
 import com.jl.project.utils.UserInfoUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -69,28 +63,16 @@ public class UserServiceImpl implements UserService {
     @Resource
     private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
 
-    @Resource
-    private DepartmentService departmentService;
 
     @Resource
     private OSSClient ossClient;
     @Resource
     private Environment env;
 
-    @Resource
-    private JavaMailSender javaMailSender;
-
 
     @Resource
     private EmailService emailService;
 
-
-    @Resource
-    private TmplMapper<Tmpl, TmplQuery> tmplMapper;
-
-
-    @Value("${spring.mail.username}")
-    private String from;
 
     /**
      * 登录
@@ -163,8 +145,7 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         // 清除token缓存
-        Boolean delete = stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
-        return delete;
+        return stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
     }
 
 
@@ -208,7 +189,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("用户名已存在");
         }
         // 2. 生成随机ID
-        String userId = IdUtil.simpleUUID().toString();
+        String userId = IdUtil.simpleUUID();
 
 
         // 3. 处理密码相关（盐 + 密码）
@@ -392,6 +373,8 @@ public class UserServiceImpl implements UserService {
             return findListByPage(query);
         }
         UserQuery userQuery = new UserQuery();
+        BeanUtil.copyProperties(query, userQuery);
+        userQuery.setDeptCode("");
         userQuery.setDeptCodeFuzzy(deptCode);
         return findListByPage(userQuery);
     }
@@ -519,44 +502,6 @@ public class UserServiceImpl implements UserService {
         return result > 0;
     }
 
-    @Override
-    public Boolean getUnBindEmailCode() throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        emailService.sendEmailCode(loginUserInfo.getEmail());
-        return true;
-    }
-
-    @Override
-    public Boolean getBindEmailCode(String email) throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        // 检验登录用户是否已经绑定邮箱
-        UserQuery userQuery = new UserQuery();
-        userQuery.setEmail(email);
-        User user = userMapper.selectById(loginUserInfo.getId());
-        if (user == null) {
-            throw new BusinessException("该用户信息有误，请联系管理员");
-        }
-
-        String oldEmail = user.getEmail();
-        if (!StrUtil.isEmpty(oldEmail)) {
-            throw new BusinessException("您已绑定邮箱");
-        }
-
-
-        // 查询该邮箱是否被注册过
-        userQuery.setEmail(email);
-        List<User> list = userMapper.selectList(userQuery);
-        if (list != null && list.size() != 0) {
-            throw new BusinessException("该邮箱已被绑定");
-        }
-
-        // 发送验证码
-        return emailService.sendEmailCode(email);
-    }
-
 
     @Override
     public Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO) {
@@ -596,35 +541,6 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    @Override
-    public Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
-        Boolean isRight =
-                emailService.checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
-        if (!isRight) {
-            throw new BusinessException("验证码错误");
-        }
-
-        // 更新该用户的邮箱
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        String userId = loginUserInfo.getId();
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException("当前登录用户信息有误");
-        }
-        user.setEmail(checkEmailCodeDTO.getEmail());
-
-        Integer result = userMapper.updateById(user, userId);
-        if (result <= 0) {
-            throw new BusinessException("邮箱绑定失败");
-        }
-
-        LoginResponseVo loginResponseVo = new LoginResponseVo();
-        BeanUtil.copyProperties(user, loginResponseVo);
-        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
-
-        return true;
-    }
 
     @Override
     public Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO) {
@@ -635,7 +551,12 @@ public class UserServiceImpl implements UserService {
         userQuery.setRole(RoleType.ADMIN.getValue());
         List<User> list = userMapper.selectList(userQuery);
         if (list == null || list.size() == 0) {
-            throw new BusinessException("该用户不存在");
+            // 管理员身份不存在的时候，继续使用教师身份找
+            userQuery.setRole(RoleType.TEACHER.getValue());
+            list = userMapper.selectList(userQuery);
+            if (list == null || list.size() == 0) {
+                throw new BusinessException("该用户不存在");
+            }
         }
 
 
@@ -651,36 +572,6 @@ public class UserServiceImpl implements UserService {
         }
         // 发送验证码
         return emailService.sendEmailCode(email);
-
-    }
-
-    @Override
-    public Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
-        Boolean isRight =
-                emailService.checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
-        if (!isRight) {
-            throw new BusinessException("验证码错误");
-        }
-
-        // 更新该用户的邮箱
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        String userId = loginUserInfo.getId();
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException("当前登录用户信息有误");
-        }
-        user.setEmail("");
-
-        Integer result = userMapper.updateById(user, userId);
-        if (result <= 0) {
-            throw new BusinessException("邮箱解绑失败");
-        }
-        LoginResponseVo loginResponseVo = new LoginResponseVo();
-        BeanUtil.copyProperties(user, loginResponseVo);
-        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
-
-        return true;
     }
 
 

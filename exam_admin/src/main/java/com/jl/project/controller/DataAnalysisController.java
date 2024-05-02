@@ -1,7 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.vo.ResponseVO;
-import com.jl.project.exception.BusinessException;
 import com.jl.project.service.DataAnalysisService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,13 +22,9 @@ public class DataAnalysisController extends ABaseController{
      * @return
      */
     @RequestMapping("sexProportion")
+    @GlobalInterceptor(checkAdmin = true,checkLogin = true)
     public ResponseVO getSexProportion() {
-        List<Map<String,Object>> result = null;
-        try {
-            result = dataAnalysisService.getSexProportion();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null,e.getCode(),e.getMessage());
-        }
+        List<Map<String,Object>>  result = dataAnalysisService.getSexProportion();
         return getSuccessResponseVO(result);
     }
 
@@ -38,13 +34,9 @@ public class DataAnalysisController extends ABaseController{
      * @return
      */
     @RequestMapping("recentExamInfo")
+    @GlobalInterceptor(checkLogin = true)
     public ResponseVO getRecentExamInfo() {
-        Map<String,List> result = null;
-        try {
-            result = dataAnalysisService.getRecentExamInfo();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null,e.getCode(),e.getMessage());
-        }
+        Map<String,List> result = dataAnalysisService.getRecentExamInfo();
         return getSuccessResponseVO(result);
     }
 }

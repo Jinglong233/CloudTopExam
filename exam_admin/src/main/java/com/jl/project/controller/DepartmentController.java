@@ -132,7 +132,6 @@ public class DepartmentController extends ABaseController {
     /**
      * 获取专业
      */
-
     @RequestMapping("profession")
     @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO getProfession() throws BusinessException {

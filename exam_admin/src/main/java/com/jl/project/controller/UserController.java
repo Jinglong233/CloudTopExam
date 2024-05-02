@@ -8,7 +8,6 @@ import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
-import com.jl.project.enums.VerifyRegexEnum;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserService;
 import io.swagger.annotations.Api;
@@ -182,60 +181,6 @@ public class UserController extends ABaseController {
         Boolean result = userService.updateUserPassword(updateUserPasswordDTO);
         return getSuccessResponseVO(result);
     }
-
-    /**
-     * 获取邮箱验证码
-     *
-     * @return
-     */
-    @ApiOperation(value = "获取解绑邮箱验证码")
-    @RequestMapping("getUnBindEmailCode")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getUnBindEmailCode() throws BusinessException {
-        Boolean result = userService.getUnBindEmailCode();
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 获取绑定邮箱验证码
-     *
-     * @return
-     */
-    @ApiOperation(value = "获取绑定邮箱验证码")
-    @RequestMapping("getBindEmailCode")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getBindEmailCode(@RequestBody @VerifyParam(require = true, regex = VerifyRegexEnum.EMAIL) String email) throws BusinessException {
-        Boolean result = userService.getBindEmailCode(email);
-        return getSuccessResponseVO(result);
-    }
-
-
-    /**
-     * 绑定邮箱
-     *
-     * @return
-     */
-    @ApiOperation(value = "绑定邮箱操作")
-    @RequestMapping("bindUserEmail")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO bindUserEmail(@RequestBody @VerifyParam CheckEmailCodeDTO checkEmailCodeDTO) throws BusinessException {
-        Boolean result = userService.bindUserEmail(checkEmailCodeDTO);
-        return getSuccessResponseVO(result);
-    }
-
-    /**
-     * 解绑邮箱操作
-     *
-     * @return
-     */
-    @ApiOperation(value = "解绑邮箱操作")
-    @RequestMapping("unBindUserEmail")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO unBindUserEmail(@RequestBody @VerifyParam CheckEmailCodeDTO checkEmailCodeDTO) throws BusinessException {
-        Boolean result = userService.unBindUserEmail(checkEmailCodeDTO);
-        return getSuccessResponseVO(result);
-    }
-
 
     /**
      * 获取找回密码邮箱验证码

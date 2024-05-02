@@ -98,27 +98,24 @@ public interface UserService {
 
     /**
      * 退出登录
+     *
      * @return
      */
     Boolean logout();
 
     /**
      * 获取用户总数
+     *
      * @return
      */
     Integer getUserCount(UserQuery userQuery);
 
     Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO);
 
-    Boolean getUnBindEmailCode();
-
-    Boolean getBindEmailCode(String email);
 
     Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO);
 
-    Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
 
     Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO);
 
-    Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
 }
