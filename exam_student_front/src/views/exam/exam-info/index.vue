@@ -103,6 +103,7 @@
   import { ExamRecord } from '@/types/model/po/ExamRecord';
   import dayjs from 'dayjs';
   import { Message } from '@arco-design/web-vue';
+  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 
   const { t } = useI18n();
 
@@ -126,8 +127,8 @@
     await getExamRecord({
       userId: userStore.id,
       examId: examInfo.value.id,
-    }).then((res: any) => {
-      examRecordInfo.value = res.data[0] as ExamRecord;
+    } as ExamRecordQuery).then((res: any) => {
+      examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
   });
 

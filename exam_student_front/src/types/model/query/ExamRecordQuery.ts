@@ -1,4 +1,6 @@
-export interface ExamRecordQuery {
+import { SimplePage } from '@/types/model/po/SimplePage';
+
+export interface ExamRecordQuery extends SimplePage {
   /**
    * ID
    */

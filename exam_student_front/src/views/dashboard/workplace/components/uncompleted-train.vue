@@ -7,7 +7,30 @@
       :body-style="{ padding: '17px 20px 21px 20px' }"
     >
       <a-empty v-if="trainList.length === 0 || trainList == null" />
-      <a-list v-if="trainList.length !== 0" :scrollbar="true" :max-height="280">
+      <a-table
+        v-if="trainList.length !== 0"
+        :columns="columns"
+        :data="trainList"
+        :bordered="false"
+        :scrollbar="true"
+        :pagination="{
+          showTotal: true,
+          showPageSize: true,
+          total: pageInfo.total,
+          pageSize: pageInfo.pageSize,
+          current: pageInfo.pageNo,
+        }"
+        :scroll="{ x: 100, y: 400 }"
+        @page-change="pageChange"
+        @page-size-change="pageSizeChange"
+      >
+        <template #operation="{ record }">
+          <a-button type="primary" @click="continueTrain(record)">
+            继续训练
+          </a-button>
+        </template>
+      </a-table>
+      <!-- <a-list v-if="trainList.length !== 0" :scrollbar="true" :max-height="280">
         <template v-for="train in trainList" :key="train.id">
           <a-list-item>
             <template #actions>
@@ -33,13 +56,14 @@
         </template>
       </a-list>
       <a-pagination
+        style="bottom: 0"
         :show-page-size="true"
         :show-total="true"
         :total="pageInfo.total"
         :page-size="pageInfo.pageSize"
         @page-size-change="pageSizeChange"
         @change="pageChange"
-      />
+      />-->
     </a-card>
   </a-spin>
 </template>
@@ -64,6 +88,18 @@
     pageTotal: 0,
     total: 0,
   });
+
+  const columns = [
+    {
+      title: '训练模式',
+      dataIndex: 'mode',
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      slotName: 'operation',
+    },
+  ];
 
   const reloadTrainRecordList = async (trainQuery: TrainQuery) => {
     loading.value = true;
@@ -92,6 +128,16 @@
       ...pageInfo.value,
     });
   });
+
+  // 继续训练
+  const continueTrain = (record: any) => {
+    router.push({
+      name: 'StartTrain',
+      params: {
+        trainId: record.id,
+      },
+    });
+  };
 
   // 页码变化
   const pageChange = (pageNo: number) => {

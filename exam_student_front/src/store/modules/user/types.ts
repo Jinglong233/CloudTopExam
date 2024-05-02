@@ -8,6 +8,7 @@ export interface UserState {
   userName?: string;
   realName?: string;
   password?: string;
+  deptText?: string;
   phone?: string;
   email?: string;
   state?: number;

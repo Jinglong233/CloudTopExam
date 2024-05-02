@@ -15,6 +15,7 @@ if (import.meta.env.VITE_API_BASE_URL) {
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 }
 
+// 请求拦截器
 axios.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     const token = getToken();
@@ -35,26 +36,25 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   (response: AxiosResponse<HttpResponse>) => {
     const res = response.data;
-    if (res.code === 200) {
-      // Message.success({
-      //   content: '',
-      //   duration: 5 * 1000,
-      // });
-      return res;
-    }
-
-    if (res.code === 401) {
+    if (res.code === 401 || res.code === 901) {
       Message.warning({
-        content: '请登录',
+        content: res.info,
         duration: 2000,
       });
       router.push({ name: 'login' });
       return null;
     }
-    Message.error({
-      content: res.info || '请求出错',
-      duration: 5 * 1000,
-    });
+    if (res.status === 'error') {
+      Message.error({
+        content: res.info,
+        duration: 2000,
+      });
+      return res;
+    }
+    if (res.code === 200) {
+      return res;
+    }
+
     return Promise.reject(new Error(res.info || '请求出错'));
   },
   (error) => {

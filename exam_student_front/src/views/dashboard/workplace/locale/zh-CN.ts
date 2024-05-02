@@ -4,6 +4,10 @@ export default {
   'workplace.balance': '余额（元）',
   'workplace.order.pending': '待支付',
   'workplace.order.pendingRenewal': '待续费订单',
+
+  'workplace.trainCount': '训练次数',
+  'workplace.examCount': '考试次数',
+
   'workplace.onlineContent': '线上总内容',
   'workplace.putIn': '投放中内容',
   'workplace.newDay': '日新增评论',
@@ -22,8 +26,8 @@ export default {
   'workplace.announcement': '公告',
   'workplace.recently.visited': '最近访问',
   'workplace.record.nodata': '暂无数据',
-  'workplace.quick.operation': '快捷操作',
-  'workplace.quickOperation.setup': '管理',
+  'workplace.quickOperation.intelligentTraining': '智能训练',
+  'workplace.quickOperation.otherTrain': '其他训练',
   'workplace.allProject': '所有项目',
   'workplace.loadMore': '加载更多',
   'workplace.viewMore': '查看更多',

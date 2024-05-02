@@ -9,21 +9,23 @@
       :title="$t('workplace.examData')"
     >
       <template #extra>
-        <a-link>{{ $t('workplace.viewMore') }}</a-link>
+        <a-link @click="$router.push({ name: 'MyExam' })">{{
+          $t('workplace.viewMore')
+        }}</a-link>
       </template>
-      <Chart height="289px" :option="chartOption" />
+      <Chart style="height: 289px" :option="chartOption" />
     </a-card>
   </a-spin>
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { nextTick, onMounted, ref } from 'vue';
   import { graphic } from 'echarts';
   import useLoading from '@/hooks/loading';
-  import { queryContentData, ContentDataRecord } from '@/api/dashboard';
   import useChartOption from '@/hooks/chart-option';
   import { ToolTipFormatterParams } from '@/types/echarts';
   import { AnyObject } from '@/types/global';
+  import { getMyRecentExam } from '@/api/dataAnalyzes';
 
   function graphicFactory(side: AnyObject) {
     return {
@@ -99,7 +101,7 @@
         axisLabel: {
           formatter(value: any, idx: number) {
             if (idx === 0) return value;
-            return `${value}k`;
+            return `${value}`;
           },
         },
         splitLine: {
@@ -116,8 +118,8 @@
           const [firstElement] = params as ToolTipFormatterParams[];
           return `<div>
             <p class="tooltip-title">${firstElement.axisValueLabel}</p>
-            <div class="content-panel"><span>总内容量</span><span class="tooltip-value">${(
-              Number(firstElement.value) * 10000
+            <div class="content-panel"><span>考试数量</span><span class="tooltip-value">${Number(
+              firstElement.value
             ).toLocaleString()}</span></div>
           </div>`;
         },
@@ -177,15 +179,10 @@
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: chartData } = await queryContentData();
-      chartData.forEach((el: ContentDataRecord, idx: number) => {
-        xAxis.value.push(el.x);
-        chartsData.value.push(el.y);
-        if (idx === 0) {
-          graphicElements.value[0].style.text = el.x;
-        }
-        if (idx === chartData.length - 1) {
-          graphicElements.value[1].style.text = el.x;
+      await getMyRecentExam().then((res: any) => {
+        if (res.data) {
+          xAxis.value = res.data.x;
+          chartsData.value = res.data.data;
         }
       });
     } catch (err) {

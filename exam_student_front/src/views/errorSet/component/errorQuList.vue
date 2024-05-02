@@ -8,7 +8,7 @@
       </a-space>
       <a-scrollbar style="height: 600px; overflow: auto">
         <template v-for="(qu, outIndex) in allQuestion" :key="outIndex">
-          <a-card class="general-card">
+          <a-card class="general-card" style="width: 1200px">
             <!--问题部分-->
             <template #title>
               <div>

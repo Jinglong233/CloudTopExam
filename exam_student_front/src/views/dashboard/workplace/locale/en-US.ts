@@ -14,6 +14,10 @@ export default {
   'workplace.docs.userGuide': 'User Guide',
   'workplace.docs.workflow': 'Workflow',
   'workplace.docs.interfaceDocs': 'Interface Docs',
+
+  'workplace.trainCount': 'Train Count',
+  'workplace.examCount': 'Exam Count',
+
   //
   'workplace.contentManagement': 'Content Management',
   'workplace.contentStatistical': 'Content Statistical',
@@ -23,8 +27,8 @@ export default {
   'workplace.announcement': 'Announcement',
   'workplace.recently.visited': 'Recently Visited',
   'workplace.record.nodata': 'No data',
-  'workplace.quick.operation': 'Quick Operation',
-  'workplace.quickOperation.setup': 'Setup',
+  'workplace.quickOperation.intelligentTraining': 'Intelligent Training',
+  'workplace.quickOperation.otherTrain': 'Other Train',
   'workplace.allProject': 'All',
   'workplace.loadMore': 'More',
   'workplace.viewMore': 'More',

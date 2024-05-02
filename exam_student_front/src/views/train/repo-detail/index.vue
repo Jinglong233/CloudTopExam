@@ -2,10 +2,9 @@
   <a-layout style="height: 700px; margin-top: 20px">
     <a-layout-content style="margin: 20px">
       <a-card :title="t('menu.train.repoDetail')" style="height: 660px">
-        <a-typography-title heading="5" :bold="true"
+        <a-typography-title :heading="5" :bold="true"
           >自由训练</a-typography-title
         >
-
         <a-space>
           <a-card
             style="
@@ -35,7 +34,7 @@
 
         <a-divider />
 
-        <a-typography-title heading="5" :bold="true"
+        <a-typography-title :heading="5" :bold="true"
           >题型训练</a-typography-title
         >
 

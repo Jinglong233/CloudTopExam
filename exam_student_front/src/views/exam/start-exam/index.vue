@@ -97,6 +97,7 @@
   import { Qu } from '@/types/model/po/Qu';
   import { QuestionType } from '@/types/model/QuestionType';
   import { GroupList } from '@/types/model/po/GroupList';
+  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 
   dayjs.extend(duration);
 
@@ -190,12 +191,11 @@
     if (!exam.value.paperId) {
       router.back();
     }
-
     await getExamRecord({
       userId: userStore.id,
       examId,
-    }).then((res: any) => {
-      examRecordInfo.value = res.data[0] as ExamRecord;
+    } as ExamRecordQuery).then((res: any) => {
+      examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
     if (examRecordInfo.value.state === 2) {
       // 已提交就到结果回显页面
@@ -204,26 +204,28 @@
         params: { examRecordId: examRecordInfo.value.id },
       });
     }
+    console.log('789');
 
     // 在此处修改该用户该考试记录的相关信息
-    await startAnswer({ userId: userStore.id, examId: examId as string }).then(
-      (res: any) => {
-        if (res.data !== undefined) {
-          Message.success({
-            id: 'startAnswer',
-            content: res.info,
-            duration: 2000,
-          });
-          startTime.value = res.data;
-        } else {
-          Message.error({
-            id: 'startAnswer1',
-            content: res.info,
-            duration: 2000,
-          });
-        }
+    await startAnswer({
+      userId: userStore.id,
+      examId: examId as string,
+    } as ExamRecordQuery).then((res: any) => {
+      if (res.data !== undefined) {
+        Message.success({
+          id: 'startAnswer',
+          content: res.info,
+          duration: 2000,
+        });
+        startTime.value = res.data;
+      } else {
+        Message.error({
+          id: 'startAnswer1',
+          content: res.info,
+          duration: 2000,
+        });
       }
-    );
+    });
 
     const paperId = exam.value.paperId as string;
     // 获取试卷信息
@@ -373,11 +375,15 @@
         quType !== QuestionType.SHORTANSWER &&
         quType !== QuestionType.GAPFILLING
       ) {
-        const answerIdArray = Object.values(
-          JSON.parse(userAnswer.answerId as string)
-        );
-        if (answerIdArray.length === 0) {
+        if (userAnswer.answerId === null || userAnswer.answerId === undefined) {
           flag = true;
+        } else {
+          const answerIdArray = Object.values(
+            JSON.parse(userAnswer.answerId as string)
+          );
+          if (answerIdArray.length === 0) {
+            flag = true;
+          }
         }
       } else {
         // 简答题和填空题判断answer

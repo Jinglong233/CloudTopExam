@@ -2,8 +2,9 @@ import localeMessageBox from '@/components/message-box/locale/zh-CN';
 import localeLogin from '@/views/login/locale/zh-CN';
 
 import localeWorkplace from '@/views/dashboard/workplace/locale/zh-CN';
+import localeUserSetting from '@/views/user/setting/locale/zh-CN';
 
-import localExam from '@/views/exam/my-exam/locale/zh-CN';
+import localExam from '@/views/exam/locale/zh-CN';
 
 import localTrain from '@/views/train/repo-train/locale/zh-CN';
 import localErrorSet from '@/views/errorSet/locale/zh-CN';
@@ -30,6 +31,8 @@ export default {
   ...localeMessageBox,
   ...localeLogin,
   ...localeWorkplace,
+
+  ...localeUserSetting,
 
   ...localExam,
   ...localTrain,

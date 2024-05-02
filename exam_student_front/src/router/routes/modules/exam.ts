@@ -55,6 +55,16 @@ const EXAM: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
+    {
+      path: 'exam-record',
+      name: 'ExamRecord',
+      component: () => import('@/views/exam/exam-record/index.vue'),
+      meta: {
+        locale: 'menu.exam.examRecord',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
   ],
 };
 

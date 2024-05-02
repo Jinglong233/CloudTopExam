@@ -50,13 +50,12 @@
           >
             {{ $t('login.form.rememberPassword') }}
           </a-checkbox>
-          <a-link>{{ $t('login.form.forgetPassword') }}</a-link>
+          <a-link @click="router.push({ name: 'RetrievePassword' })">{{
+            $t('login.form.forgetPassword')
+          }}</a-link>
         </div>
         <a-button type="primary" html-type="submit" long :loading="loading">
           {{ $t('login.form.login') }}
-        </a-button>
-        <a-button type="text" long class="login-form-register-btn">
-          {{ $t('login.form.register') }}
         </a-button>
       </a-space>
     </a-form>
@@ -70,7 +69,7 @@
   import { useStorage } from '@vueuse/core';
   import { useUserStore } from '@/store';
   import useLoading from '@/hooks/loading';
-  import { login } from '@/api/user';
+  import { login, LoginData } from '@/api/user';
   import { setToken } from '@/utils/auth';
   import { Message, ValidatedError } from '@arco-design/web-vue';
 

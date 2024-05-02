@@ -12,17 +12,11 @@
           />
         </a-avatar>
         <a-statistic
-          :title="$t('workplace.onlineContent')"
-          :value="373.5"
-          :precision="1"
-          :value-from="0"
+          :title="$t('workplace.trainCount')"
+          :value="trainCount"
           animation
           show-group-separator
-        >
-          <template #suffix>
-            W+ <span class="unit">{{ $t('workplace.pecs') }}</span>
-          </template>
-        </a-statistic>
+        />
       </a-space>
     </a-grid-item>
     <a-grid-item
@@ -37,72 +31,33 @@
           />
         </a-avatar>
         <a-statistic
-          :title="$t('workplace.putIn')"
-          :value="368"
+          :title="$t('workplace.examCount')"
+          :value="examCount"
           :value-from="0"
           animation
           show-group-separator
-        >
-          <template #suffix>
-            <span class="unit">{{ $t('workplace.pecs') }}</span>
-          </template>
-        </a-statistic>
+        />
       </a-space>
-    </a-grid-item>
-    <a-grid-item
-      class="panel-col"
-      :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
-    >
-      <a-space>
-        <a-avatar :size="54" class="col-avatar">
-          <img
-            alt="avatar"
-            src="//p3-armor.byteimg.com/tos-cn-i-49unhts6dw/77d74c9a245adeae1ec7fb5d4539738d.svg~tplv-49unhts6dw-image.image"
-          />
-        </a-avatar>
-        <a-statistic
-          :title="$t('workplace.newDay')"
-          :value="8874"
-          :value-from="0"
-          animation
-          show-group-separator
-        >
-          <template #suffix>
-            <span class="unit">{{ $t('workplace.pecs') }}</span>
-          </template>
-        </a-statistic>
-      </a-space>
-    </a-grid-item>
-    <a-grid-item
-      class="panel-col"
-      :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
-      style="border-right: none"
-    >
-      <a-space>
-        <a-avatar :size="54" class="col-avatar">
-          <img
-            alt="avatar"
-            src="//p3-armor.byteimg.com/tos-cn-i-49unhts6dw/c8b36e26d2b9bb5dbf9b74dd6d7345af.svg~tplv-49unhts6dw-image.image"
-          />
-        </a-avatar>
-        <a-statistic
-          :title="$t('workplace.newFromYesterday')"
-          :value="2.8"
-          :precision="1"
-          :value-from="0"
-          animation
-        >
-          <template #suffix> % <icon-caret-up class="up-icon" /> </template>
-        </a-statistic>
-      </a-space>
-    </a-grid-item>
-    <a-grid-item :span="24">
-      <a-divider class="panel-border" />
     </a-grid-item>
   </a-grid>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+  import { onMounted, ref } from 'vue';
+  import { getExamCount, getTrainCount } from '@/api/dataAnalyzes';
+
+  const trainCount = ref<number>(0);
+  const examCount = ref<number>(0);
+
+  onMounted(async () => {
+    await getTrainCount().then((res: any) => {
+      trainCount.value = res.data;
+    });
+    await getExamCount().then((res: any) => {
+      examCount.value = res.data;
+    });
+  });
+</script>
 
 <style lang="less" scoped>
   .arco-grid.panel {
