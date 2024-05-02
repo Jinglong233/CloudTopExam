@@ -1,6 +1,8 @@
 package com.jl.project.service;
 
+import com.jl.project.entity.dto.RetrievePasswordDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.query.UserQuery;
@@ -79,4 +81,9 @@ public interface StudentService {
     Boolean logout();
 
 
+    Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO);
+
+    Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO);
+
+    Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO);
 }

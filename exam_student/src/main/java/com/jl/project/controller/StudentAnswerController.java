@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
@@ -34,13 +36,9 @@ public class StudentAnswerController extends ABaseController {
      * 新增
      */
     @RequestMapping("getDataList")
-    public ResponseVO getDataList(@RequestBody UserAnswerQuery userAnswerQuery) {
-        List<UserAnswer> result = null;
-        try {
-            result = studentAnswerService.findListByParam(userAnswerQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) {
+        List<UserAnswer> result = studentAnswerService.findListByParam(userAnswerQuery);
         return getSuccessResponseVO(result);
     }
 
@@ -49,14 +47,9 @@ public class StudentAnswerController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
-    public ResponseVO add(@RequestBody AddUserAnswerDTO addUserAnswerDTO) {
-
-        List<UserAnswer> result = null;
-        try {
-            result = studentAnswerService.add(addUserAnswerDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO("添加失败", e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO add(@RequestBody @VerifyParam AddUserAnswerDTO addUserAnswerDTO) {
+        List<UserAnswer> result = studentAnswerService.add(addUserAnswerDTO);
         return getSuccessResponseVO(result);
     }
 
@@ -64,62 +57,11 @@ public class StudentAnswerController extends ABaseController {
      * 根据Id更新
      */
     @RequestMapping("updateStudentAnswerById")
-    public ResponseVO updateUserAnswerById(@RequestBody CorrectUserAnswerDTO correctUserAnswerDTO) {
-        List<UserAnswer> result = null;
-        try {
-            result = studentAnswerService.updateUserAnswerById(correctUserAnswerDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO updateUserAnswerById(@RequestBody @VerifyParam CorrectUserAnswerDTO correctUserAnswerDTO) {
+        List<UserAnswer> result = studentAnswerService.updateUserAnswerById(correctUserAnswerDTO);
         return getSuccessResponseVO(result);
     }
-
-
-    /**
-     * 根据条件分页查询
-     */
-    @RequestMapping("loadDataList")
-    public ResponseVO loadDatalist(UserAnswerQuery query) {
-        return getSuccessResponseVO(studentAnswerService.findListByPage(query));
-    }
-
-
-    /**
-     * 批量新增
-     */
-    @RequestMapping("addBatch")
-    public ResponseVO addBatch(@RequestBody List<UserAnswer> listBean) {
-
-        return getSuccessResponseVO(studentAnswerService.addBatch(listBean));
-    }
-
-    /**
-     * 批量新增或修改
-     */
-    @RequestMapping("addOrUpdateBatch")
-    public ResponseVO addOrUpdateBatch(@RequestBody List<UserAnswer> listBean) {
-        return getSuccessResponseVO(this.studentAnswerService.addOrUpdateBatch(listBean));
-    }
-
-    /**
-     * 根据Id查询
-     */
-
-    @RequestMapping("getUserAnswerById")
-    public ResponseVO getUserAnswerById(String id) {
-        return getSuccessResponseVO(this.studentAnswerService.getUserAnswerById(id));
-    }
-
-
-    /**
-     * 根据Id删除
-     */
-    @RequestMapping("deleteUserAnswerById")
-    public ResponseVO deleteUserAnswerById(String id) {
-        this.studentAnswerService.deleteUserAnswerById(id);
-        return getSuccessResponseVO(null);
-    }
-
 
     /**
      * 获取错题统计
@@ -128,6 +70,7 @@ public class StudentAnswerController extends ABaseController {
      * @return
      */
     @RequestMapping("errorCount")
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
     public ResponseVO errorCount(@RequestBody String userId) {
         List<ErrorVO> result = null;
         try {

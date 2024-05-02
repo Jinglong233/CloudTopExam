@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.SubmitExamDTO;
 import com.jl.project.entity.vo.ExamResultVO;
 import com.jl.project.entity.vo.ExamVO;
@@ -30,7 +32,8 @@ public class StudentExamController extends ABaseController {
      * 根据学生Id查询考试列表
      */
     @RequestMapping("loadStudentExamList")
-    public ResponseVO loadDatalist(@RequestBody String userId) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
+    public ResponseVO loadDatalist(@RequestBody @VerifyParam(require = true) String userId) throws BusinessException {
         List<ExamVO> result = studentExamService.loadStudentExamList(userId);
         return getSuccessResponseVO(result);
     }
@@ -39,13 +42,9 @@ public class StudentExamController extends ABaseController {
      * 提交试卷
      */
     @RequestMapping("submitExam")
-    public ResponseVO submitExam(@RequestBody SubmitExamDTO submitExamDTO) {
-        Double result = null;
-        try {
-            result = studentExamService.submitExam(submitExamDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
+    public ResponseVO submitExam(@RequestBody @VerifyParam SubmitExamDTO submitExamDTO) {
+        Double result = studentExamService.submitExam(submitExamDTO);
         return getSuccessResponseVO(result);
     }
 
@@ -54,13 +53,9 @@ public class StudentExamController extends ABaseController {
      * 回显考试结果
      */
     @RequestMapping("examResult")
-    public ResponseVO getExamResult(@RequestBody String examRecordId) {
-        ExamResultVO result = null;
-        try {
-            result = studentExamService.getExamResult(examRecordId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
+    public ResponseVO getExamResult(@RequestBody @VerifyParam(require = true) String examRecordId) {
+        ExamResultVO result = studentExamService.getExamResult(examRecordId);
         return getSuccessResponseVO(result);
     }
 

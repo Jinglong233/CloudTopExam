@@ -2,6 +2,7 @@ package com.jl.project.entity.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jl.project.annotation.VerifyParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -21,6 +22,7 @@ public class StartTrainDTO {
      * 训练模式
      */
     @Schema(description = "训练模式")
+    @VerifyParam(require = true)
     private Integer mode;
 
     /**

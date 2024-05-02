@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.StartTrainDTO;
 import com.jl.project.entity.po.Repo;
 import com.jl.project.entity.po.Train;
@@ -43,7 +45,8 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "条件查询训练记录")
     @RequestMapping("getTrain")
-    public ResponseVO getTrain(@RequestBody TrainQuery trainQuery) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getTrain(@RequestBody @VerifyParam TrainQuery trainQuery) throws BusinessException {
         PaginationResultVO<Train> result = null;
         try {
             result = studentTrainService.getTrain(trainQuery);
@@ -62,13 +65,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "通过Id获取训练记录")
     @RequestMapping("getTrainById")
-    public ResponseVO getTrainById(@RequestBody String trainId) throws BusinessException {
-        Train result = null;
-        try {
-            result = studentTrainService.getTrainById(trainId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getTrainById(@RequestBody @VerifyParam(require = true) String trainId) throws BusinessException {
+        Train result = studentTrainService.getTrainById(trainId);
         return getSuccessResponseVO(result);
     }
 
@@ -81,13 +80,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "获取训练题库")
     @RequestMapping("repoList")
-    public ResponseVO getRepoList(@RequestBody RepoQuery repoQuery) throws BusinessException {
-        List<Repo> result = null;
-        try {
-            result = studentTrainService.getRepoList(repoQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getRepoList(@RequestBody @VerifyParam RepoQuery repoQuery) throws BusinessException {
+        List<Repo> result = studentTrainService.getRepoList(repoQuery);
         return getSuccessResponseVO(result);
     }
 
@@ -99,13 +94,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "根据题库Id获取各种题型数量")
     @RequestMapping("getQuTypeClassifyByRepoId")
-    public ResponseVO getQuTypeClassifyByRepoId(@RequestBody String repoId) throws BusinessException {
-        Map<Integer, Long> result = null;
-        try {
-            result = studentTrainService.getQuTypeClassifyByRepoId(repoId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getQuTypeClassifyByRepoId(@RequestBody @VerifyParam(require = true) String repoId) throws BusinessException {
+        Map<Integer, Long> result = studentTrainService.getQuTypeClassifyByRepoId(repoId);
         return getSuccessResponseVO(result);
     }
 
@@ -118,13 +109,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "开始训练")
     @RequestMapping("startTrain")
-    public ResponseVO startTrain(@RequestBody StartTrainDTO startTrainDTO) throws BusinessException {
-        String result = null;
-        try {
-            result = studentTrainService.startTrain(startTrainDTO);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO startTrain(@RequestBody @VerifyParam StartTrainDTO startTrainDTO) throws BusinessException {
+        String result = studentTrainService.startTrain(startTrainDTO);
         return getSuccessResponseVO(result);
     }
 
@@ -136,13 +123,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "根据Id获取训练记录")
     @RequestMapping("getTrainRecordById")
-    public ResponseVO getTrainRecordById(@RequestBody String trainId) throws BusinessException {
-        Integer result = null;
-        try {
-            result = studentTrainService.getTrainRecordById(trainId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO getTrainRecordById(@RequestBody @VerifyParam(require = true) String trainId) throws BusinessException {
+        Integer result  = studentTrainService.getTrainRecordById(trainId);
         return getSuccessResponseVO(result);
     }
 
@@ -154,13 +137,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "根据sort+获取训练记录Id 获取题目信息")
     @RequestMapping("getTrainRecordQu")
-    public ResponseVO getTrainRecordQu(@RequestBody TrainRecordQuQuery trainRecordQuQuery) throws BusinessException {
-        TrainRecordQuVO result = null;
-        try {
-            result = studentTrainService.getTrainRecordQu(trainRecordQuQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO getTrainRecordQu(@RequestBody @VerifyParam TrainRecordQuQuery trainRecordQuQuery) throws BusinessException {
+        TrainRecordQuVO result  = studentTrainService.getTrainRecordQu(trainRecordQuQuery);
         return getSuccessResponseVO(result);
     }
 
@@ -173,16 +152,11 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "更新作答记录")
     @RequestMapping("updateTrainRecord")
-    public ResponseVO updateTrainRecord(@RequestBody TrainRecord trainRecord) throws BusinessException {
-        Boolean result = null;
-        try {
-            result = studentTrainService.updateTrainRecord(trainRecord);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO updateTrainRecord(@RequestBody @VerifyParam TrainRecord trainRecord) throws BusinessException {
+        Boolean result = studentTrainService.updateTrainRecord(trainRecord);
         return getSuccessResponseVO(result);
     }
-
 
 
     /**
@@ -193,13 +167,9 @@ public class StudentTrainController extends ABaseController {
      */
     @ApiOperation(value = "结束训练")
     @RequestMapping("stopTrain")
-    public ResponseVO stopTrain(@RequestBody String trainId) throws BusinessException {
-        Boolean result = null;
-        try {
-            result = studentTrainService.stopTrain(trainId);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO stopTrain(@RequestBody @VerifyParam(require = true) String trainId) throws BusinessException {
+        Boolean result  = studentTrainService.stopTrain(trainId);
         return getSuccessResponseVO(result);
     }
 

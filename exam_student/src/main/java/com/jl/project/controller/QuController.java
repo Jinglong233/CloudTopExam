@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
@@ -27,7 +29,8 @@ public class QuController extends ABaseController {
      * 根据Id查询
      */
     @RequestMapping("getQuById")
-    public ResponseVO getQuById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true)
+    public ResponseVO getQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         QuAndAnswerVo result = quService.getQuById(id);
         return getSuccessResponseVO(result);
     }

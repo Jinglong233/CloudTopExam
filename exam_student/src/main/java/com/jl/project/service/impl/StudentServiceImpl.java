@@ -4,15 +4,18 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
+import com.jl.project.entity.dto.LoginDTO;
+import com.jl.project.entity.dto.RetrievePasswordDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
 import com.jl.project.entity.po.Department;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.DepartmentQuery;
-import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.enums.ResponseCodeEnum;
@@ -20,8 +23,10 @@ import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.DepartmentMapper;
 import com.jl.project.mapper.UserMapper;
+import com.jl.project.service.EmailService;
 import com.jl.project.service.StudentService;
 import com.jl.project.utils.MD5Util;
+import com.jl.project.utils.UserInfoUtil;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -57,6 +62,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Resource
     private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
+
+    @Resource
+    private EmailService emailService;
 
 
     @Resource
@@ -130,50 +138,36 @@ public class StudentServiceImpl implements StudentService {
      * 根据Id更新
      */
     public Boolean updateUserById(UpdateUserDTO updateDeptDTO) throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
         String id = updateDeptDTO.getId();
-        if (updateDeptDTO == null || id == null || updateDeptDTO.getUser() == null) {
-            throw new BusinessException("缺少参数");
+
+        // 判断是否是本人
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        if (!id.equals(loginUserInfo.getId())) {
+            // 如果不是本人，再次得判断是否是管理员
+            String role = UserInfoUtil.getLoginUserRole(request, stringRedisTemplate);
+            if (!"admin".equals(role)) {
+                throw new BusinessException("无权限修改");
+            }
         }
 
         // 1. 获取用户的信息
         User user = updateDeptDTO.getUser();
         String password = user.getPassword();
-        // 2. 判断是否需要修改密码
-        if (password != null && !"".equals(password.trim())) {
-            // 2.1 获取密码盐
-            User temp = userMapper.selectById(id);
-            if (temp == null) {
-                throw new BusinessException("更新失败");
-            }
-            String salt = temp.getSalt();
-            String encodePwd = MD5Util.getMD5Encode(password, salt);
-            // 2.2 修改密码
-            user.setPassword(encodePwd);
-        }
 
-        // 判断是否修改部门
-        User oldUser = userMapper.selectById(id);
-        String oldDeptCode = oldUser.getDeptCode();
-        String newDeptCode = user.getDeptCode();
-        if (oldDeptCode != newDeptCode) {
-            // 更新用户所属部门
-            DepartmentQuery departmentQuery = new DepartmentQuery();
-            departmentQuery.setDeptCode(newDeptCode);
-            List<Department> list = departmentMapper.selectList(departmentQuery);
-            if (list == null || list.size() == 0) {
-                throw new BusinessException("部门信息错误");
-            }
-            Department department = list.get(0);
-            user.setDeptText(department.getDeptName());
-        }
+//        不同于管理员，这里不用修改密码和部门
 
-        // 3. 添加更新日期
+
+        // 2. 添加更新日期
         user.setUpdateTime(new Date());
 
-        // 4. 更新
+        user.setUpdateBy(loginUserInfo.getId());
+
+        // 3. 更新
         Integer result = userMapper.updateById(user, id);
 
-        // 5. 更改缓存中的用户信息
+        // 4. 更改缓存中的用户信息
         String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + id);
         if (token != null) {
             // 更新该登录用户缓存的信息
@@ -350,6 +344,124 @@ public class StudentServiceImpl implements StudentService {
         // 清除token缓存
         Boolean delete = stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
         return delete;
+    }
+
+    @Override
+    public Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO) {
+        // 校验用户
+        String userName = retrievePasswordDTO.getUserName();
+        UserQuery userQuery = new UserQuery();
+        userQuery.setUserName(userName);
+        userQuery.setRole(RoleType.STUDENT.getValue());
+        List<User> list = userMapper.selectList(userQuery);
+        if (list == null || list.size() == 0) {
+            throw new BusinessException("该用户不存在");
+        }
+
+
+        // 校验邮箱
+        User user = list.get(0);
+        String email = user.getEmail();
+        if (StrUtil.isEmpty(email)) {
+            throw new BusinessException("该用户没有绑定邮箱");
+        }
+        String toEmail = retrievePasswordDTO.getEmail();
+        if (!toEmail.equals(email)) {
+            throw new BusinessException("输入的邮箱有误");
+        }
+        // 发送验证码
+        return emailService.sendEmailCode(email);
+    }
+
+    @Override
+    public Boolean retrievePassword(RetrievePasswordDTO retrievePasswordDTO) {
+        String password = retrievePasswordDTO.getPassword();
+        if (StrUtil.isEmpty(password)) {
+            throw new BusinessException("密码为空");
+        }
+        // 获取邮箱+用户名（唯一凭证）
+        String email = retrievePasswordDTO.getEmail();
+        if (StrUtil.isEmpty(email)) {
+            throw new BusinessException("邮箱信息为空，请尝试重新操作");
+        }
+        String userName = retrievePasswordDTO.getUserName();
+        if (StrUtil.isEmpty(userName)) {
+            throw new BusinessException("用户名为空，请尝试重新操作");
+        }
+
+        UserQuery userQuery = new UserQuery();
+        userQuery.setEmail(email);
+        userQuery.setUserName(userName);
+        List<User> userList = userMapper.selectList(userQuery);
+        if (userList == null || userList.size() == 0) {
+            throw new BusinessException("用户信息不存在");
+        }
+        User user = userList.get(0);
+        String newPassword = MD5Util.getMD5Encode(password, user.getSalt());
+        user.setPassword(newPassword);
+        Integer result = userMapper.updateById(user, user.getId());
+        if (result <= 0) {
+            throw new BusinessException("更新密码失败");
+        }
+        // 更新redis中的信息
+        LoginResponseVo loginResponseVo = new LoginResponseVo();
+        BeanUtil.copyProperties(user, loginResponseVo);
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+        return true;
+
+    }
+
+    @Override
+    public Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        // 判断是否是原用户
+        if (!updateUserPasswordDTO.getUserId().equals(loginUserInfo.getId())) {
+            throw new BusinessException("无权限修改");
+        }
+
+
+        String oldPassword = updateUserPasswordDTO.getOldPassword();
+        if (oldPassword == null || "".equals(oldPassword.trim())) {
+            throw new BusinessException("原密码错误");
+        }
+
+        String userId = updateUserPasswordDTO.getUserId();
+        if (userId == null || "".equals(userId.trim())) {
+            throw new BusinessException("缺少必要参数");
+        }
+
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户信息不存在");
+        }
+
+        // 对比密码
+        String rightPassword = user.getPassword();
+        String mixPassword = MD5Util.getMD5Encode(oldPassword, user.getSalt());
+        if (!rightPassword.equals(mixPassword)) {
+            throw new BusinessException("密码错误");
+        }
+
+        String newPassword = updateUserPasswordDTO.getNewPassword();
+        if (newPassword == null || "".equals(newPassword.trim())) {
+            throw new BusinessException("缺少新密码");
+        }
+
+        // 更新密码
+        String newMIxPassword = MD5Util.getMD5Encode(newPassword, user.getSalt());
+        user.setPassword(newMIxPassword);
+        user.setUpdateTime(new Date());
+        user.setUpdateBy(loginUserInfo.getId());
+
+        //  删除redis中缓存的信息（如果有）
+        stringRedisTemplate.delete(USER_PREFIX + TOKEN + loginUserInfo.getToken());
+
+        Integer result = userMapper.updateById(user, userId);
+        return result > 0;
+
     }
 
 

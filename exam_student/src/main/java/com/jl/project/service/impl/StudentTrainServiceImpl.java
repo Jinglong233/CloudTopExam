@@ -2,6 +2,7 @@ package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.jl.project.entity.dto.StartTrainDTO;
 import com.jl.project.entity.po.*;
@@ -14,6 +15,7 @@ import com.jl.project.enums.QuType;
 import com.jl.project.enums.TrainMode;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.service.RecommendService;
 import com.jl.project.service.StudentTrainService;
 import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,8 @@ public class StudentTrainServiceImpl implements StudentTrainService {
     @Resource
     private RepoMapper<Repo, RepoQuery> repoMapper;
 
-
+    @Resource
+    private BookMapper<Book, BookQuery> bookMapper;
     @Resource
     private TrainMapper<Train, TrainQuery> trainMapper;
 
@@ -46,22 +49,18 @@ public class StudentTrainServiceImpl implements StudentTrainService {
     @Resource
     private QuMapper<Qu, QuQuery> quMapper;
 
+    @Resource
+    private RecommendService recommendService;
+
 
     @Override
     public List<Repo> getRepoList(RepoQuery repoQuery) {
-        if (repoQuery == null) {
-            throw new BusinessException("缺少参数");
-        }
         List<Repo> repos = repoMapper.selectList(repoQuery);
         return repos;
     }
 
     @Override
     public Map<Integer, Long> getQuTypeClassifyByRepoId(String repoId) {
-        if (repoId == null) {
-            throw new BusinessException("缺少题库Id");
-        }
-
         QuQuery quQuery = new QuQuery();
         quQuery.setRepoId(repoId);
 
@@ -94,10 +93,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
             throw new BusinessException("缺少参数");
         }
 
-        String repoId = startTrainDTO.getRepoId();
-        if (repoId == null || repoId.trim().equals("")) {
-            throw new BusinessException("缺少题库Id");
-        }
 
         // 获取用户Id
         String userId = startTrainDTO.getUserId();
@@ -107,8 +102,11 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
         // 获取训练模式
         Integer mode = startTrainDTO.getMode();
-        if (mode == null) {
-            throw new BusinessException("缺少训练类型");
+
+        String repoId = startTrainDTO.getRepoId();
+        // 不是智能训练的都需要题库ID
+        if (!TrainMode.INTELLIGENT.getValue().equals(mode) && StrUtil.isEmpty(repoId)) {
+            throw new BusinessException("缺少题库Id");
         }
 
         Integer quType = startTrainDTO.getQuType();
@@ -177,19 +175,31 @@ public class StudentTrainServiceImpl implements StudentTrainService {
                 throw new BusinessException("题库对应题型题目数量为0");
             }
         } else if (mode.equals(TrainMode.RANDOM.getValue())) { // 随机训练
-
             quList = quMapper.selectList(quQuery);
-            Collections.shuffle(quList);
-
-        } else if (mode.equals(TrainMode.SEQUENCE.getValue())) { // 顺序训练
-            quList = quMapper.selectList(quQuery);
-            // 排除简答题
+            // 排除简答题和填空
             quList = quList.stream().filter(qu -> {
-                if (QuType.SHORTANSWER.getValue().equals(qu.getQuType())) {
+                if (QuType.SHORTANSWER.getValue().equals(qu.getQuType())
+                        || QuType.FILL.getValue().equals(qu.getQuType())) {
                     return false;
                 }
                 return true;
             }).collect(Collectors.toList());
+            // 排除多选和填空
+            Collections.shuffle(quList);
+
+        } else if (mode.equals(TrainMode.SEQUENCE.getValue())) { // 顺序训练
+            quList = quMapper.selectList(quQuery);
+            // 排除简答题和填空
+            quList = quList.stream().filter(qu -> {
+                if (QuType.SHORTANSWER.getValue().equals(qu.getQuType())
+                        || QuType.FILL.getValue().equals(qu.getQuType())) {
+                    return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
+        } else if (mode.equals(TrainMode.INTELLIGENT.getValue())) {// 智能推荐训练
+            List<String> recommendQuList = recommendService.getRecommendQuList();
+            quList = quMapper.getQuListByIds(recommendQuList);
         }
         // 设置题目总数
         train.setTotalCount(quList.size());
@@ -226,10 +236,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
     @Override
     public Integer getTrainRecordById(String trainId) throws BusinessException {
-        if (trainId == null || trainId.trim() == "") {
-            throw new BusinessException("缺少参数");
-        }
-
         // 根据Id获取训练记录
         Train train = trainMapper.selectById(trainId);
         if (train == null) {
@@ -305,8 +311,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         if (trainRecord == null) {
             throw new BusinessException("缺少参数");
         }
-
-
         String jsonAnswerId = trainRecord.getAnswerId();
         // 将Json字符串转换为数组
         Gson gson = new Gson();
@@ -387,10 +391,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
     @Override
     public Boolean stopTrain(String trainId) throws BusinessException {
-        if (trainId == null || "".equals(trainId)) {
-            throw new BusinessException("缺少参数");
-        }
-
         // 更新训练状态
         Train train = trainMapper.selectById(trainId);
         if (train == null) {
@@ -418,14 +418,19 @@ public class StudentTrainServiceImpl implements StudentTrainService {
                 throw new BusinessException("提交失败");
             }
         }
+
+        // 获取此次训练的所有答题记录，做错题统计
+        trainRecords = trainRecordMapper.selectList(trainRecordQuery);
+        if (trainRecords != null && trainRecords.size() != 0) {
+            for (TrainRecord trainRecord : trainRecords) {
+                updateBookData(trainRecord, train.getUserId());
+            }
+        }
         return true;
     }
 
     @Override
     public Train getTrainById(String trainId) throws BusinessException {
-        if (trainId == null || "".equals(trainId)) {
-            throw new BusinessException("缺少参数");
-        }
         Train train = trainMapper.selectById(trainId);
         if (train == null) {
             throw new BusinessException("训练记录不存在");
@@ -474,5 +479,35 @@ public class StudentTrainServiceImpl implements StudentTrainService {
     private Boolean clearNoAnswerRecord() {
         Integer integer = trainRecordMapper.deleteNoAnswerRecord();
         return integer > 0;
+    }
+
+    /**
+     * 根据用户答案记录更新错题数据
+     */
+    private void updateBookData(TrainRecord trainRecord, String userId) {
+        // 同时更新错题本数据
+        BookQuery bookQuery = new BookQuery();
+        bookQuery.setQuId(trainRecord.getQuId());
+        bookQuery.setUserId(userId);
+        List<Book> list = bookMapper.selectList(bookQuery);
+        if (list != null && list.size() != 0) {
+            // 存在，则直接进行更改
+            Book book = list.get(0);
+            book.setWrongCount(book.getWrongCount() + 1);
+            Integer integer = bookMapper.updateById(book, book.getId());
+            if (integer <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        } else {
+            Book book = new Book();
+            book.setId(CommonUtil.getRandomId());
+            book.setQuId(trainRecord.getQuId());
+            book.setUserId(userId);
+            book.setWrongCount(1);
+            Integer insert = bookMapper.insert(book);
+            if (insert <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        }
     }
 }

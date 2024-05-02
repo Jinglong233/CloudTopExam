@@ -1,8 +1,12 @@
 package com.jl.project.controller;
 
-import com.jl.project.entity.dto.UpdateUserDTO;
-import com.jl.project.entity.po.User;
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.LoginDTO;
+import com.jl.project.entity.dto.RetrievePasswordDTO;
+import com.jl.project.entity.dto.UpdateUserDTO;
+import com.jl.project.entity.dto.UpdateUserPasswordDTO;
+import com.jl.project.entity.po.User;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
@@ -36,7 +40,8 @@ public class StudentController extends ABaseController {
      */
     @ApiOperation(value = "学生登录")
     @RequestMapping("login")
-    public ResponseVO login(@RequestBody LoginDTO user) throws BusinessException {
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
+    public ResponseVO login(@RequestBody @VerifyParam LoginDTO user) throws BusinessException {
         LoginResponseVo result = studentService.login(user);
         return getSuccessResponseVO(result, "登录成功");
     }
@@ -48,6 +53,7 @@ public class StudentController extends ABaseController {
      */
     @ApiOperation(value = "学生退出登录")
     @RequestMapping("logout")
+    @GlobalInterceptor(checkLogin = true)
     public ResponseVO logout() {
         Boolean result = studentService.logout();
         return getSuccessResponseVO(result, "退出成功");
@@ -60,45 +66,80 @@ public class StudentController extends ABaseController {
      */
     @ApiOperation(value = "学生获取个人信息")
     @RequestMapping("info")
+    @GlobalInterceptor(checkLogin = true, checkStudent = true)
     public ResponseVO getLoginUserInfo() {
-        User result = null;
-        try {
-            result = studentService.getLoginUserInfo();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
+        User result = studentService.getLoginUserInfo();
         return getSuccessResponseVO(result);
     }
 
-    /**
-     * 新增（注册）
-     */
-    @ApiOperation(value = "学生注册（预留）")
-    @RequestMapping("register")
-    public ResponseVO register(@RequestBody User bean) throws BusinessException {
-        Boolean result = this.studentService.register(bean);
-        return getSuccessResponseVO(result, "添加成功");
-    }
 
     /**
      * 根据Id更新
      */
     @ApiOperation(value = "学生更新个人信息")
     @RequestMapping("updateUserById")
-    public ResponseVO updateUserById(@RequestBody UpdateUserDTO updateUserDTO) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
+    public ResponseVO updateUserById(@RequestBody @VerifyParam UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = studentService.updateUserById(updateUserDTO);
         return getSuccessResponseVO(result, "更新成功");
     }
 
+
+    /**
+     * 修改密码
+     *
+     * @return
+     */
+    @ApiOperation(value = "修改密码")
+    @RequestMapping("updateUserPassword")
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
+        Boolean result = studentService.updateUserPassword(updateUserPasswordDTO);
+        return getSuccessResponseVO(result);
+    }
+
+
     /**
      * 根据Id删除
      */
-    @ApiOperation(value = "学生注销账户")
+    @ApiOperation(value = "学生注销账户(预留)")
     @RequestMapping("deleteUserById")
-    public ResponseVO deleteUserById(@RequestBody String id) throws BusinessException {
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+    public ResponseVO deleteUserById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         Boolean result = studentService.deleteUserById(id);
         return getSuccessResponseVO(result, result ? "删除成功" : "删除失败");
     }
+
+
+    /**
+     * 获取找回密码邮箱验证码
+     *
+     * @param retrievePasswordDTO
+     * @return
+     * @throws BusinessException
+     */
+    @ApiOperation(value = "获取找回密码邮箱验证码")
+    @RequestMapping("getRetrievePasswordCode")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
+    public ResponseVO getRetrievePasswordCode(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+        Boolean result = studentService.getRetrievePasswordCode(retrievePasswordDTO);
+        return getSuccessResponseVO(result);
+    }
+
+
+    /**
+     * 找回密码
+     *
+     * @return
+     */
+    @ApiOperation(value = "找回密码")
+    @RequestMapping("retrievePassword")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
+    public ResponseVO retrievePassword(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+        Boolean result = studentService.retrievePassword(retrievePasswordDTO);
+        return getSuccessResponseVO(result);
+    }
+
 
     /**
      * 头像上传
@@ -107,6 +148,7 @@ public class StudentController extends ABaseController {
      */
     @ApiOperation(value = "学生头像上传")
     @PostMapping("/upload/avatar")
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
     public ResponseVO uploadAvatar(@RequestParam("file") MultipartFile file) {
         String result = null;
         try {
@@ -116,7 +158,6 @@ public class StudentController extends ABaseController {
         }
         return getSuccessResponseVO(result);
     }
-
 
 
 }

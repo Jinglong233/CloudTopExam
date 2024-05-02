@@ -3,19 +3,14 @@ package com.jl.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.jl.project.entity.dto.SubmitExamDTO;
 import com.jl.project.entity.po.*;
-import com.jl.project.entity.query.ExamQuery;
-import com.jl.project.entity.query.ExamRecordQuery;
-import com.jl.project.entity.query.PaperQuery;
-import com.jl.project.entity.query.UserAnswerQuery;
+import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.ExamResultVO;
 import com.jl.project.entity.vo.ExamVO;
 import com.jl.project.enums.ExamRecordStateType;
 import com.jl.project.exception.BusinessException;
-import com.jl.project.mapper.ExamMapper;
-import com.jl.project.mapper.ExamRecordMapper;
-import com.jl.project.mapper.PaperMapper;
-import com.jl.project.mapper.UserAnswerMapper;
+import com.jl.project.mapper.*;
 import com.jl.project.service.StudentExamService;
+import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -40,6 +35,8 @@ public class StudentExamServiceImpl implements StudentExamService {
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
 
+    @Resource
+    private BookMapper<Book, BookQuery> bookMapper;
 
     /**
      * 查询考试
@@ -49,10 +46,6 @@ public class StudentExamServiceImpl implements StudentExamService {
      */
     @Override
     public List<ExamVO> loadStudentExamList(String userId) throws BusinessException {
-        if (userId == null) {
-            throw new BusinessException("缺少参数");
-        }
-
         // 1. 查询该考生所有的考试记录
         ExamRecordQuery examRecordQuery = new ExamRecordQuery();
         examRecordQuery.setUserId(userId);
@@ -97,14 +90,7 @@ public class StudentExamServiceImpl implements StudentExamService {
 
     @Override
     public Double submitExam(SubmitExamDTO submitExamDTO) {
-        if (submitExamDTO == null) {
-            throw new BusinessException("缺少参数");
-
-        }
         String recordId = submitExamDTO.getExamRecordId();
-        if (recordId == null) {
-            throw new BusinessException("缺少参数");
-        }
 
         ExamRecord oldRecord = examRecordMapper.selectById(recordId);
         if (oldRecord == null) {
@@ -131,7 +117,8 @@ public class StudentExamServiceImpl implements StudentExamService {
 
         // 4. 判断是否需要阅卷
         Integer reviewQuire = exam.getReviewQuire();
-        if (reviewQuire == 0) { // 不需要手动判题
+        // 不需要手动判题；同时可以更新错题统计表
+        if (reviewQuire == 0) {
             List<Qu> quList = submitExamDTO.getQuList();
             if (quList == null || quList.isEmpty()) {
                 throw new BusinessException("无题目列表信息");
@@ -147,7 +134,7 @@ public class StudentExamServiceImpl implements StudentExamService {
                 }
                 userAnswerQuery.setExamRecordId(recordId);
                 userAnswerQuery.setQuId(quId);
-                // 4.2 获取用户该题目的答题记录，判断是否答对
+                // 4.2 获取用户该题目的答题记录，获取单题得分
                 List<UserAnswer> userAnswerList = userAnswerMapper.selectList(userAnswerQuery);
                 if (userAnswerList == null || userAnswerList.isEmpty()) {
                     throw new BusinessException("用户答题记录不存在");
@@ -155,11 +142,11 @@ public class StudentExamServiceImpl implements StudentExamService {
                 UserAnswer userAnswer = userAnswerList.get(0);
                 Integer score = userAnswer.getScore();
                 totalScore += score;
+
+                updateBookData(userAnswer);
             }
             // 不需要则设置考试记录状态为已处理
             oldRecord.setHandState(1);
-
-
         }
 
         // 5. 同时修改考试总分、通过情况、阅卷时间
@@ -181,14 +168,44 @@ public class StudentExamServiceImpl implements StudentExamService {
             throw new BusinessException("更新失败");
         }
 
+
         return Double.valueOf(totalScore);
+    }
+
+    /**
+     * 根据用户答案记录更新错题数据
+     *
+     * @param userAnswer
+     */
+    private void updateBookData(UserAnswer userAnswer) {
+        // 同时更新错题本数据
+        BookQuery bookQuery = new BookQuery();
+        bookQuery.setQuId(userAnswer.getQuId());
+        bookQuery.setUserId(userAnswer.getUserId());
+        List<Book> list = bookMapper.selectList(bookQuery);
+        if (list != null && list.size() != 0) {
+            // 存在，则直接进行更改
+            Book book = list.get(0);
+            book.setWrongCount(book.getWrongCount() + 1);
+            Integer integer = bookMapper.updateById(book, book.getId());
+            if (integer <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        } else {
+            Book book = new Book();
+            book.setId(CommonUtil.getRandomId());
+            book.setQuId(userAnswer.getQuId());
+            book.setUserId(userAnswer.getUserId());
+            book.setWrongCount(1);
+            Integer insert = bookMapper.insert(book);
+            if (insert <= 0) {
+                throw new BusinessException("更新错题表失败");
+            }
+        }
     }
 
     @Override
     public ExamResultVO getExamResult(String examRecordId) {
-        if (examRecordId == null) {
-            throw new BusinessException("缺少参数");
-        }
         ExamRecord examRecord = examRecordMapper.selectById(examRecordId);
         if (examRecord == null) {
             throw new BusinessException("该考试记录不存在");

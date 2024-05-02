@@ -2,6 +2,8 @@ package com.jl.project.service;
 
 import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.query.ExamRecordQuery;
+import com.jl.project.entity.vo.AnsweredRecordVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 
 import java.util.Date;
 import java.util.List;
@@ -13,7 +15,7 @@ public interface StudentExamRecordService {
      * @param examRecordQuery
      * @return
      */
-    public List<ExamRecord> getStudentExamRecord(ExamRecordQuery examRecordQuery);
+    public PaginationResultVO<ExamRecord> getStudentExamRecord(ExamRecordQuery examRecordQuery);
 
     /**
      * 开始考试
@@ -21,4 +23,6 @@ public interface StudentExamRecordService {
      * @return
      */
     Date startAnswer(ExamRecordQuery query);
+
+    List<AnsweredRecordVO> getAnsweredRecord(String userId);
 }

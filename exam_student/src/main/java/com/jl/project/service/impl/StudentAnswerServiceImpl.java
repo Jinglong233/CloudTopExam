@@ -233,7 +233,6 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
             score = glQus.get(0).getScore();
         }
 
-
         Boolean answer = strategyContext.isAnswer(userAnswer, quType, score);
         if (!answer) {
             throw new BusinessException("用户答题记录更新出错");
