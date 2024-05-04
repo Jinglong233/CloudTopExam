@@ -75,5 +75,5 @@ export function userUploadApi(
   }
 ) {
   // const controller = new AbortController();
-  return axios.post('/api/user/upload/avatar', data, config);
+  return axios.post('/api/student/upload/avatar', data, config);
 }

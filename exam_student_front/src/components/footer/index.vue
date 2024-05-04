@@ -1,5 +1,5 @@
 <template>
-  <a-layout-footer class="footer">CloudTopExam</a-layout-footer>
+  <a-layout-footer class="footer"> "学路有你"-学生端</a-layout-footer>
 </template>
 
 <script lang="ts" setup></script>
