@@ -149,13 +149,8 @@ public class StudentController extends ABaseController {
     @ApiOperation(value = "学生头像上传")
     @PostMapping("/upload/avatar")
     @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
-    public ResponseVO uploadAvatar(@RequestParam("file") MultipartFile file) {
-        String result = null;
-        try {
-            result = studentService.uploadAvatar(file);
-        } catch (IOException | BusinessException e) {
-            return getErrorResponseVO("上传出错", 400, e.getMessage());
-        }
+    public ResponseVO uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws IOException {
+        Boolean result  = studentService.uploadAvatar(file);
         return getSuccessResponseVO(result);
     }
 

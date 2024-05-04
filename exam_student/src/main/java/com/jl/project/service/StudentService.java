@@ -71,7 +71,7 @@ public interface StudentService {
      * @param file
      * @return
      */
-    String uploadAvatar(MultipartFile file) throws BusinessException, IOException;
+    Boolean uploadAvatar(MultipartFile file) throws BusinessException, IOException;
 
     /**
      * 退出登录

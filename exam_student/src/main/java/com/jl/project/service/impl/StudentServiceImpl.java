@@ -5,8 +5,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PutObjectResult;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.LoginDTO;
@@ -273,16 +276,15 @@ public class StudentServiceImpl implements StudentService {
      * @return
      */
     @Override
-    public String uploadAvatar(MultipartFile file) throws BusinessException, IOException {
+    public Boolean uploadAvatar(MultipartFile file) throws BusinessException, IOException {
         if (file == null) {
             throw new BusinessException("文件为空");
         }
 
         // 获取登录用户
-        User loginUserInfo = getLoginUserInfo();
-        if (loginUserInfo == null) {
-            throw new BusinessException("请重新登录");
-        }
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
 
         String userId = loginUserInfo.getId();
         if (userId == null) {
@@ -316,17 +318,36 @@ public class StudentServiceImpl implements StudentService {
 
 
         // 7. 创建oss请求，传入三个参数
-        ossClient.putObject(env.getProperty("aliyun.oss.bucketName"), dirFileName, inputStream, objectMetadata);
-
+        try {
+            PutObjectResult putObjectResult = ossClient.putObject(env.getProperty("aliyun.oss.bucketName"), dirFileName, inputStream, objectMetadata);
+        } catch (OSSException e) {
+            throw new BusinessException("上传失败");
+        } catch (ClientException e) {
+            throw new BusinessException("上传失败");
+        }
         // 8. 拼接图片url路径，方便后续入库
         url = "https://" + env.getProperty("aliyun.oss.bucketName") + "." + env.getProperty("aliyun.oss.endpoint") + "/" + dirFileName;
-
-
         // 9. 文件路径保存到数据库
         User user = new User();
         user.setAvatar(url);
         Integer result = userMapper.updateById(user, userId);
-        return url;
+        if (result <= 0) {
+            throw new BusinessException("保存头像信息失败");
+        }
+
+        // 刷新用户缓存信息
+
+        // 10. 更改缓存中的用户信息
+        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + userId);
+        if (token != null) {
+            // 更新该登录用户缓存的信息
+            Gson gson = new Gson();
+            User afterUpdate = userMapper.selectById(userId);
+            String json = gson.toJson(afterUpdate);
+            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
+        }
+
+        return true;
     }
 
     /**
