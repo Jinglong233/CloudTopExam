@@ -142,7 +142,7 @@ public class UserController extends ABaseController {
     @PostMapping("/upload/avatar")
     @GlobalInterceptor(checkLogin = true, checkParams = true)
     public ResponseVO uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws BusinessException, IOException {
-        String result = userService.uploadAvatar(file);
+        Boolean result = userService.uploadAvatar(file);
         return getSuccessResponseVO(result);
     }
 

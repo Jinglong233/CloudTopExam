@@ -5,7 +5,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
@@ -386,9 +388,10 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public String uploadAvatar(MultipartFile file) throws BusinessException, IOException {
+    public Boolean uploadAvatar(MultipartFile file) throws BusinessException, IOException {
         // 获取登录用户
-        LoginResponseVo loginUserInfo = getLoginUserInfo();
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
 
         String userId = loginUserInfo.getId();
         if (userId == null) {
@@ -423,7 +426,13 @@ public class UserServiceImpl implements UserService {
 
 
         // 7. 创建oss请求，传入三个参数
-        ossClient.putObject(env.getProperty("aliyun.oss.bucketName"), dirFileName, inputStream, objectMetadata);
+        try {
+            ossClient.putObject(env.getProperty("aliyun.oss.bucketName"), dirFileName, inputStream, objectMetadata);
+        } catch (OSSException e) {
+            throw new RuntimeException("上传失败");
+        } catch (ClientException e) {
+            throw new RuntimeException("上传失败");
+        }
 
         // 8. 拼接图片url路径，方便后续入库
         url = "https://" + env.getProperty("aliyun.oss.bucketName") + "." + env.getProperty("aliyun.oss.endpoint") + "/" + dirFileName;
@@ -433,7 +442,24 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setAvatar(url);
         Integer result = userMapper.updateById(user, userId);
-        return url;
+
+        if (result <= 0) {
+            throw new RuntimeException("上传失败");
+        }
+
+
+        // 刷新用户缓存信息
+        // 10. 更改缓存中的用户信息
+        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + userId);
+        if (token != null) {
+            // 更新该登录用户缓存的信息
+            Gson gson = new Gson();
+            User afterUpdate = userMapper.selectById(userId);
+            String json = gson.toJson(afterUpdate);
+            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
+        }
+
+        return true;
     }
 
 
