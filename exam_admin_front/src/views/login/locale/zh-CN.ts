@@ -1,5 +1,5 @@
 export default {
-  'login.form.title': '登录 Cloud Top Exam',
+  'login.form.title': '登录 "学路有你"-管理端',
   'login.form.userName.errMsg': '用户名不能为空',
   'login.form.password.errMsg': '密码不能为空',
   'login.form.login.errMsg': '登录出错，轻刷新重试',

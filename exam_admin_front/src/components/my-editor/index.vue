@@ -87,8 +87,6 @@
   });
 
   const handleCreated = (editor: any) => {
-    console.log('创建了');
-    console.log(props.editorText);
     editor.setHtml(props.editorText as string);
     editorRef.value = editor; // 记录 my-editor 实例，重要！
   };

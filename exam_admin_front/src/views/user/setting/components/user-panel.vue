@@ -77,6 +77,7 @@
   import { useUserStore } from '@/store';
   import { userUploadApi } from '@/api/user-center';
   import type { DescData } from '@arco-design/web-vue/es/descriptions/interface';
+  import { Message } from '@arco-design/web-vue';
 
   const userStore = useUserStore();
   const file = {
@@ -143,16 +144,19 @@
         const res = await userUploadApi(formData, {
           controller,
           onUploadProgress,
+        }).then(async (re: any) => {
+          if (re.data === true) {
+            Message.success({
+              content: '上传成功',
+              duration: 2000,
+            });
+            await userInfo.reloadState();
+            // 重新渲染页面
+            const { ctx: that } = getCurrentInstance() as any;
+            that.$forceUpdate();
+            onSuccess(res);
+          }
         });
-
-        // todo 待修改 开始
-        // 重新加载用户pinia数据
-        // await userInfo.reloadState();
-        // 重新渲染页面
-        const { ctx: that } = getCurrentInstance() as any;
-        that.$forceUpdate();
-        // todo 结束
-        onSuccess(res);
       } catch (error) {
         onError(error);
       }

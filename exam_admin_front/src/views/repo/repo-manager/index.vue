@@ -33,13 +33,8 @@
                 :allow-clear="true"
                 @change="handleSelectChange"
               />
-              <a-checkbox :value="1" @change="handleExamChange"
-                >是否用于考试</a-checkbox
-              >
-              <a-checkbox :value="1" @change="handleTrainChange"
-                >是否用于训练</a-checkbox
-              >
-
+              <a-checkbox @change="handleExamChange">是否用于考试</a-checkbox>
+              <a-checkbox @change="handleTrainChange">是否用于训练</a-checkbox>
               <!--标题搜索-->
               <a-input-search
                 v-model="searchForm.titleFuzzy"
@@ -55,7 +50,7 @@
                 :repo-list="repoList"
                 :loading="loading"
                 style="margin-top: 20px"
-                @reload-repo-list="reloadRepoList"
+                @reload-repo-list="reloadRepoList({})"
               />
             </a-scrollbar>
             <div style="margin-top: 10px; flex: auto">
@@ -103,9 +98,9 @@
   const subjectTree = ref<SubjectTreeVO[]>([]);
 
   // 题库列表
-  const repoList = ref<Repo[]>();
+  const repoList = ref<Repo[]>([]);
   // 查询表单
-  const searchForm = ref<RepoQuery>({});
+  const searchForm = ref<RepoQuery>({} as RepoQuery);
   const reloadRepoList = async (repoQuery: RepoQuery) => {
     loading.value = true;
     await getRepoList(repoQuery).then((res: any) => {

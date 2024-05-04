@@ -61,12 +61,10 @@
 
         <!--作用范围-->
         <a-form-item field="repo.isExam" tooltip="考试可以选择该题库题目">
-          <a-checkbox v-model="updateForm.repo.isExam" :value="1"
-            >是否用于考试</a-checkbox
-          >
+          <a-checkbox v-model="updateForm.repo.isExam">是否用于考试</a-checkbox>
         </a-form-item>
         <a-form-item field="repo.isTrain" tooltip="训练可以使用该题库">
-          <a-checkbox v-model="updateForm.repo.isTrain" :value="1"
+          <a-checkbox v-model="updateForm.repo.isTrain"
             >是否用于训练</a-checkbox
           >
         </a-form-item>
@@ -93,7 +91,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref, toRaw } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { UpdateRepoDTO } from '@/types/model/dto/UpdateRepoDTO';
   import { getDeptTree } from '@/api/department';
   import { Repo } from '@/types/model/po/Repo';
@@ -156,7 +154,6 @@
         await reloadRepoInfo();
       }
     });
-    console.log(toRaw(updateForm.value));
   };
 </script>
 

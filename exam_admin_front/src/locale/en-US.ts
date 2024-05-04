@@ -6,9 +6,6 @@ import localeWorkplace from '@/views/dashboard/workplace/locale/en-US';
 import localeDataAnalysis from '@/views/visualization/data-analysis/locale/en-US';
 import localeMultiDAnalysis from '@/views/visualization/multi-dimension-data-analysis/locale/en-US';
 
-import localeSuccess from '@/views/result/success/locale/en-US';
-import localeError from '@/views/result/error/locale/en-US';
-
 import locale403 from '@/views/exception/403/locale/en-US';
 import locale404 from '@/views/exception/404/locale/en-US';
 import locale500 from '@/views/exception/500/locale/en-US';
@@ -61,8 +58,7 @@ export default {
 
   ...localeDataAnalysis,
   ...localeMultiDAnalysis,
-  ...localeSuccess,
-  ...localeError,
+
   ...locale403,
   ...locale404,
   ...locale500,

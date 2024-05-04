@@ -26,7 +26,11 @@ export function addRepo(addRepoDTO: AddRepoDTO) {
  * 通过Id获取题库信息
  */
 export function getRepoById(id: string) {
-  return axios.get<Repo>('/api/repo/getRepoById', { params: { id } });
+  return axios.post<Repo>('/api/repo/getRepoById', id, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
 }
 
 /**

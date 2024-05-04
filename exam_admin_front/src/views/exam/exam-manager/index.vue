@@ -200,7 +200,7 @@
                 >
                 </a-avatar>
                 <a-typography-title style="margin-right: 20px" :heading="6">
-                  CloudTopExam
+                  "学路有你"-管理端
                 </a-typography-title>
                 <a-space>
                   <a-typography-paragraph

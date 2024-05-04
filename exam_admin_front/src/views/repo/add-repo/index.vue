@@ -99,6 +99,7 @@
   import { useUserStore } from '@/store';
   import { SubjectTreeVO } from '@/types/model/vo/SubjectTreeVO';
   import { getSubjectTree } from '@/api/subject';
+  import { RepoQuery } from '@/types/model/query/RepoQuery';
 
   // 题库列表
   const repoList = ref();
@@ -113,7 +114,7 @@
 
   onMounted(async () => {
     // 获取题库列表
-    await getRepoList({}).then((res: any) => {
+    await getRepoList({} as RepoQuery).then((res: any) => {
       repoList.value = res.data.list;
     });
     await getDeptTree().then((res: any) => {

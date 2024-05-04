@@ -114,7 +114,6 @@
     router.push({
       path: '/repo/add-repo',
     });
-    console.log('创建题库');
   };
 
   /**

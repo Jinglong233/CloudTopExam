@@ -623,7 +623,6 @@
     >
       <MyEditor
         v-if="visible"
-        :ref="editorRef"
         :editor-text="currentEditorText"
         @editor-get-html="handleEditorGetText"
       />
@@ -643,7 +642,6 @@
   import { Repo } from '@/types/model/po/Repo';
   import { AddQuAndAnswerDTO } from '@/types/model/dto/AddQuAndAnswerDTO';
   import { useRouter } from 'vue-router';
-  import { QuestionType } from '@/types/model/QuestionType';
   import { addQuAndQuAnswer } from '@/api/qu';
   import { RepoQuery } from '@/types/model/query/RepoQuery';
 
@@ -728,7 +726,6 @@
     if (Number(key) === 3 && quForm.value.quAnswerList) {
       quForm.value.quAnswerList[0].content = '正确';
       quForm.value.quAnswerList[1].content = '错误';
-      console.log('init:', quForm.value.quAnswerList);
     }
   };
 

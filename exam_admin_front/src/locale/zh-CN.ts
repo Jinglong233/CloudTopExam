@@ -6,9 +6,6 @@ import localeWorkplace from '@/views/dashboard/workplace/locale/zh-CN';
 import localeDataAnalysis from '@/views/visualization/data-analysis/locale/zh-CN';
 import localeMultiDAnalysis from '@/views/visualization/multi-dimension-data-analysis/locale/zh-CN';
 
-import localeSuccess from '@/views/result/success/locale/zh-CN';
-import localeError from '@/views/result/error/locale/zh-CN';
-
 import locale403 from '@/views/exception/403/locale/zh-CN';
 import locale404 from '@/views/exception/404/locale/zh-CN';
 import locale500 from '@/views/exception/500/locale/zh-CN';
@@ -62,8 +59,7 @@ export default {
 
   ...localeDataAnalysis,
   ...localeMultiDAnalysis,
-  ...localeSuccess,
-  ...localeError,
+
   ...locale403,
   ...locale404,
   ...locale500,
