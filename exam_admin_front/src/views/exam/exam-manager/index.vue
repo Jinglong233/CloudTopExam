@@ -279,7 +279,7 @@
   const ExamList = ref<ExamVO[]>();
 
   // 查询表单
-  const examSearch = ref<ExamQuery>({});
+  const examSearch = ref<ExamQuery>({} as ExamQuery);
 
   // 获取考试列表
   const reloadExamList = async (examQuery: ExamQuery) => {

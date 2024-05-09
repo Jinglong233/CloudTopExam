@@ -16,6 +16,11 @@ export interface MsgQuery extends SimplePage {
   templIdFuzzy?: string;
 
   /**
+   * 消息类型
+   */
+  msgType?: number;
+
+  /**
    * 标题
    */
   title?: string;
@@ -52,4 +57,18 @@ export interface MsgQuery extends SimplePage {
    * 状态
    */
   state?: number;
+
+  /**
+   * 发送人Id
+   */
+  createUser?: string;
+
+  createUserFuzzy?: string;
+
+  /**
+   * 发送人姓名
+   */
+  createUserText?: string;
+
+  createUserTextFuzzy?: string;
 }

@@ -20,6 +20,11 @@ export interface Msg {
   content?: string;
 
   /**
+   * 消息类型
+   */
+  msgType?: number;
+
+  /**
    * 发送人数
    */
   sendCount?: number;

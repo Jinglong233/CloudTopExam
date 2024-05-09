@@ -107,3 +107,21 @@ export function maskEmail(email: string) {
     localPart.slice(-2);
   return `${maskedLocalPart}@${domain}`;
 }
+
+/**
+ * 根据部门code获取部门名称
+ */
+export function getDeptText(deptCode: string, data: any) {
+  let result: string | null = null;
+  data.forEach((item: any) => {
+    if (item.deptCode === deptCode) {
+      result = item.deptName;
+    } else if (item.children) {
+      const childResult = getDeptText(deptCode, item.children);
+      if (childResult) {
+        result = childResult;
+      }
+    }
+  });
+  return result;
+}

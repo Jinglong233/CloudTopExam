@@ -322,19 +322,18 @@
   import dayjs from 'dayjs';
   import { useRoute, useRouter } from 'vue-router';
   import { useI18n } from 'vue-i18n';
-  import { onMounted, ref, toRaw, watch } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { Paper } from '@/types/model/po/Paper';
   import { getPaperDetail } from '@/api/paper';
   import { UserQuery } from '@/types/model/query/UserQuery';
   import { getDeptTree } from '@/api/department';
-  import { getDeptUserList, getUserList } from '@/api/user';
+  import { getUserList } from '@/api/user';
   import { AddExamDTO } from '@/types/model/dto/AddExamDTO';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { User } from '@/types/model/po/User';
   import { Message, ValidatedError } from '@arco-design/web-vue';
   import { useUserStore } from '@/store';
   import { SimplePage } from '@/types/model/po/SimplePage';
-  import { removeObjByProperty } from '@/utils/common';
   import { addExam } from '@/api/exam';
 
   const { t } = useI18n();
@@ -465,7 +464,7 @@
   // 显示考试结果按钮改变
   const resultTypeChange = (value: any) => {};
 
-  // 问题列表行被选择时触发
+  // 用户列表行被选择时触发
   const userTableRowSelect = (rowKeys: any, rowKey: any, record: User) => {
     if (!addExamForm.value.userList) {
       addExamForm.value.userList = [];
