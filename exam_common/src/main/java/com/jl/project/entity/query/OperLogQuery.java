@@ -2,11 +2,11 @@ package com.jl.project.entity.query;
 
 import java.util.Date;
 /**
- * @Description:日志表查询对象
+ * @Description:操作日志表查询对象
  * @author:jingLong
- * @date:2024/05/06
+ * @date:2024/05/08
  */
-public class LogQuery extends BaseQuery{
+public class OperLogQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
@@ -36,37 +36,39 @@ public class LogQuery extends BaseQuery{
 	private String ipFuzzy;
 
 	/**
+	 * 操作地点
+	 */
+	private String operAddress;
+
+	private String operAddressFuzzy;
+
+	/**
 	 * 是否成功
 	 */
 	private Integer success;
 
 	/**
-	 * 创建时间
+	 * 操作时间
 	 */
-	private Date createTime;
+	private Date operTime;
 
-	private String createTimeStart;
+	private String operTimeStart;
 
-	private String createTimeEnd;
+	private String operTimeEnd;
 
 	/**
-	 * 日志类型 0：登录日志1：操作日志
-	 */
-	private Integer logType;
-
-	/**
-	 * 请求方式
+	 * 请求方式（get、post...）
 	 */
 	private String requestMode;
 
 	private String requestModeFuzzy;
 
 	/**
-	 * 操作方法
+	 * 操作方法（哪个方法处理的）
 	 */
-	private String OperationMethod;
+	private String operationMethod;
 
-	private String operationMethogFuzzy;
+	private String operationMethodFuzzy;
 
 	/**
 	 * 请求参数
@@ -88,6 +90,11 @@ public class LogQuery extends BaseQuery{
 	private String description;
 
 	private String descriptionFuzzy;
+
+	/**
+	 * 操作类型（增删改查...）
+	 */
+	private Integer operType;
 
 	public void setId(String id) {
 		this.id = id;
@@ -121,6 +128,14 @@ public class LogQuery extends BaseQuery{
 		return this.ip;
 	}
 
+	public void setOperAddress(String operAddress) {
+		this.operAddress = operAddress;
+	}
+
+	public String getOperAddress() {
+		return this.operAddress;
+	}
+
 	public void setSuccess(Integer success) {
 		this.success = success;
 	}
@@ -129,20 +144,12 @@ public class LogQuery extends BaseQuery{
 		return this.success;
 	}
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
+	public void setOperTime(Date operTime) {
+		this.operTime = operTime;
 	}
 
-	public Date getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setLogType(Integer logType) {
-		this.logType = logType;
-	}
-
-	public Integer getLogType() {
-		return this.logType;
+	public Date getOperTime() {
+		return this.operTime;
 	}
 
 	public void setRequestMode(String requestMode) {
@@ -153,12 +160,12 @@ public class LogQuery extends BaseQuery{
 		return this.requestMode;
 	}
 
-	public void setOperationMethod(String OperationMethod) {
-		this.OperationMethod = OperationMethod;
+	public void setOperationMethod(String operationMethod) {
+		this.operationMethod = operationMethod;
 	}
 
-	public String getOperationMethog() {
-		return this.OperationMethod;
+	public String getOperationMethod() {
+		return this.operationMethod;
 	}
 
 	public void setRequestArg(String requestArg) {
@@ -183,6 +190,14 @@ public class LogQuery extends BaseQuery{
 
 	public String getDescription() {
 		return this.description;
+	}
+
+	public void setOperType(Integer operType) {
+		this.operType = operType;
+	}
+
+	public Integer getOperType() {
+		return this.operType;
 	}
 
 	public void setIdFuzzy(String idFuzzy) {
@@ -217,20 +232,28 @@ public class LogQuery extends BaseQuery{
 		return this.ipFuzzy;
 	}
 
-	public void setCreateTimeStart(String createTimeStart) {
-		this.createTimeStart = createTimeStart;
+	public void setOperAddressFuzzy(String operAddressFuzzy) {
+		this.operAddressFuzzy = operAddressFuzzy;
 	}
 
-	public String getCreateTimeStart() {
-		return this.createTimeStart;
+	public String getOperAddressFuzzy() {
+		return this.operAddressFuzzy;
 	}
 
-	public void setCreateTimeEnd(String createTimeEnd) {
-		this.createTimeEnd = createTimeEnd;
+	public void setOperTimeStart(String operTimeStart) {
+		this.operTimeStart = operTimeStart;
 	}
 
-	public String getCreateTimeEnd() {
-		return this.createTimeEnd;
+	public String getOperTimeStart() {
+		return this.operTimeStart;
+	}
+
+	public void setOperTimeEnd(String operTimeEnd) {
+		this.operTimeEnd = operTimeEnd;
+	}
+
+	public String getOperTimeEnd() {
+		return this.operTimeEnd;
 	}
 
 	public void setRequestModeFuzzy(String requestModeFuzzy) {
@@ -241,12 +264,12 @@ public class LogQuery extends BaseQuery{
 		return this.requestModeFuzzy;
 	}
 
-	public void setOperationMethogFuzzy(String operationMethogFuzzy) {
-		this.operationMethogFuzzy = operationMethogFuzzy;
+	public void setOperationMethodFuzzy(String operationMethodFuzzy) {
+		this.operationMethodFuzzy = operationMethodFuzzy;
 	}
 
-	public String getOperationMethogFuzzy() {
-		return this.operationMethogFuzzy;
+	public String getOperationMethodFuzzy() {
+		return this.operationMethodFuzzy;
 	}
 
 	public void setRequestArgFuzzy(String requestArgFuzzy) {

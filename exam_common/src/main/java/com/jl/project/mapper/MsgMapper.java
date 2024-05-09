@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 /**
  * @Description:消息表商品Mapper
  * @author:jingLong
- * @date:2023/11/22
+ * @date:2024/05/08
  */
 public interface MsgMapper<T, P> extends BaseMapper {
 	/**

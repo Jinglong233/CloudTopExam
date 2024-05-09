@@ -1,8 +1,8 @@
 package com.jl.project.service;
 
 import com.jl.project.entity.dto.CheckEmailCodeDTO;
-import com.jl.project.entity.dto.RetrievePasswordDTO;
 import com.jl.project.entity.po.Exam;
+import com.jl.project.entity.po.Msg;
 
 /**
  * @Description:邮箱验证码Service
@@ -43,5 +43,11 @@ public interface EmailService {
     Boolean bindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
 
     Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO);
+
+    /**
+     * 发送通知
+     *
+     */
+    void sendNotification(String toEmail, Msg msg);
 
 }

@@ -13,7 +13,7 @@ import java.util.Date;
 /**
  * @Description:消息表
  * @author:jingLong
- * @date:2024/04/19
+ * @date:2024/05/08
  */
 public class Msg implements Serializable{
 	/**
@@ -35,6 +35,11 @@ public class Msg implements Serializable{
 	 * 消息内容
 	 */
 	private String content;
+
+	/**
+	 * 消息类型 0：公告1：通知2：邮件
+	 */
+	private Integer msgType;
 
 	/**
 	 * 发送人数
@@ -100,6 +105,14 @@ public class Msg implements Serializable{
 		return this.content;
 	}
 
+	public void setMsgType(Integer msgType) {
+		this.msgType = msgType;
+	}
+
+	public Integer getMsgType() {
+		return this.msgType;
+	}
+
 	public void setSendCount(Integer sendCount) {
 		this.sendCount = sendCount;
 	}
@@ -150,7 +163,7 @@ public class Msg implements Serializable{
 
 	@Override
 	public String toString() {
-		return "ID:" + (id == null ? "空" : id) + ",模板ID:" + (templId == null ? "空" : templId) + ",标题:" + (title == null ? "空" : title) + ",消息内容:" + (content == null ? "空" : content) + ",发送人数:" + (sendCount == null ? "空" : sendCount) + ",已读人数:" + (readCount == null ? "空" : readCount) + ",发送时间:" + (sendTime == null ? "空" : DateUtils.format(sendTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",状态:" + (state == null ? "空" : state) + ",发送人Id:" + (createUser == null ? "空" : createUser) + ",发送人姓名:" + (createUserText == null ? "空" : createUserText) ;
+		return "ID:" + (id == null ? "空" : id) + ",模板ID:" + (templId == null ? "空" : templId) + ",标题:" + (title == null ? "空" : title) + ",消息内容:" + (content == null ? "空" : content) + ",消息类型 0：公告1：通知2：邮件:" + (msgType == null ? "空" : msgType) + ",发送人数:" + (sendCount == null ? "空" : sendCount) + ",已读人数:" + (readCount == null ? "空" : readCount) + ",发送时间:" + (sendTime == null ? "空" : DateUtils.format(sendTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",状态:" + (state == null ? "空" : state) + ",发送人Id:" + (createUser == null ? "空" : createUser) + ",发送人姓名:" + (createUserText == null ? "空" : createUserText) ;
 	}
 
 }

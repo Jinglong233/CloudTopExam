@@ -261,7 +261,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
 
-
     @Override
     public Boolean unBindUserEmail(CheckEmailCodeDTO checkEmailCodeDTO) {
         Boolean isRight = checkCode(checkEmailCodeDTO.getEmail(), checkEmailCodeDTO.getCode());
@@ -288,6 +287,16 @@ public class EmailServiceImpl implements EmailService {
         UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
 
         return true;
+    }
+
+    @Override
+    public void sendNotification(String toEmail, Msg msg) {
+        MailContent mailContent = new MailContent();
+        mailContent.setSubject(msg.getTemplId());
+        mailContent.setContext(msg.getContent());
+        mailContent.setToEmail(toEmail);
+        // 发送邮件通知
+        MailUtil.sendMail(mailContent, javaMailSender, from);
     }
 
 }

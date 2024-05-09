@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.LoginLogMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.LoginLog">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 登录用户名 -->
+		<result column="user_name" property="userName"/>
+		<!-- 用户IP -->
+		<result column="ip" property="ip"/>
+		<!-- 登录状态 -->
+		<result column="login_state" property="loginState"/>
+		<!-- 登录时间 -->
+		<result column="login_time" property="loginTime"/>
+		<!-- 操作信息 -->
+		<result column="oper_msg" property="operMsg"/>
+		<!-- 登录地址 -->
+		<result column="login_address" property="loginAddress"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,user_name,ip,login_state,login_time,oper_msg,login_address
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null">
+			and id = #{query.id}
+		</if>
+		<if test="query.userName != null and query.userName!= ''">
+			and user_name = #{query.userName}
+		</if>
+		<if test="query.ip != null and query.ip!= ''">
+			and ip = #{query.ip}
+		</if>
+		<if test="query.loginState != null">
+			and login_state = #{query.loginState}
+		</if>
+		<if test="query.loginTime != null">
+			and login_time = #{query.loginTime}
+		</if>
+		<if test="query.operMsg != null and query.operMsg!= ''">
+			and oper_msg = #{query.operMsg}
+		</if>
+		<if test="query.loginAddress != null and query.loginAddress!= ''">
+			and login_address = #{query.loginAddress}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.userNameFuzzy != null and query.userNameFuzzy != '' ">
+			and user_name like concat('%', #{query.userNameFuzzy}, '%')
+		</if>
+		<if test="query.ipFuzzy != null and query.ipFuzzy != '' ">
+			and ip like concat('%', #{query.ipFuzzy}, '%')
+		</if>
+		<if test="query.loginTimeStart != null and query.loginTimeStart != '' ">
+			<![CDATA[ and login_time >= str_to_date(#{query.loginTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.loginTimeEnd != null and query.loginTimeEnd != '' ">
+			<![CDATA[ and login_time < date_sub(str_to_date(#{query.loginTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.operMsgFuzzy != null and query.operMsgFuzzy != '' ">
+			and oper_msg like concat('%', #{query.operMsgFuzzy}, '%')
+		</if>
+		<if test="query.loginAddressFuzzy != null and query.loginAddressFuzzy != '' ">
+			and login_address like concat('%', #{query.loginAddressFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM login_log
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM login_log
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.LoginLog">
+
+		INSERT INTO login_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.ip != null">
+				ip,
+			</if>
+			<if test="bean.loginState != null">
+				login_state,
+			</if>
+			<if test="bean.loginTime != null">
+				login_time,
+			</if>
+			<if test="bean.operMsg != null">
+				oper_msg,
+			</if>
+			<if test="bean.loginAddress != null">
+				login_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.ip != null">
+				#{bean.ip},
+			</if>
+			<if test="bean.loginState != null">
+				#{bean.loginState},
+			</if>
+			<if test="bean.loginTime != null">
+				#{bean.loginTime},
+			</if>
+			<if test="bean.operMsg != null">
+				#{bean.operMsg},
+			</if>
+			<if test="bean.loginAddress != null">
+				#{bean.loginAddress},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.LoginLog">
+		INSERT INTO login_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.ip != null">
+				ip,
+			</if>
+			<if test="bean.loginState != null">
+				login_state,
+			</if>
+			<if test="bean.loginTime != null">
+				login_time,
+			</if>
+			<if test="bean.operMsg != null">
+				oper_msg,
+			</if>
+			<if test="bean.loginAddress != null">
+				login_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.ip != null">
+				#{bean.ip},
+			</if>
+			<if test="bean.loginState != null">
+				#{bean.loginState},
+			</if>
+			<if test="bean.loginTime != null">
+				#{bean.loginTime},
+			</if>
+			<if test="bean.operMsg != null">
+				#{bean.operMsg},
+			</if>
+			<if test="bean.loginAddress != null">
+				#{bean.loginAddress},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.userName != null">
+				user_name= VALUES(user_name),
+			</if>
+			<if test="bean.ip != null">
+				ip= VALUES(ip),
+			</if>
+			<if test="bean.loginState != null">
+				login_state= VALUES(login_state),
+			</if>
+			<if test="bean.loginTime != null">
+				login_time= VALUES(login_time),
+			</if>
+			<if test="bean.operMsg != null">
+				oper_msg= VALUES(oper_msg),
+			</if>
+			<if test="bean.loginAddress != null">
+				login_address= VALUES(login_address),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.LoginLog">
+		INSERT INTO login_log(id,user_name,ip,login_state,login_time,oper_msg,login_address)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.LoginLog">
+		INSERT INTO 
+		login_log(id,user_name,ip,login_state,login_time,oper_msg,login_address)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),user_name= VALUES(user_name),ip= VALUES(ip),login_state= VALUES(login_state),login_time= VALUES(login_time),oper_msg= VALUES(oper_msg),login_address= VALUES(login_address)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from login_log where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.LoginLog">
+		update login_log
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.ip != null">
+				ip = #{bean.ip},
+			</if>
+			<if test="bean.loginState != null">
+				login_state = #{bean.loginState},
+			</if>
+			<if test="bean.loginTime != null">
+				login_time = #{bean.loginTime},
+			</if>
+			<if test="bean.operMsg != null">
+				oper_msg = #{bean.operMsg},
+			</if>
+			<if test="bean.loginAddress != null">
+				login_address = #{bean.loginAddress},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from login_log where id=#{id}
+	</delete>
+</mapper>
+

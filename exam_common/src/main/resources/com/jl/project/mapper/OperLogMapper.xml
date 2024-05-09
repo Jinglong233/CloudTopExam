@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.OperLogMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.OperLog">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 操作人员名称 -->
+		<result column="user_name" property="userName"/>
+		<!-- 请求地址 -->
+		<result column="url" property="url"/>
+		<!-- 用户IP -->
+		<result column="ip" property="ip"/>
+		<!-- 操作地点 -->
+		<result column="oper_address" property="operAddress"/>
+		<!-- 是否成功 -->
+		<result column="success" property="success"/>
+		<!-- 操作时间 -->
+		<result column="oper_time" property="operTime"/>
+		<!-- 请求方式（get、post...） -->
+		<result column="request_mode" property="requestMode"/>
+		<!-- 操作方法（哪个方法处理的） -->
+		<result column="operation_method" property="operationMethod"/>
+		<!-- 请求参数 -->
+		<result column="request_arg" property="requestArg"/>
+		<!-- 返回参数 -->
+		<result column="return_arg" property="returnArg"/>
+		<!-- 操作描述 -->
+		<result column="description" property="description"/>
+		<!-- 操作类型（增删改查...） -->
+		<result column="oper_type" property="operType"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null and query.id!= ''">
+			and id = #{query.id}
+		</if>
+		<if test="query.userName != null and query.userName!= ''">
+			and user_name = #{query.userName}
+		</if>
+		<if test="query.url != null and query.url!= ''">
+			and url = #{query.url}
+		</if>
+		<if test="query.ip != null and query.ip!= ''">
+			and ip = #{query.ip}
+		</if>
+		<if test="query.operAddress != null and query.operAddress!= ''">
+			and oper_address = #{query.operAddress}
+		</if>
+		<if test="query.success != null">
+			and success = #{query.success}
+		</if>
+		<if test="query.operTime != null">
+			and oper_time = #{query.operTime}
+		</if>
+		<if test="query.requestMode != null and query.requestMode!= ''">
+			and request_mode = #{query.requestMode}
+		</if>
+		<if test="query.operationMethod != null and query.operationMethod!= ''">
+			and operation_method = #{query.operationMethod}
+		</if>
+		<if test="query.requestArg != null and query.requestArg!= ''">
+			and request_arg = #{query.requestArg}
+		</if>
+		<if test="query.returnArg != null and query.returnArg!= ''">
+			and return_arg = #{query.returnArg}
+		</if>
+		<if test="query.description != null and query.description!= ''">
+			and description = #{query.description}
+		</if>
+		<if test="query.operType != null">
+			and oper_type = #{query.operType}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
+			and id like concat('%', #{query.idFuzzy}, '%')
+		</if>
+		<if test="query.userNameFuzzy != null and query.userNameFuzzy != '' ">
+			and user_name like concat('%', #{query.userNameFuzzy}, '%')
+		</if>
+		<if test="query.urlFuzzy != null and query.urlFuzzy != '' ">
+			and url like concat('%', #{query.urlFuzzy}, '%')
+		</if>
+		<if test="query.ipFuzzy != null and query.ipFuzzy != '' ">
+			and ip like concat('%', #{query.ipFuzzy}, '%')
+		</if>
+		<if test="query.operAddressFuzzy != null and query.operAddressFuzzy != '' ">
+			and oper_address like concat('%', #{query.operAddressFuzzy}, '%')
+		</if>
+		<if test="query.operTimeStart != null and query.operTimeStart != '' ">
+			<![CDATA[ and oper_time >= str_to_date(#{query.operTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.operTimeEnd != null and query.operTimeEnd != '' ">
+			<![CDATA[ and oper_time < date_sub(str_to_date(#{query.operTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+		</if>
+		<if test="query.requestModeFuzzy != null and query.requestModeFuzzy != '' ">
+			and request_mode like concat('%', #{query.requestModeFuzzy}, '%')
+		</if>
+		<if test="query.operationMethodFuzzy != null and query.operationMethodFuzzy != '' ">
+			and operation_method like concat('%', #{query.operationMethodFuzzy}, '%')
+		</if>
+		<if test="query.requestArgFuzzy != null and query.requestArgFuzzy != '' ">
+			and request_arg like concat('%', #{query.requestArgFuzzy}, '%')
+		</if>
+		<if test="query.returnArgFuzzy != null and query.returnArgFuzzy != '' ">
+			and return_arg like concat('%', #{query.returnArgFuzzy}, '%')
+		</if>
+		<if test="query.descriptionFuzzy != null and query.descriptionFuzzy != '' ">
+			and description like concat('%', #{query.descriptionFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM oper_log
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM oper_log
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.OperLog">
+
+		INSERT INTO oper_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.url != null">
+				url,
+			</if>
+			<if test="bean.ip != null">
+				ip,
+			</if>
+			<if test="bean.operAddress != null">
+				oper_address,
+			</if>
+			<if test="bean.success != null">
+				success,
+			</if>
+			<if test="bean.operTime != null">
+				oper_time,
+			</if>
+			<if test="bean.requestMode != null">
+				request_mode,
+			</if>
+			<if test="bean.operationMethod != null">
+				operation_method,
+			</if>
+			<if test="bean.requestArg != null">
+				request_arg,
+			</if>
+			<if test="bean.returnArg != null">
+				return_arg,
+			</if>
+			<if test="bean.description != null">
+				description,
+			</if>
+			<if test="bean.operType != null">
+				oper_type,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.url != null">
+				#{bean.url},
+			</if>
+			<if test="bean.ip != null">
+				#{bean.ip},
+			</if>
+			<if test="bean.operAddress != null">
+				#{bean.operAddress},
+			</if>
+			<if test="bean.success != null">
+				#{bean.success},
+			</if>
+			<if test="bean.operTime != null">
+				#{bean.operTime},
+			</if>
+			<if test="bean.requestMode != null">
+				#{bean.requestMode},
+			</if>
+			<if test="bean.operationMethod != null">
+				#{bean.operationMethod},
+			</if>
+			<if test="bean.requestArg != null">
+				#{bean.requestArg},
+			</if>
+			<if test="bean.returnArg != null">
+				#{bean.returnArg},
+			</if>
+			<if test="bean.description != null">
+				#{bean.description},
+			</if>
+			<if test="bean.operType != null">
+				#{bean.operType},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.OperLog">
+		INSERT INTO oper_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.url != null">
+				url,
+			</if>
+			<if test="bean.ip != null">
+				ip,
+			</if>
+			<if test="bean.operAddress != null">
+				oper_address,
+			</if>
+			<if test="bean.success != null">
+				success,
+			</if>
+			<if test="bean.operTime != null">
+				oper_time,
+			</if>
+			<if test="bean.requestMode != null">
+				request_mode,
+			</if>
+			<if test="bean.operationMethod != null">
+				operation_method,
+			</if>
+			<if test="bean.requestArg != null">
+				request_arg,
+			</if>
+			<if test="bean.returnArg != null">
+				return_arg,
+			</if>
+			<if test="bean.description != null">
+				description,
+			</if>
+			<if test="bean.operType != null">
+				oper_type,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.url != null">
+				#{bean.url},
+			</if>
+			<if test="bean.ip != null">
+				#{bean.ip},
+			</if>
+			<if test="bean.operAddress != null">
+				#{bean.operAddress},
+			</if>
+			<if test="bean.success != null">
+				#{bean.success},
+			</if>
+			<if test="bean.operTime != null">
+				#{bean.operTime},
+			</if>
+			<if test="bean.requestMode != null">
+				#{bean.requestMode},
+			</if>
+			<if test="bean.operationMethod != null">
+				#{bean.operationMethod},
+			</if>
+			<if test="bean.requestArg != null">
+				#{bean.requestArg},
+			</if>
+			<if test="bean.returnArg != null">
+				#{bean.returnArg},
+			</if>
+			<if test="bean.description != null">
+				#{bean.description},
+			</if>
+			<if test="bean.operType != null">
+				#{bean.operType},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.userName != null">
+				user_name= VALUES(user_name),
+			</if>
+			<if test="bean.url != null">
+				url= VALUES(url),
+			</if>
+			<if test="bean.ip != null">
+				ip= VALUES(ip),
+			</if>
+			<if test="bean.operAddress != null">
+				oper_address= VALUES(oper_address),
+			</if>
+			<if test="bean.success != null">
+				success= VALUES(success),
+			</if>
+			<if test="bean.operTime != null">
+				oper_time= VALUES(oper_time),
+			</if>
+			<if test="bean.requestMode != null">
+				request_mode= VALUES(request_mode),
+			</if>
+			<if test="bean.operationMethod != null">
+				operation_method= VALUES(operation_method),
+			</if>
+			<if test="bean.requestArg != null">
+				request_arg= VALUES(request_arg),
+			</if>
+			<if test="bean.returnArg != null">
+				return_arg= VALUES(return_arg),
+			</if>
+			<if test="bean.description != null">
+				description= VALUES(description),
+			</if>
+			<if test="bean.operType != null">
+				oper_type= VALUES(oper_type),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.OperLog">
+		INSERT INTO oper_log(id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.description},#{item.operType})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.OperLog">
+		INSERT INTO 
+		oper_log(id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.description},#{item.operType})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),user_name= VALUES(user_name),url= VALUES(url),ip= VALUES(ip),oper_address= VALUES(oper_address),success= VALUES(success),oper_time= VALUES(oper_time),request_mode= VALUES(request_mode),operation_method= VALUES(operation_method),request_arg= VALUES(request_arg),return_arg= VALUES(return_arg),description= VALUES(description),oper_type= VALUES(oper_type)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from oper_log where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.OperLog">
+		update oper_log
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.url != null">
+				url = #{bean.url},
+			</if>
+			<if test="bean.ip != null">
+				ip = #{bean.ip},
+			</if>
+			<if test="bean.operAddress != null">
+				oper_address = #{bean.operAddress},
+			</if>
+			<if test="bean.success != null">
+				success = #{bean.success},
+			</if>
+			<if test="bean.operTime != null">
+				oper_time = #{bean.operTime},
+			</if>
+			<if test="bean.requestMode != null">
+				request_mode = #{bean.requestMode},
+			</if>
+			<if test="bean.operationMethod != null">
+				operation_method = #{bean.operationMethod},
+			</if>
+			<if test="bean.requestArg != null">
+				request_arg = #{bean.requestArg},
+			</if>
+			<if test="bean.returnArg != null">
+				return_arg = #{bean.returnArg},
+			</if>
+			<if test="bean.description != null">
+				description = #{bean.description},
+			</if>
+			<if test="bean.operType != null">
+				oper_type = #{bean.operType},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from oper_log where id=#{id}
+	</delete>
+</mapper>
+

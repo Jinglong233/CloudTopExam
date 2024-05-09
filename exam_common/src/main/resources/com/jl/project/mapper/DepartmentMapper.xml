@@ -94,7 +94,7 @@
             <![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
         </if>
         <if test="query.createTimeEnd != null and query.createTimeEnd != '' ">
-            <![CDATA[ and create_time < data_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+            <![CDATA[ and create_time < date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
         </if>
         <if test="query.createByFuzzy != null and query.createByFuzzy != '' ">
             and create_by like concat('%', #{query.createByFuzzy}, '%')
@@ -103,7 +103,7 @@
             <![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
         </if>
         <if test="query.updateTimeEnd != null and query.updateTimeEnd != '' ">
-            <![CDATA[ and update_time < data_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+            <![CDATA[ and update_time < date_sub(str_to_date(#{query.updateTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
         </if>
         <if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
             and update_by like concat('%', #{query.updateByFuzzy}, '%')

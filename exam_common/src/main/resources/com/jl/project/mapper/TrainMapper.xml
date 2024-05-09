@@ -85,7 +85,7 @@
 			<![CDATA[ and train_time >= str_to_date(#{query.trainTimeStart}, '%Y-%m-%d') ]]>
 		</if>
 		<if test="query.trainTimeEnd != null and query.trainTimeEnd != '' ">
-			<![CDATA[ and train_time < data_sub(str_to_date(#{query.trainTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+			<![CDATA[ and train_time < date_sub(str_to_date(#{query.trainTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 	</sql>
 	<!--通用查询条件-->

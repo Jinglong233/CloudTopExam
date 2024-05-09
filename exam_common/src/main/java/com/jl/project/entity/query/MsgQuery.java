@@ -4,7 +4,7 @@ import java.util.Date;
 /**
  * @Description:消息表查询对象
  * @author:jingLong
- * @date:2024/04/19
+ * @date:2024/05/08
  */
 public class MsgQuery extends BaseQuery{
 	/**
@@ -34,6 +34,11 @@ public class MsgQuery extends BaseQuery{
 	private String content;
 
 	private String contentFuzzy;
+
+	/**
+	 * 消息类型 0：公告1：通知2：邮件
+	 */
+	private Integer msgType;
 
 	/**
 	 * 发送人数
@@ -103,6 +108,14 @@ public class MsgQuery extends BaseQuery{
 
 	public String getContent() {
 		return this.content;
+	}
+
+	public void setMsgType(Integer msgType) {
+		this.msgType = msgType;
+	}
+
+	public Integer getMsgType() {
+		return this.msgType;
 	}
 
 	public void setSendCount(Integer sendCount) {
