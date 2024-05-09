@@ -111,9 +111,6 @@ public class MsgUserServiceImpl implements MsgUserService {
 
     @Override
     public PaginationResultVO loadDatalist(MsgUserQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少查询参数");
-        }
         PaginationResultVO resultVO = new PaginationResultVO();
 
         PaginationResultVO<MsgUser> page = findListByPage(query);
@@ -128,7 +125,7 @@ public class MsgUserServiceImpl implements MsgUserService {
         List<MsgVO> resultList = new ArrayList<>();
         for (MsgUser msgUser : msgUsers) {
             String msgId = msgUser.getMsgId();
-            Msg msg = msgMapper.selectById(msgId);
+                Msg msg = msgMapper.selectById(msgId);
             MsgVO msgVO = new MsgVO();
             BeanUtil.copyProperties(msg,msgVO);
             msgVO.setMsgUser(msgUser);

@@ -1,6 +1,8 @@
 package com.jl.project.controller;
 
 import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
+import com.jl.project.entity.dto.SendMessageDTO;
 import com.jl.project.entity.po.Msg;
 import com.jl.project.entity.query.MsgQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -25,22 +27,25 @@ public class MsgController extends ABaseController{
 	private MsgService msgService;
 
 	/**
+	 * 发送消息
+	 */
+	@RequestMapping("sendMessage")
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
+	public ResponseVO sendMessage(@RequestBody @VerifyParam(require = true) SendMessageDTO sendMessageDTO) {
+		Boolean result = msgService.sendMessage(sendMessageDTO);
+		return getSuccessResponseVO(result);
+	}
+
+	/**
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
 	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
-	public ResponseVO loadDatalist(MsgQuery query) {
+	public ResponseVO loadDatalist(@RequestBody MsgQuery query) {
 		return getSuccessResponseVO(msgService.findListByPage(query));
 	}
 
-	/**
-	 * 新增
-	 */
-	@RequestMapping("add")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true, checkParams = true)
-	public ResponseVO add(Msg bean) {
-		return getSuccessResponseVO(this.msgService.add(bean));
-	}
+
 
 	/**
 	 * 批量新增

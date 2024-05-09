@@ -184,6 +184,7 @@ public class UserController extends ABaseController {
 
     /**
      * 获取找回密码邮箱验证码
+     *
      * @param retrievePasswordDTO
      * @return
      * @throws BusinessException

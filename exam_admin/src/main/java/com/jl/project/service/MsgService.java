@@ -1,6 +1,7 @@
 package com.jl.project.service;
 
 ;
+import com.jl.project.entity.dto.SendMessageDTO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.Msg;
 import com.jl.project.entity.query.MsgQuery;
@@ -31,7 +32,7 @@ public interface MsgService {
 	/**
 	 * 新增
 	 */
-	Integer add(Msg bean);
+	Boolean sendMessage(SendMessageDTO sendMessageDTO);
 
 	/**
 	 * 批量新增
