@@ -96,7 +96,7 @@
         >
           <div ref="refBtn" class="ref-btn"></div>
           <template #content>
-            <message-box @refresh-unread-msg="reloadUnreadCount" />
+            <message-box @refresh-unread-msg-count="reloadUnreadCount" />
           </template>
         </a-popover>
       </li>
@@ -185,7 +185,6 @@
   import useUser from '@/hooks/user';
   import Menu from '@/components/menu/index.vue';
   import { getMyUnreadMsgCount } from '@/api/msg';
-  import { MsgUserQuery } from '@/types/model/query/MsgUserQuery';
   import MessageBox from '../message-box/index.vue';
 
   const appStore = useAppStore();
@@ -245,10 +244,7 @@
   // 未读消息数量
   const unreadCount = ref(0);
   const reloadUnreadCount = async () => {
-    await getMyUnreadMsgCount({
-      userId: userStore.id,
-      state: 0,
-    } as MsgUserQuery).then((res: any) => {
+    await getMyUnreadMsgCount().then((res: any) => {
       unreadCount.value = res.data;
     });
   };

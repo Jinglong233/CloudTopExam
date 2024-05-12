@@ -1,17 +1,16 @@
 <template>
   <a-spin style="display: block" :loading="loading">
     <a-tabs
-      v-model:activeKey="messageType"
+      v-model:activeKey="activeKey"
       type="rounded"
       destroy-on-hide
-      :default-active-key="activeKey"
       @change="tabChange"
     >
       <a-tab-pane v-for="item in tabList" :key="item.key">
         <template #title>
           <span> {{ item.title }}</span>
         </template>
-        <a-result v-if="!MsgList.length" status="404">
+        <a-result v-if="!MsgList || !MsgList.length" status="404">
           <template #subtitle> {{ $t('messageBox.noContent') }} </template>
         </a-result>
         <List :render-list="MsgList" @item-click="handleItemClick" />
@@ -21,14 +20,18 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { ref, toRaw } from 'vue';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
-  import { addOrUpdateBatch, loadMyMsgList } from '@/api/msg';
-  import { MsgUserQuery } from '@/types/model/query/MsgUserQuery';
+  import {
+    addOrUpdateBatch,
+    getNotification,
+    getUnReadNotification,
+  } from '@/api/msg';
   import { useUserStore } from '@/store';
   import { MsgVO } from '@/types/model/vo/MsgVO';
   import { MsgUser } from '@/types/model/po/MsgUser';
+  import { SimplePage } from '@/types/model/po/SimplePage';
   import List from './list.vue';
 
   interface TabItem {
@@ -39,20 +42,17 @@
 
   const userStore = useUserStore();
   const { loading, setLoading } = useLoading(true);
-  const messageType = ref('message');
   const { t } = useI18n();
-  const MsgList = ref([]);
+  const MsgList = ref<MsgVO[]>([]);
   const activeKey = ref('notice');
-  const loadMsgData = async (state?: number) => {
-    await loadMyMsgList({
-      pageSize: 5,
-      userId: userStore.id,
-      state,
-    } as MsgUserQuery).then((res: any) => {
-      MsgList.value = res.data.list;
-    });
+  const loadMsgData = async () => {
+    await getNotification({ pageNo: 1, pageSize: 3 } as SimplePage).then(
+      (res: any) => {
+        MsgList.value = res.data.list;
+      }
+    );
   };
-  const emit = defineEmits(['refreshUnreadMsg']);
+  const emit = defineEmits(['refreshUnreadMsgCount']);
 
   const tabList: TabItem[] = [
     {
@@ -78,9 +78,15 @@
 
   // 切换tab时触发
   const tabChange = async (index: string) => {
+    emit('refreshUnreadMsgCount');
     if (index === 'todo') {
       activeKey.value = 'todo';
-      await loadMsgData(0);
+      await getUnReadNotification({
+        pageNo: 1,
+        pageSize: 3,
+      } as SimplePage).then((res: any) => {
+        MsgList.value = res.data.list;
+      });
     } else if (index === 'notice') {
       activeKey.value = 'notice';
       await loadMsgData();
@@ -99,7 +105,7 @@
     await addOrUpdateBatch(msgUserList).then(async (res: any) => {
       // 刷新消息列表
       await loadMsgData();
-      emit('refreshUnreadMsg');
+      emit('refreshUnreadMsgCount');
     });
   };
 

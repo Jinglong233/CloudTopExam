@@ -26,6 +26,7 @@ import localeExamManager from '@/views/exam/exam-manager/locale/en-US';
 import localeWrongManager from '@/views/wrong-topic-management/locale/en-US';
 
 import localMessage from '@/views/msg-center/locale/en-US';
+import localAnnouncement from '@/views/announcement/locale/en-US';
 import localeSettings from './en-US/settings';
 
 export default {
@@ -78,4 +79,5 @@ export default {
   ...localeExamManager,
   ...localeWrongManager,
   ...localMessage,
+  ...localAnnouncement,
 };

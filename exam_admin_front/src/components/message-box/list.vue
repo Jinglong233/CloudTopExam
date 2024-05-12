@@ -42,14 +42,16 @@
           <a-link @click="allRead">{{ $t('messageBox.allRead') }}</a-link>
         </div>
         <div class="footer-wrap">
-          <a-link>{{ $t('messageBox.viewMore') }}</a-link>
+          <a-link @click="router.push({ name: 'MyMsg' })">{{
+            $t('messageBox.viewMore')
+          }}</a-link>
         </div>
       </a-space>
     </template>
     <div
       v-if="renderList.length && renderList.length < 3"
       :style="{ height: (showMax - renderList.length) * 86 + 'px' }"
-    ></div>
+    />
   </a-list>
 </template>
 
@@ -57,10 +59,12 @@
   import { PropType } from 'vue';
   import { Msg } from '@/types/model/po/Msg';
   import { MsgVO } from '@/types/model/vo/MsgVO';
+  import { useRouter } from 'vue-router';
 
+  const router = useRouter();
   const props = defineProps({
     renderList: {
-      type: Array as PropType<MsgVO>,
+      type: Array as PropType<MsgVO[]>,
       required: true,
     },
   });

@@ -21,17 +21,11 @@
     </div>
     <div class="right-side">
       <a-grid :cols="24" :row-gap="16">
-        <a-grid-item :span="24">
-          <div class="panel moduler-wrap">
-            <QuickOperation />
-            <RecentlyVisited />
-          </div>
+        <a-grid-item class="panel" :span="24">
+          <Announcement :announce-list="announceList" />
         </a-grid-item>
         <a-grid-item class="panel" :span="24">
           <Carousel />
-        </a-grid-item>
-        <a-grid-item class="panel" :span="24">
-          <Announcement />
         </a-grid-item>
         <a-grid-item class="panel" :span="24">
           <Docs />
@@ -42,19 +36,30 @@
 </template>
 
 <script lang="ts" setup>
+  import { onMounted, ref } from 'vue';
+  import { Msg } from '@/types/model/po/Msg';
+  import { getAnnouncement } from '@/api/msg';
   import Banner from './components/banner.vue';
   import DataPanel from './components/data-panel.vue';
   import WaitCorrect from './components/exam-data-chart.vue';
   import PopularContent from './components/wait-correct.vue';
   import CategoriesPercent from './components/categories-percent.vue';
-  import RecentlyVisited from './components/recently-visited.vue';
-  import QuickOperation from './components/quick-operation.vue';
   import Announcement from './components/announcement.vue';
   import Carousel from './components/carousel.vue';
   import Docs from './components/docs.vue';
-</script>
 
-<script lang="ts" setup></script>
+  const announceList = ref<Msg[]>([]);
+
+  onMounted(async () => {
+    await getAnnouncement().then((res: any) => {
+      if (res.data && res.data.length > 3) {
+        announceList.value = res.data.splice(0, 3);
+      } else if (res.data) {
+        announceList.value = res.data;
+      }
+    });
+  });
+</script>
 
 <style lang="less" scoped>
   .container {

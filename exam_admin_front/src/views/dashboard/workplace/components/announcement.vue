@@ -5,14 +5,17 @@
     :header-style="{ paddingBottom: '0' }"
     :body-style="{ padding: '15px 20px 13px 20px' }"
   >
+    <a-empty v-if="!announceList || announceList.length === 0" />
     <template #extra>
-      <a-link>{{ $t('workplace.viewMore') }}</a-link>
+      <a-link @click="router.push({ name: 'AnnounceList' })">{{
+        $t('workplace.viewMore')
+      }}</a-link>
     </template>
     <div>
-      <div v-for="(item, idx) in list" :key="idx" class="item">
-        <a-tag :color="item.type" size="small">{{ item.label }}</a-tag>
+      <div v-for="(item, idx) in announceList" :key="idx" class="item">
+        <a-tag color="orange" size="small">公告</a-tag>
         <span class="item-content">
-          {{ item.content }}
+          {{ item.title }}
         </span>
       </div>
     </div>
@@ -20,33 +23,20 @@
 </template>
 
 <script lang="ts" setup>
-  const list = [
-    {
-      type: 'orangered',
-      label: '活动',
-      content: '内容最新优惠活动',
+  import { PropType } from 'vue/dist/vue';
+  import { Msg } from '@/types/model/po/Msg';
+  import { useRouter } from 'vue-router';
+
+  const router = useRouter();
+
+  defineProps({
+    announceList: {
+      type: Array as PropType<Msg[]>,
+      default() {
+        return [];
+      },
     },
-    {
-      type: 'cyan',
-      label: '消息',
-      content: '新增内容尚未通过审核，详情请点击查看。',
-    },
-    {
-      type: 'blue',
-      label: '通知',
-      content: '当前产品试用期即将结束，如需续费请点击查看。',
-    },
-    {
-      type: 'blue',
-      label: '通知',
-      content: '1月新系统升级计划通知',
-    },
-    {
-      type: 'cyan',
-      label: '消息',
-      content: '新增内容已经通过审核，详情请点击查看。',
-    },
-  ];
+  });
 </script>
 
 <style scoped lang="less">

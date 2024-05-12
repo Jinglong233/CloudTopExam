@@ -1,84 +1,86 @@
 <template>
   <div class="container">
     <Breadcrumb :items="['msg.center', 'msg.center.msgRecord']" />
-    <a-card
-      class="general-card"
-      :title="$t('msg.center.msgRecord')"
-      style="height: 680px"
-    >
-      <a-alert>注意：公告默认所有人读取，没有关联具体用户</a-alert>
-      <!--查询栏-->
-      <a-space align="center" style="margin: 10px 0">
-        <!--消息标题-->
-        <a-input
-          v-model="messageSearch.titleFuzzy"
-          placeholder="请输入消息标题"
-          style="width: 200px"
-        />
-
-        <!--消息标题-->
-        <a-input
-          v-model="messageSearch.createUserTextFuzzy"
-          placeholder="请输入创建人姓名"
-          style="width: 200px"
-        />
-
-        <!--消息类型-->
-        <a-select
-          v-model="messageSearch.msgType"
-          placeholder="请选择消息类型"
-          style="width: 250px"
-          allow-clear
-        >
-          <a-option :value="0">公告</a-option>
-          <a-option :value="1">通知</a-option>
-          <a-option :value="2">邮件</a-option>
-        </a-select>
-
-        <!--消息时间-->
-        <a-range-picker
-          :placeholder="['请选择开始时间范围', '请选择结束时间范围']"
-          style="width: 380px"
-          @change="onDateChange"
-        />
-      </a-space>
-
-      <a-table
-        row-key="id"
-        :loading="loading"
-        :columns="columns"
-        :data="messageList"
-        :bordered="false"
-        :scrollbar="true"
-        :pagination="{
-          showTotal: true,
-          showPageSize: true,
-          total: pageInfo.total,
-          pageSize: pageInfo.pageSize,
-          current: pageInfo.pageNo,
-        }"
-        :scroll="{ x: 100, y: 440 }"
-        @row-click="getMsgUser"
-        @page-change="pageChange"
-        @page-size-change="pageSizeChange"
+    <a-layout style="margin: 0 20px">
+      <a-card
+        class="general-card"
+        :title="$t('msg.center.msgRecord')"
+        style="height: 680px"
       >
-        <template #msgType="{ record }">
-          <a-tag v-if="record.msgType === 0" color="blue">公告</a-tag>
-          <a-tag v-if="record.msgType === 1" color="green">通知</a-tag>
-          <a-tag v-if="record.msgType === 2" color="orange">邮件</a-tag>
-        </template>
+        <a-alert>注意：公告默认所有人读取，没有关联具体用户</a-alert>
+        <!--查询栏-->
+        <a-space align="center" style="margin: 10px 0">
+          <!--消息标题-->
+          <a-input
+            v-model="messageSearch.titleFuzzy"
+            placeholder="请输入消息标题"
+            style="width: 200px"
+          />
 
-        <template #state="{ record }">
-          <a-tag v-if="record.state === 0" color="red">失败</a-tag>
-          <a-tag v-if="record.state === 1" color="blue">成功</a-tag>
-        </template>
-      </a-table>
-      <MsgUserList
-        :flag="visible"
-        :msg-id="currentMsgId"
-        @close-dialog="visible = false"
-      />
-    </a-card>
+          <!--消息标题-->
+          <a-input
+            v-model="messageSearch.createUserTextFuzzy"
+            placeholder="请输入创建人姓名"
+            style="width: 200px"
+          />
+
+          <!--消息类型-->
+          <a-select
+            v-model="messageSearch.msgType"
+            placeholder="请选择消息类型"
+            style="width: 250px"
+            allow-clear
+          >
+            <a-option :value="0">公告</a-option>
+            <a-option :value="1">通知</a-option>
+            <a-option :value="2">邮件</a-option>
+          </a-select>
+
+          <!--消息时间-->
+          <a-range-picker
+            :placeholder="['请选择开始时间范围', '请选择结束时间范围']"
+            style="width: 380px"
+            @change="onDateChange"
+          />
+        </a-space>
+
+        <a-table
+          row-key="id"
+          :loading="loading"
+          :columns="columns"
+          :data="messageList"
+          :bordered="false"
+          :scrollbar="true"
+          :pagination="{
+            showTotal: true,
+            showPageSize: true,
+            total: pageInfo.total,
+            pageSize: pageInfo.pageSize,
+            current: pageInfo.pageNo,
+          }"
+          :scroll="{ x: 100, y: 440 }"
+          @row-click="getMsgUser"
+          @page-change="pageChange"
+          @page-size-change="pageSizeChange"
+        >
+          <template #msgType="{ record }">
+            <a-tag v-if="record.msgType === 0" color="blue">公告</a-tag>
+            <a-tag v-if="record.msgType === 1" color="green">通知</a-tag>
+            <a-tag v-if="record.msgType === 2" color="orange">邮件</a-tag>
+          </template>
+
+          <template #state="{ record }">
+            <a-tag v-if="record.state === 0" color="red">失败</a-tag>
+            <a-tag v-if="record.state === 1" color="blue">成功</a-tag>
+          </template>
+        </a-table>
+        <MsgUserList
+          :flag="visible"
+          :msg-id="currentMsgId"
+          @close-dialog="visible = false"
+        />
+      </a-card>
+    </a-layout>
   </div>
 </template>
 
