@@ -6,16 +6,24 @@ import com.jl.project.entity.po.MsgUser;
 import com.jl.project.entity.query.MsgQuery;
 import com.jl.project.entity.query.MsgUserQuery;
 import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.MsgVO;
 import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.enums.MsgType;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.MsgMapper;
 import com.jl.project.mapper.MsgUserMapper;
 import com.jl.project.service.MsgUserService;
+import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +35,9 @@ import java.util.List;
  */
 @Service("msgUserService")
 public class MsgUserServiceImpl implements MsgUserService {
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private MsgUserMapper<MsgUser, MsgUserQuery> msgUserMapper;
@@ -125,9 +136,9 @@ public class MsgUserServiceImpl implements MsgUserService {
         List<MsgVO> resultList = new ArrayList<>();
         for (MsgUser msgUser : msgUsers) {
             String msgId = msgUser.getMsgId();
-                Msg msg = msgMapper.selectById(msgId);
+            Msg msg = msgMapper.selectById(msgId);
             MsgVO msgVO = new MsgVO();
-            BeanUtil.copyProperties(msg,msgVO);
+            BeanUtil.copyProperties(msg, msgVO);
             msgVO.setMsgUser(msgUser);
             resultList.add(msgVO);
         }
@@ -137,16 +148,144 @@ public class MsgUserServiceImpl implements MsgUserService {
     }
 
     @Override
-    public Integer getMyUnreadCount(MsgUserQuery query) throws BusinessException {
-        if (query == null) {
-            throw new BusinessException("缺少参数");
+    public Integer getMyUnreadCount() throws BusinessException {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        MsgQuery msgQuery = new MsgQuery();
+        msgQuery.setMsgType(MsgType.NOTIFICATION.getValue());
+        List<Msg> msgList = msgMapper.selectList(msgQuery);
+        int totalUnReadCount = 0;
+        if (msgList.size() == 0) {
+            return totalUnReadCount;
         }
-        // 这里必须给定userId
-        String userId = query.getUserId();
-        if(userId==null || "".equals(userId.trim())){
-            throw new BusinessException("缺少必要参数");
+
+        for (Msg msg : msgList) {
+            MsgUserQuery msgUserQuery = new MsgUserQuery();
+            msgUserQuery.setMsgId(msg.getId());
+            msgUserQuery.setUserId(loginUserInfo.getId());
+            // 未读状态
+            msgUserQuery.setState(0);
+            Integer count = msgUserMapper.selectCount(msgUserQuery);
+            totalUnReadCount += count;
         }
-        return findCountByParam(query);
+        return totalUnReadCount;
+    }
+
+    @Override
+    public PaginationResultVO<MsgVO> getNotification(SimplePage simplePage) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
+        List<MsgVO> result = new ArrayList<>();
+
+        MsgUserQuery msgUserQuery = new MsgUserQuery();
+        msgUserQuery.setUserId(loginUserInfo.getId());
+        List<MsgUser> msgUserList = msgUserMapper.selectList(msgUserQuery);
+        if (msgUserList != null && msgUserList.size() != 0) {
+            // 遍历关联信息
+            for (MsgUser msgUser : msgUserList) {
+                String msgId = msgUser.getMsgId();
+                MsgQuery msgQuery = new MsgQuery();
+                msgQuery.setId(msgId);
+                // 设置通知类型
+                msgQuery.setMsgType(MsgType.NOTIFICATION.getValue());
+                // 查询关联的消息
+                List<Msg> msgList = msgMapper.selectList(msgQuery);
+                if (msgList.size() != 0) {
+                    MsgVO msgVO = new MsgVO();
+                    msgVO.setMsgUser(msgUser);
+                    // 只有一个
+                    BeanUtil.copyProperties(msgList.get(0), msgVO);
+                    result.add(msgVO);
+                }
+            }
+        }
+        // 按照时间降序排序
+        Collections.sort(result, (o1, o2) -> o2.getSendTime().compareTo(o1.getSendTime()));
+
+        return CommonUtil.paginate(result,simplePage);
+    }
+
+    @Override
+    public List<Msg> getAnnouncement() {
+        MsgQuery msgQuery = new MsgQuery();
+        msgQuery.setMsgType(MsgType.ANNOUNCEMENT.getValue());
+        List<Msg> result = msgMapper.selectList(msgQuery);
+        // 按照时间降序排序
+        Collections.sort(result, (o1, o2) -> o2.getSendTime().compareTo(o1.getSendTime()));
+        return result;
+    }
+
+    @Override
+    public PaginationResultVO<MsgVO> getUnReadNotification(SimplePage simplePage) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
+        List<MsgVO> result = new ArrayList<>();
+
+        MsgUserQuery msgUserQuery = new MsgUserQuery();
+        msgUserQuery.setUserId(loginUserInfo.getId());
+        // 设置未读状态
+        msgUserQuery.setState(0);
+        List<MsgUser> msgUserList = msgUserMapper.selectList(msgUserQuery);
+        if (msgUserList != null && msgUserList.size() != 0) {
+            // 遍历关联信息
+            for (MsgUser msgUser : msgUserList) {
+                String msgId = msgUser.getMsgId();
+                MsgQuery msgQuery = new MsgQuery();
+                msgQuery.setId(msgId);
+                // 设置通知类型
+                msgQuery.setMsgType(MsgType.NOTIFICATION.getValue());
+                // 查询关联的消息
+                List<Msg> msgList = msgMapper.selectList(msgQuery);
+                if (msgList.size() != 0) {
+                    MsgVO msgVO = new MsgVO();
+                    msgVO.setMsgUser(msgUser);
+                    // 只有一个
+                    BeanUtil.copyProperties(msgList.get(0), msgVO);
+                    result.add(msgVO);
+                }
+            }
+        }
+        // 按照时间降序排序
+        Collections.sort(result, (o1, o2) -> o2.getSendTime().compareTo(o1.getSendTime()));
+        return CommonUtil.paginate(result,simplePage);
+    }
+
+    @Override
+    public PaginationResultVO<MsgVO> getReadNotification(SimplePage simplePage) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+
+        List<MsgVO> result = new ArrayList<>();
+
+        MsgUserQuery msgUserQuery = new MsgUserQuery();
+        msgUserQuery.setUserId(loginUserInfo.getId());
+        // 设置未读状态
+        msgUserQuery.setState(1);
+        List<MsgUser> msgUserList = msgUserMapper.selectList(msgUserQuery);
+        if (msgUserList != null && msgUserList.size() != 0) {
+            // 遍历关联信息
+            for (MsgUser msgUser : msgUserList) {
+                String msgId = msgUser.getMsgId();
+                MsgQuery msgQuery = new MsgQuery();
+                msgQuery.setId(msgId);
+                // 设置通知类型
+                msgQuery.setMsgType(MsgType.NOTIFICATION.getValue());
+                // 查询关联的消息
+                List<Msg> msgList = msgMapper.selectList(msgQuery);
+                if (msgList.size() != 0) {
+                    MsgVO msgVO = new MsgVO();
+                    msgVO.setMsgUser(msgUser);
+                    // 只有一个
+                    BeanUtil.copyProperties(msgList.get(0), msgVO);
+                    result.add(msgVO);
+                }
+            }
+        }
+        // 按照时间降序排序
+        Collections.sort(result, (o1, o2) -> o2.getSendTime().compareTo(o1.getSendTime()));
+        return CommonUtil.paginate(result,simplePage);
     }
 
 }

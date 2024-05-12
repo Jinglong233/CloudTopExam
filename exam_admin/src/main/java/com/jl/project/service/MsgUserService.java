@@ -1,5 +1,8 @@
 package com.jl.project.service;
 
+import com.jl.project.entity.po.Msg;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.MsgVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.MsgUser;
 import com.jl.project.entity.query.MsgUserQuery;
@@ -59,5 +62,13 @@ public interface MsgUserService {
 
     PaginationResultVO loadDatalist(MsgUserQuery query);
 
-	Integer getMyUnreadCount(MsgUserQuery query);
+	Integer getMyUnreadCount();
+
+	PaginationResultVO<MsgVO> getNotification(SimplePage simplePage);
+
+	List<Msg> getAnnouncement();
+
+	PaginationResultVO<MsgVO> getUnReadNotification(SimplePage simplePage);
+
+	PaginationResultVO<MsgVO> getReadNotification(SimplePage simplePage);
 }
