@@ -8,6 +8,8 @@ import localExam from '@/views/exam/locale/zh-CN';
 
 import localTrain from '@/views/train/repo-train/locale/zh-CN';
 import localErrorSet from '@/views/errorSet/locale/zh-CN';
+import localAnnouncement from '@/views/announcement/locale/zh-CN';
+
 import localeSettings from './zh-CN/settings';
 
 export default {
@@ -37,4 +39,5 @@ export default {
   ...localExam,
   ...localTrain,
   ...localErrorSet,
+  ...localAnnouncement,
 };

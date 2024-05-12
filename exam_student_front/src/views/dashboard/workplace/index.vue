@@ -18,15 +18,14 @@
       <a-grid :cols="24" :row-gap="16">
         <a-grid-item :span="24">
           <div class="panel moduler-wrap">
-            <QuickOperation />
-            <RecentlyVisited />
+            <IntellTraining />
           </div>
         </a-grid-item>
         <a-grid-item class="panel" :span="24">
-          <Carousel />
+          <Announcement :announce-list="announceList" />
         </a-grid-item>
         <a-grid-item class="panel" :span="24">
-          <Announcement />
+          <Carousel />
         </a-grid-item>
         <a-grid-item class="panel" :span="24">
           <Docs />
@@ -37,21 +36,29 @@
 </template>
 
 <script lang="ts" setup>
+  import { Msg } from '@/types/model/po/Msg';
+  import { onMounted, ref } from 'vue';
+  import { getAnnouncement } from '@/api/msg';
   import Banner from './components/banner.vue';
   import DataPanel from './components/data-panel.vue';
   import ExamDataChart from './components/exam-data-chart.vue';
   import UncompletedTrain from './components/uncompleted-train.vue';
-  import RecentlyVisited from './components/recently-visited.vue';
-  import QuickOperation from './components/intelligent-training.vue';
+  import IntellTraining from './components/intelligent-training.vue';
   import Announcement from './components/announcement.vue';
   import Carousel from './components/carousel.vue';
   import Docs from './components/docs.vue';
-</script>
 
-<script lang="ts">
-  export default {
-    name: 'Dashboard', // If you want the include property of keep-alive to take effect, you must name the component
-  };
+  const announceList = ref<Msg[]>([]);
+
+  onMounted(async () => {
+    await getAnnouncement().then((res: any) => {
+      if (res.data && res.data.length > 3) {
+        announceList.value = res.data.splice(0, 3);
+      } else if (res.data) {
+        announceList.value = res.data;
+      }
+    });
+  });
 </script>
 
 <style lang="less" scoped>

@@ -1,38 +1,37 @@
 <template>
   <a-spin style="display: block" :loading="loading">
-    <a-tabs v-model:activeKey="messageType" type="rounded" destroy-on-hide>
+    <a-tabs
+      v-model:activeKey="activeKey"
+      type="rounded"
+      destroy-on-hide
+      @change="tabChange"
+    >
       <a-tab-pane v-for="item in tabList" :key="item.key">
         <template #title>
-          <span> {{ item.title }}{{ formatUnreadLength(item.key) }} </span>
+          <span> {{ item.title }}</span>
         </template>
-        <a-result v-if="!renderList.length" status="404">
+        <a-result v-if="!MsgList || !MsgList.length" status="404">
           <template #subtitle> {{ $t('messageBox.noContent') }} </template>
         </a-result>
-        <List
-          :render-list="renderList"
-          :unread-count="unreadCount"
-          @item-click="handleItemClick"
-        />
+        <List :render-list="MsgList" @item-click="handleItemClick" />
       </a-tab-pane>
-      <template #extra>
-        <a-button type="text" @click="emptyList">
-          {{ $t('messageBox.tab.button') }}
-        </a-button>
-      </template>
     </a-tabs>
   </a-spin>
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, toRefs, computed } from 'vue';
+  import { ref, toRaw } from 'vue';
   import { useI18n } from 'vue-i18n';
-  import {
-    queryMessageList,
-    setMessageStatus,
-    MessageRecord,
-    MessageListType,
-  } from '@/api/message';
   import useLoading from '@/hooks/loading';
+  import {
+    addOrUpdateBatch,
+    getNotification,
+    getUnReadNotification,
+  } from '@/api/msg';
+  import { useUserStore } from '@/store';
+  import { MsgVO } from '@/types/model/vo/MsgVO';
+  import { MsgUser } from '@/types/model/po/MsgUser';
+  import { SimplePage } from '@/types/model/po/SimplePage';
   import List from './list.vue';
 
   interface TabItem {
@@ -40,22 +39,22 @@
     title: string;
     avatar?: string;
   }
+
+  const userStore = useUserStore();
   const { loading, setLoading } = useLoading(true);
-  const messageType = ref('message');
   const { t } = useI18n();
-  const messageData = reactive<{
-    renderList: MessageRecord[];
-    messageList: MessageRecord[];
-  }>({
-    renderList: [],
-    messageList: [],
-  });
-  toRefs(messageData);
+  const MsgList = ref<MsgVO[]>([]);
+  const activeKey = ref('notice');
+  const loadMsgData = async () => {
+    await getNotification({ pageNo: 1, pageSize: 3 } as SimplePage).then(
+      (res: any) => {
+        MsgList.value = res.data.list;
+      }
+    );
+  };
+  const emit = defineEmits(['refreshUnreadMsgCount']);
+
   const tabList: TabItem[] = [
-    {
-      key: 'message',
-      title: t('messageBox.tab.title.message'),
-    },
     {
       key: 'notice',
       title: t('messageBox.tab.title.notice'),
@@ -65,46 +64,51 @@
       title: t('messageBox.tab.title.todo'),
     },
   ];
+
   async function fetchSourceData() {
     setLoading(true);
     try {
-      const { data } = await queryMessageList();
-      messageData.messageList = data;
+      await loadMsgData();
     } catch (err) {
       // you can report use errorHandler or other
     } finally {
       setLoading(false);
     }
   }
-  async function readMessage(data: MessageListType) {
-    const ids = data.map((item) => item.id);
-    await setMessageStatus({ ids });
-    fetchSourceData();
-  }
-  const renderList = computed(() => {
-    return messageData.messageList.filter(
-      (item) => messageType.value === item.type
-    );
-  });
-  const unreadCount = computed(() => {
-    return renderList.value.filter((item) => !item.status).length;
-  });
-  const getUnreadList = (type: string) => {
-    const list = messageData.messageList.filter(
-      (item) => item.type === type && !item.status
-    );
-    return list;
+
+  // 切换tab时触发
+  const tabChange = async (index: string) => {
+    emit('refreshUnreadMsgCount');
+    if (index === 'todo') {
+      activeKey.value = 'todo';
+      await getUnReadNotification({
+        pageNo: 1,
+        pageSize: 3,
+      } as SimplePage).then((res: any) => {
+        MsgList.value = res.data.list;
+      });
+    } else if (index === 'notice') {
+      activeKey.value = 'notice';
+      await loadMsgData();
+    }
   };
-  const formatUnreadLength = (type: string) => {
-    const list = getUnreadList(type);
-    return list.length ? `(${list.length})` : ``;
+
+  // 全部已读（更新当前显示数据的读取状态->全部已读）
+  const handleItemClick = async (allReadList: []) => {
+    const msgUserList = allReadList.map(
+      (msgVO: MsgVO) => msgVO.msgUser
+    ) as MsgUser[];
+    msgUserList.forEach((msgUser: MsgUser) => {
+      msgUser.state = 1;
+    });
+    // 创建更新对象
+    await addOrUpdateBatch(msgUserList).then(async (res: any) => {
+      // 刷新消息列表
+      await loadMsgData();
+      emit('refreshUnreadMsgCount');
+    });
   };
-  const handleItemClick = (items: MessageListType) => {
-    if (renderList.value.length) readMessage([...items]);
-  };
-  const emptyList = () => {
-    messageData.messageList = [];
-  };
+
   fetchSourceData();
 </script>
 

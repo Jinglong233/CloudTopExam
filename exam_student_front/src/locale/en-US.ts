@@ -4,6 +4,7 @@ import localeUserSetting from '@/views/user/setting/locale/en-US';
 
 import localeWorkplace from '@/views/dashboard/workplace/locale/en-US';
 import localErrorSet from '@/views/errorSet/locale/en-US';
+import localAnnouncement from '@/views/announcement/locale/en-US';
 
 import localeSettings from './en-US/settings';
 
@@ -32,4 +33,5 @@ export default {
   ...localErrorSet,
 
   ...localeUserSetting,
+  ...localAnnouncement,
 };

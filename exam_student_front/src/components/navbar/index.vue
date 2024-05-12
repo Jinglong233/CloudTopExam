@@ -10,7 +10,7 @@
           :style="{ margin: 0, fontSize: '18px' }"
           :heading="5"
         >
-          "学路有你"-学生端
+          "学路有你"-管理端
         </a-typography-title>
         <icon-menu-fold
           v-if="!topMenu && appStore.device === 'mobile'"
@@ -76,7 +76,7 @@
       <li>
         <a-tooltip :content="$t('settings.navbar.alerts')">
           <div class="message-box-trigger">
-            <a-badge :count="9" dot>
+            <a-badge :count="unreadCount">
               <a-button
                 class="nav-btn"
                 type="outline"
@@ -96,7 +96,7 @@
         >
           <div ref="refBtn" class="ref-btn"></div>
           <template #content>
-            <message-box />
+            <message-box @refresh-unread-msg-count="reloadUnreadCount" />
           </template>
         </a-popover>
       </li>
@@ -146,6 +146,14 @@
           </a-avatar>
           <template #content>
             <a-doption>
+              <a-space @click="$router.push({ name: 'Info' })">
+                <icon-user />
+                <span>
+                  {{ $t('messageBox.userCenter') }}
+                </span>
+              </a-space>
+            </a-doption>
+            <a-doption>
               <a-space @click="$router.push({ name: 'Setting' })">
                 <icon-settings />
                 <span>
@@ -169,13 +177,14 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, inject, ref } from 'vue';
+  import { computed, inject, onMounted, ref } from 'vue';
   import { useDark, useFullscreen, useToggle } from '@vueuse/core';
   import { useAppStore, useUserStore } from '@/store';
   import { LOCALE_OPTIONS } from '@/locale';
   import useLocale from '@/hooks/locale';
   import useUser from '@/hooks/user';
   import Menu from '@/components/menu/index.vue';
+  import { getMyUnreadMsgCount } from '@/api/msg';
   import MessageBox from '../message-box/index.vue';
 
   const appStore = useAppStore();
@@ -230,8 +239,19 @@
     });
     triggerBtn.value.dispatchEvent(event);
   };
-
   const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
+
+  // 未读消息数量
+  const unreadCount = ref(0);
+  const reloadUnreadCount = async () => {
+    await getMyUnreadMsgCount().then((res: any) => {
+      unreadCount.value = res.data;
+    });
+  };
+
+  onMounted(async () => {
+    await reloadUnreadCount();
+  });
 </script>
 
 <style scoped lang="less">
