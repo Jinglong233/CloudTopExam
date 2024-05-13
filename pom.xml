@@ -183,6 +183,13 @@
             <version>2.7.9</version>
         </dependency>
 
+        <!-- ip地址获取位置离线库 -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
 
 
     </dependencies>
