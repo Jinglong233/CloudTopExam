@@ -223,7 +223,6 @@
   // 日期变化，单独处理
   const onDateChange = (date: any[]) => {
     if (date) {
-      console.log('date', date);
       messageSearch.value.sendTimeStart = date[0] as string;
       messageSearch.value.sendTimeEnd = date[1] as string;
     } else {

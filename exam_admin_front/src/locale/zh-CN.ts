@@ -28,6 +28,7 @@ import localeWrongManager from '@/views/wrong-topic-management/locale/zh-CN';
 
 import localMessage from '@/views/msg-center/locale/zh-CN';
 import localAnnouncement from '@/views/announcement/locale/zh-CN';
+import localLog from '@/views/log/locale/zh-CN';
 import localeSettings from './zh-CN/settings';
 
 export default {
@@ -82,4 +83,5 @@ export default {
 
   ...localMessage,
   ...localAnnouncement,
+  ...localLog,
 };
