@@ -2,6 +2,7 @@ package com.jl.project.controller;
 
 
 import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.OperationLog;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddQuAndAnswerDTO;
 import com.jl.project.entity.dto.RandomSelectQuDTO;
@@ -9,10 +10,10 @@ import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
 import com.jl.project.entity.po.Qu;
 import com.jl.project.entity.query.QuExcludeQuery;
 import com.jl.project.entity.query.QuQuery;
-import com.jl.project.entity.query.WrongQuQuery;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.ResponseVO;
-import com.jl.project.entity.vo.WrongQuVO;
+import com.jl.project.enums.LogType;
+import com.jl.project.enums.OperationType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.QuService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +48,6 @@ public class QuController extends ABaseController {
         return getSuccessResponseVO(quService.findListByPage(query));
     }
 
-    // TODO: 2024-04-24 (前端从未使用，loadExcludeQuAnAnswerList用到了)考虑对此接口做分页，数据量太大，响应速度慢
     /**
      * 获取题目+选项列表
      */
@@ -78,6 +78,7 @@ public class QuController extends ABaseController {
      */
     @RequestMapping("add")
     @GlobalInterceptor(checkLogin = true,checkParams = true)
+    @OperationLog(logType = LogType.OPERATION_LOG,oper = OperationType.ADD)
     public ResponseVO add(@RequestBody @VerifyParam AddQuAndAnswerDTO bean) throws BusinessException {
         Boolean result = quService.add(bean);
         return getSuccessResponseVO(result);

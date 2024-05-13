@@ -1,15 +1,12 @@
 package com.jl.project.service;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;;
-import org.springframework.format.annotation.DateTimeFormat;
-import com.jl.project.enums.DateTimePatternEnum;
-import com.jl.project.utils.DateUtils;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.OperLog;
 import com.jl.project.entity.query.OperLogQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 
 import java.util.List;
+
+;
 /**
  * @Description:操作日志表Service
  * @author:jingLong
@@ -50,16 +47,16 @@ public interface OperLogService {
 	/**
 	 * 根据Id查询
 	 */
-	OperLog getOperLogById(String id);
+	OperLog getOperLogById(Integer id);
 
 	/**
 	 * 根据Id更新
 	 */
-	Integer updateOperLogById(OperLog bean, String id);
+	Integer updateOperLogById(OperLog bean, Integer id);
 
 	/**
 	 * 根据Id删除
 	 */
-	Integer deleteOperLogById(String id);
+	Integer deleteOperLogById(Integer id);
 
 }

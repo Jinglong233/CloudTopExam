@@ -4,15 +4,13 @@ import java.util.Date;
 /**
  * @Description:操作日志表查询对象
  * @author:jingLong
- * @date:2024/05/08
+ * @date:2024/05/13
  */
 public class OperLogQuery extends BaseQuery{
 	/**
 	 * ID
 	 */
-	private String id;
-
-	private String idFuzzy;
+	private Integer id;
 
 	/**
 	 * 操作人员名称
@@ -85,22 +83,15 @@ public class OperLogQuery extends BaseQuery{
 	private String returnArgFuzzy;
 
 	/**
-	 * 操作描述
-	 */
-	private String description;
-
-	private String descriptionFuzzy;
-
-	/**
 	 * 操作类型（增删改查...）
 	 */
 	private Integer operType;
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return this.id;
 	}
 
@@ -184,28 +175,12 @@ public class OperLogQuery extends BaseQuery{
 		return this.returnArg;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
 	public void setOperType(Integer operType) {
 		this.operType = operType;
 	}
 
 	public Integer getOperType() {
 		return this.operType;
-	}
-
-	public void setIdFuzzy(String idFuzzy) {
-		this.idFuzzy = idFuzzy;
-	}
-
-	public String getIdFuzzy() {
-		return this.idFuzzy;
 	}
 
 	public void setUserNameFuzzy(String userNameFuzzy) {
@@ -286,14 +261,6 @@ public class OperLogQuery extends BaseQuery{
 
 	public String getReturnArgFuzzy() {
 		return this.returnArgFuzzy;
-	}
-
-	public void setDescriptionFuzzy(String descriptionFuzzy) {
-		this.descriptionFuzzy = descriptionFuzzy;
-	}
-
-	public String getDescriptionFuzzy() {
-		return this.descriptionFuzzy;
 	}
 
 }

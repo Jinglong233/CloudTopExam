@@ -1,14 +1,9 @@
 package com.jl.project.service.impl;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;;
-import org.springframework.format.annotation.DateTimeFormat;
-import com.jl.project.enums.DateTimePatternEnum;
-import com.jl.project.utils.DateUtils;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.OperLog;
-import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.query.OperLogQuery;
+import com.jl.project.entity.query.SimplePage;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.mapper.OperLogMapper;
 import com.jl.project.service.OperLogService;
@@ -16,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+;
 /**
  * @Description:操作日志表Service
  * @author:jingLong
@@ -84,21 +81,21 @@ public class OperLogServiceImpl implements OperLogService {
 	/**
 	 * 根据Id查询
 	 */
-	public OperLog getOperLogById(String id) {
+	public OperLog getOperLogById(Integer id) {
 		return this.operLogMapper.selectById(id);
 	}
 
 	/**
 	 * 根据Id更新
 	 */
-	public Integer updateOperLogById(OperLog bean, String id) {
+	public Integer updateOperLogById(OperLog bean, Integer id) {
 		return this.operLogMapper.updateById(bean, id);
 	}
 
 	/**
 	 * 根据Id删除
 	 */
-	public Integer deleteOperLogById(String id) {
+	public Integer deleteOperLogById(Integer id) {
 		return this.operLogMapper.deleteById(id);
 	}
 

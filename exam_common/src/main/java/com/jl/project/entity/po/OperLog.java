@@ -1,23 +1,25 @@
 package com.jl.project.entity.po;
 
-import java.io.Serializable;
-
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jl.project.enums.DateTimePatternEnum;
 import com.jl.project.utils.DateUtils;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.util.Date;
+
+;
 
 /**
  * @Description:操作日志表
  * @author:jingLong
- * @date:2024/05/08
+ * @date:2024/05/13
  */
 public class OperLog implements Serializable{
 	/**
 	 * ID
 	 */
-	private String id;
+	private Integer id;
 
 	/**
 	 * 操作人员名称
@@ -72,20 +74,15 @@ public class OperLog implements Serializable{
 	private String returnArg;
 
 	/**
-	 * 操作描述
-	 */
-	private String description;
-
-	/**
 	 * 操作类型（增删改查...）
 	 */
 	private Integer operType;
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return this.id;
 	}
 
@@ -169,14 +166,6 @@ public class OperLog implements Serializable{
 		return this.returnArg;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
 	public void setOperType(Integer operType) {
 		this.operType = operType;
 	}
@@ -187,7 +176,7 @@ public class OperLog implements Serializable{
 
 	@Override
 	public String toString() {
-		return "ID:" + (id == null ? "空" : id) + ",操作人员名称:" + (userName == null ? "空" : userName) + ",请求地址:" + (url == null ? "空" : url) + ",用户IP:" + (ip == null ? "空" : ip) + ",操作地点:" + (operAddress == null ? "空" : operAddress) + ",是否成功:" + (success == null ? "空" : success) + ",操作时间:" + (operTime == null ? "空" : DateUtils.format(operTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",请求方式（get、post...）:" + (requestMode == null ? "空" : requestMode) + ",操作方法（哪个方法处理的）:" + (operationMethod == null ? "空" : operationMethod) + ",请求参数:" + (requestArg == null ? "空" : requestArg) + ",返回参数:" + (returnArg == null ? "空" : returnArg) + ",操作描述:" + (description == null ? "空" : description) + ",操作类型（增删改查...）:" + (operType == null ? "空" : operType) ;
+		return "ID:" + (id == null ? "空" : id) + ",操作人员名称:" + (userName == null ? "空" : userName) + ",请求地址:" + (url == null ? "空" : url) + ",用户IP:" + (ip == null ? "空" : ip) + ",操作地点:" + (operAddress == null ? "空" : operAddress) + ",是否成功:" + (success == null ? "空" : success) + ",操作时间:" + (operTime == null ? "空" : DateUtils.format(operTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",请求方式（get、post...）:" + (requestMode == null ? "空" : requestMode) + ",操作方法（哪个方法处理的）:" + (operationMethod == null ? "空" : operationMethod) + ",请求参数:" + (requestArg == null ? "空" : requestArg) + ",返回参数:" + (returnArg == null ? "空" : returnArg) + ",操作类型（增删改查...）:" + (operType == null ? "空" : operType) ;
 	}
 
 }

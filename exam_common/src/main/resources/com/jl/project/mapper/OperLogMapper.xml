@@ -26,18 +26,16 @@
 		<result column="request_arg" property="requestArg"/>
 		<!-- 返回参数 -->
 		<result column="return_arg" property="returnArg"/>
-		<!-- 操作描述 -->
-		<result column="description" property="description"/>
 		<!-- 操作类型（增删改查...） -->
 		<result column="oper_type" property="operType"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type
+		id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,oper_type
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
-		<if test="query.id != null and query.id!= ''">
+		<if test="query.id != null">
 			and id = #{query.id}
 		</if>
 		<if test="query.userName != null and query.userName!= ''">
@@ -70,18 +68,12 @@
 		<if test="query.returnArg != null and query.returnArg!= ''">
 			and return_arg = #{query.returnArg}
 		</if>
-		<if test="query.description != null and query.description!= ''">
-			and description = #{query.description}
-		</if>
 		<if test="query.operType != null">
 			and oper_type = #{query.operType}
 		</if>
 	</sql>
 	<!--扩展查询条件-->
 	<sql id="base_query_condition_extend">
-		<if test="query.idFuzzy != null and query.idFuzzy != '' ">
-			and id like concat('%', #{query.idFuzzy}, '%')
-		</if>
 		<if test="query.userNameFuzzy != null and query.userNameFuzzy != '' ">
 			and user_name like concat('%', #{query.userNameFuzzy}, '%')
 		</if>
@@ -98,7 +90,7 @@
 			<![CDATA[ and oper_time >= str_to_date(#{query.operTimeStart}, '%Y-%m-%d') ]]>
 		</if>
 		<if test="query.operTimeEnd != null and query.operTimeEnd != '' ">
-			<![CDATA[ and oper_time < date_sub(str_to_date(#{query.operTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+			<![CDATA[ and oper_time < data_sub(str_to_date(#{query.operTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 		<if test="query.requestModeFuzzy != null and query.requestModeFuzzy != '' ">
 			and request_mode like concat('%', #{query.requestModeFuzzy}, '%')
@@ -111,9 +103,6 @@
 		</if>
 		<if test="query.returnArgFuzzy != null and query.returnArgFuzzy != '' ">
 			and return_arg like concat('%', #{query.returnArgFuzzy}, '%')
-		</if>
-		<if test="query.descriptionFuzzy != null and query.descriptionFuzzy != '' ">
-			and description like concat('%', #{query.descriptionFuzzy}, '%')
 		</if>
 	</sql>
 	<!--通用查询条件-->
@@ -144,7 +133,9 @@
 	</select>
 	<!--插入（匹配有值的字段）-->
 	<insert id="insert" parameterType="com.jl.project.entity.po.OperLog">
-
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
 		INSERT INTO oper_log
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -179,9 +170,6 @@
 			</if>
 			<if test="bean.returnArg != null">
 				return_arg,
-			</if>
-			<if test="bean.description != null">
-				description,
 			</if>
 			<if test="bean.operType != null">
 				oper_type,
@@ -220,9 +208,6 @@
 			</if>
 			<if test="bean.returnArg != null">
 				#{bean.returnArg},
-			</if>
-			<if test="bean.description != null">
-				#{bean.description},
 			</if>
 			<if test="bean.operType != null">
 				#{bean.operType},
@@ -267,9 +252,6 @@
 			<if test="bean.returnArg != null">
 				return_arg,
 			</if>
-			<if test="bean.description != null">
-				description,
-			</if>
 			<if test="bean.operType != null">
 				oper_type,
 			</if>
@@ -308,9 +290,6 @@
 			<if test="bean.returnArg != null">
 				#{bean.returnArg},
 			</if>
-			<if test="bean.description != null">
-				#{bean.description},
-			</if>
 			<if test="bean.operType != null">
 				#{bean.operType},
 			</if>
@@ -347,9 +326,6 @@
 			<if test="bean.returnArg != null">
 				return_arg= VALUES(return_arg),
 			</if>
-			<if test="bean.description != null">
-				description= VALUES(description),
-			</if>
 			<if test="bean.operType != null">
 				oper_type= VALUES(oper_type),
 			</if>
@@ -358,20 +334,20 @@
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.OperLog">
-		INSERT INTO oper_log(id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type)values
+		INSERT INTO oper_log(user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,oper_type)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.description},#{item.operType})
+			(#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.operType})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.OperLog">
 		INSERT INTO 
-		oper_log(id,user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,description,oper_type)values
+		oper_log(user_name,url,ip,oper_address,success,oper_time,request_mode,operation_method,request_arg,return_arg,oper_type)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.description},#{item.operType})
+			(#{item.userName},#{item.url},#{item.ip},#{item.operAddress},#{item.success},#{item.operTime},#{item.requestMode},#{item.operationMethod},#{item.requestArg},#{item.returnArg},#{item.operType})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),user_name= VALUES(user_name),url= VALUES(url),ip= VALUES(ip),oper_address= VALUES(oper_address),success= VALUES(success),oper_time= VALUES(oper_time),request_mode= VALUES(request_mode),operation_method= VALUES(operation_method),request_arg= VALUES(request_arg),return_arg= VALUES(return_arg),description= VALUES(description),oper_type= VALUES(oper_type)
+			on DUPLICATE key update id= VALUES(id),user_name= VALUES(user_name),url= VALUES(url),ip= VALUES(ip),oper_address= VALUES(oper_address),success= VALUES(success),oper_time= VALUES(oper_time),request_mode= VALUES(request_mode),operation_method= VALUES(operation_method),request_arg= VALUES(request_arg),return_arg= VALUES(return_arg),oper_type= VALUES(oper_type)
 	</insert>
 
 
@@ -418,9 +394,6 @@
 			</if>
 			<if test="bean.returnArg != null">
 				return_arg = #{bean.returnArg},
-			</if>
-			<if test="bean.description != null">
-				description = #{bean.description},
 			</if>
 			<if test="bean.operType != null">
 				oper_type = #{bean.operType},

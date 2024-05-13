@@ -1,6 +1,7 @@
 package com.jl.project.controller;
 
 import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.OperationLog;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.User;
@@ -8,6 +9,7 @@ import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.enums.LogType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserService;
 import io.swagger.annotations.Api;
@@ -41,6 +43,7 @@ public class UserController extends ABaseController {
     @ApiOperation(value = "管理员/教师登录")
     @RequestMapping("login")
     @GlobalInterceptor(checkParams = true, checkLogin = false)
+    @OperationLog(logType = LogType.LOGIN_LOG)
     public ResponseVO login(@RequestBody @VerifyParam LoginDTO loginDTO) {
         LoginResponseVo result = userService.login(loginDTO);
         return getSuccessResponseVO(result, "登录成功");

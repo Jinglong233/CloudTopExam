@@ -20,9 +20,12 @@ public class MyExceptionHandler extends ABaseController {
         return getErrorResponseVO(null, e.getCode(), e.getMessage());
     }
 
+
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public ResponseVO globalHandler(Exception e) {
         return getErrorResponseVO(null, CODE_500.getCode(), CODE_500.getMsg());
     }
+
+
 }
