@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface OperLogQuery extends SimplePage {
+class OperLogQuery extends SimplePage {
   /**
    * ID
    */
@@ -81,3 +81,5 @@ export interface OperLogQuery extends SimplePage {
    */
   operType?: number;
 }
+
+export default OperLogQuery;

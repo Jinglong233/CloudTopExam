@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface UserQuery extends SimplePage {
+class UserQuery extends SimplePage {
   /**
    * ID
    */
@@ -120,3 +120,4 @@ export interface UserQuery extends SimplePage {
 
   updateByEnd?: string;
 }
+export default UserQuery;

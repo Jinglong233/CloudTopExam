@@ -43,43 +43,69 @@
           :title="$t('menu.wrongManage.examList')"
         >
           <!--查询栏-->
-          <a-space align="center" style="margin-bottom: 10px">
-            <!--考试标题-->
-            <a-input
-              v-model="examSearch.titleFuzzy"
-              :placeholder="$t('examManager.placeholder.title')"
-              style="width: 200px"
-            />
+          <div>
+            <a-row style="margin-bottom: 10px" :gutter="5">
+              <!--考试标题-->
+              <a-col :span="8">
+                <a-input
+                  v-model="examSearch.titleFuzzy"
+                  :placeholder="$t('examManager.placeholder.title')"
+                  style="width: 250px"
+                />
+              </a-col>
+              <!--开放类型-->
+              <a-col :span="8">
+                <a-select
+                  v-model="examSearch.openType"
+                  :placeholder="$t('examManager.placeholder.openType')"
+                  style="width: 250px"
+                  allow-clear
+                >
+                  <a-option value="0">完全公开</a-option>
+                  <a-option value="1">指定学生</a-option>
+                  <a-option value="2">指定部门</a-option>
+                </a-select>
+              </a-col>
+            </a-row>
+            <a-row style="margin-bottom: 10px" :gutter="1">
+              <!--考试时间-->
+              <a-col :span="8">
+                <a-date-picker
+                  v-model="examSearch.startTimeStart"
+                  style="width: 250px"
+                  show-time
+                  :time-picker-props="{ defaultValue: '09:09:06' }"
+                  :placeholder="t('examManager.placeholder.startTime')"
+                  format="YYYY-MM-DD"
+                />
+              </a-col>
+              <a-col :span="8">
+                <a-date-picker
+                  v-model="examSearch.endTimeEnd"
+                  style="width: 250px"
+                  show-time
+                  :placeholder="t('examManager.placeholder.endTime')"
+                  format="YYYY-MM-DD hh:mm"
+                />
+              </a-col>
+              <!--搜索重置按钮-->
+              <a-col :span="8">
+                <a-button type="primary" style="margin: 0 5px" @click="search">
+                  <template #icon>
+                    <icon-search />
+                  </template>
+                  搜索
+                </a-button>
+                <a-button type="primary" style="margin: 0 5px" @click="reset">
+                  <template #icon>
+                    <icon-refresh />
+                  </template>
+                  重置
+                </a-button>
+              </a-col>
+            </a-row>
+          </div>
 
-            <!--开放类型-->
-            <a-select
-              v-model="examSearch.openType"
-              :placeholder="$t('examManager.placeholder.openType')"
-              style="width: 250px"
-              allow-clear
-            >
-              <a-option value="0">完全公开</a-option>
-              <a-option value="1">指定学生</a-option>
-              <a-option value="2">指定部门</a-option>
-            </a-select>
-
-            <!--考试时间-->
-            <a-date-picker
-              v-model="examSearch.startTimeStart"
-              style="width: 220px"
-              show-time
-              :time-picker-props="{ defaultValue: '09:09:06' }"
-              :placeholder="t('examManager.placeholder.startTime')"
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-            <a-date-picker
-              v-model="examSearch.endTimeEnd"
-              style="width: 220px"
-              show-time
-              :placeholder="t('examManager.placeholder.endTime')"
-              format="YYYY-MM-DD hh:mm"
-            />
-          </a-space>
           <a-divider style="margin-top: 0; margin-bottom: 16px" />
           <a-table
             row-key="id"
@@ -91,9 +117,9 @@
             :pagination="{
               showTotal: true,
               showPageSize: true,
-              total: pageInfo.total,
-              pageSize: pageInfo.pageSize,
-              current: pageInfo.pageNo,
+              total: pagination.total,
+              pageSize: pagination.pageSize,
+              current: pagination.pageNo,
             }"
             :scroll="{ x: 100, y: 400 }"
             @page-change="pageChange"
@@ -139,23 +165,18 @@
   import { DepartmentQuery } from '@/types/model/query/DepartmentQuery';
   import usePermission from '@/hooks/permission';
   import { useUserStore } from '@/store';
-  import { SimplePage } from '@/types/model/po/SimplePage';
-  import { ExamQuery } from '@/types/model/query/ExamQuery';
   import { getExamList } from '@/api/exam';
   import { ExamVO } from '@/types/model/vo/ExamVO';
   import { Message } from '@arco-design/web-vue';
   import { useRouter } from 'vue-router';
+  import usePagination from '@/hooks/pagination';
+  import ExamQuery from '@/types/model/query/ExamQuery';
+  import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
-  const { t } = useI18n();
+  const { pagination, setPagination } = usePagination();
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
+  const { t } = useI18n();
 
   const router = useRouter();
 
@@ -175,16 +196,18 @@
   const ExamList = ref<ExamVO[]>();
 
   // 查询表单
-  const examSearch = ref<ExamQuery>({});
+  const examSearch = ref<ExamQuery>(new ExamQuery());
   // 获取考试列表
   const reloadExamList = async (examQuery: ExamQuery) => {
     setLoading(true);
     await getExamList(examQuery).then((res: any) => {
       ExamList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
     setLoading(false);
   };
@@ -193,7 +216,7 @@
     await getDeptTree().then((res: any) => {
       deptTree.value = res.data;
     });
-    await reloadExamList(pageInfo.value);
+    await reloadExamList(examSearch.value);
   });
 
   // 清空查询表单
@@ -203,11 +226,11 @@
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    examSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    examSearch.value.pageSize = pageSize;
   };
 
   // 表头列名
@@ -248,7 +271,7 @@
       title: t('examManager.columns.totalCount'),
       dataIndex: 'totalCount',
       slotName: 'totalCount',
-      width: 80,
+      width: 100,
       ellipsis: true,
       tooltip: true,
     },
@@ -272,7 +295,7 @@
       title: t('examManager.columns.options'),
       dataIndex: 'option',
       slotName: 'option',
-      width: 150,
+      width: 100,
       ellipsis: true,
     },
   ]);
@@ -309,24 +332,38 @@
     });
   };
 
+  // 搜索
+  const search = async () => {
+    // 拷贝一个新的搜索对象（因为如何将deptCodeFuzzy转换为非数组后，控制台会报警告）
+    const newSearchObj = { ...examSearch.value };
+    // 将树状列表选择的数组转化为单个值
+    if (Array.isArray(examSearch.value.deptCodeFuzzy)) {
+      const code = examSearch.value.deptCodeFuzzy?.[0];
+      newSearchObj.deptCodeFuzzy = code;
+    }
+    await reloadExamList(newSearchObj);
+  };
+
+  // 重置
+  const reset = async () => {
+    examSearch.value = new ExamQuery();
+    pagination.value = new SimplePage();
+    await reloadExamList(examSearch.value);
+  };
+
+  // 监视页码变化
   watch(
-    examSearch.value,
-    async () => {
+    () => [examSearch.value.pageNo, examSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      // 拷贝一个新的搜索对象（因为如何将deptCodeFuzzy转换为非数组后，控制台会报警告）
+      const newSearchObj = { ...examSearch.value };
+      // 将树状列表选择的数组转化为单个值
       if (Array.isArray(examSearch.value.deptCodeFuzzy)) {
         const code = examSearch.value.deptCodeFuzzy?.[0];
-        examSearch.value.deptCodeFuzzy = code;
+        newSearchObj.deptCodeFuzzy = code;
       }
-    },
-    { deep: true, immediate: true }
-  );
-
-  // 监视查询数据及其页码变化
-  watch(
-    [pageInfo.value, examSearch.value],
-    async ([newPageInfo, oldPageInfo], [newUserSearch, oldUserSearch]) => {
-      await reloadExamList({ ...pageInfo.value, ...examSearch.value });
-    },
-    { deep: true }
+      await reloadExamList(newSearchObj);
+    }
   );
 </script>
 

@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface ExamRecordQuery extends SimplePage {
+class ExamRecordQuery extends SimplePage {
   /**
    * ID
    */
@@ -95,3 +95,4 @@ export interface ExamRecordQuery extends SimplePage {
    */
   state?: number;
 }
+export default ExamRecordQuery;

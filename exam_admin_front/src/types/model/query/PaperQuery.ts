@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '../po/SimplePage';
 
-export interface PaperQuery extends SimplePage {
+class PaperQuery extends SimplePage {
   /**
    * 试卷ID
    */
@@ -76,3 +76,4 @@ export interface PaperQuery extends SimplePage {
 
   updateByFuzzy?: string;
 }
+export default PaperQuery;

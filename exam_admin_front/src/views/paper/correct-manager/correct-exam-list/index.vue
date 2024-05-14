@@ -7,43 +7,68 @@
       :title="$t('menu.exam.correctExam')"
     >
       <!--查询栏-->
-      <a-space align="center" style="margin-bottom: 10px">
-        <!--考试标题-->
-        <a-input
-          v-model="examSearch.titleFuzzy"
-          :placeholder="$t('examManager.placeholder.title')"
-          style="width: 320px"
-        />
-
-        <!--开放类型-->
-        <a-select
-          v-model="examSearch.openType"
-          :placeholder="$t('examManager.placeholder.openType')"
-          style="width: 250px"
-          allow-clear
-        >
-          <a-option value="0">完全公开</a-option>
-          <a-option value="1">指定学生</a-option>
-          <a-option value="2">指定部门</a-option>
-        </a-select>
-
-        <!--考试时间-->
-        <a-date-picker
-          v-model="examSearch.startTimeStart"
-          style="width: 220px"
-          show-time
-          :time-picker-props="{ defaultValue: '09:09:06' }"
-          :placeholder="t('examManager.placeholder.startTime')"
-          format="YYYY-MM-DD HH:mm:ss"
-        />
-        <a-date-picker
-          v-model="examSearch.endTimeEnd"
-          style="width: 220px"
-          show-time
-          :placeholder="t('examManager.placeholder.endTime')"
-          format="YYYY-MM-DD HH:mm:ss"
-        />
-      </a-space>
+      <div>
+        <a-row :gutter="5" style="margin-bottom: 16px">
+          <!--考试标题-->
+          <a-col :span="6">
+            <a-input
+              v-model="examSearch.titleFuzzy"
+              :placeholder="$t('examManager.placeholder.title')"
+              style="width: 250px"
+            />
+          </a-col>
+          <!--开放类型-->
+          <a-col :span="6">
+            <a-select
+              v-model="examSearch.openType"
+              :placeholder="$t('examManager.placeholder.openType')"
+              style="width: 250px"
+              allow-clear
+            >
+              <a-option value="0">完全公开</a-option>
+              <a-option value="1">指定学生</a-option>
+              <a-option value="2">指定部门</a-option>
+            </a-select>
+          </a-col>
+        </a-row>
+        <a-row :gutter="5" style="margin-bottom: 16px">
+          <!--考试时间-->
+          <a-col :span="6">
+            <a-date-picker
+              v-model="examSearch.startTimeStart"
+              style="width: 250px"
+              show-time
+              :time-picker-props="{ defaultValue: '09:09:06' }"
+              :placeholder="t('examManager.placeholder.startTime')"
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </a-col>
+          <a-col :span="6">
+            <a-date-picker
+              v-model="examSearch.endTimeEnd"
+              style="width: 250px"
+              show-time
+              :placeholder="t('examManager.placeholder.endTime')"
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </a-col>
+          <!--搜索重置按钮-->
+          <a-col :span="6">
+            <a-button type="primary" style="margin: 0 5px" @click="search">
+              <template #icon>
+                <icon-search />
+              </template>
+              搜索
+            </a-button>
+            <a-button type="primary" style="margin: 0 5px" @click="reset">
+              <template #icon>
+                <icon-refresh />
+              </template>
+              重置
+            </a-button>
+          </a-col>
+        </a-row>
+      </div>
       <a-divider style="margin-top: 0" />
       <a-table
         row-key="id"
@@ -55,9 +80,9 @@
         :pagination="{
           showTotal: true,
           showPageSize: true,
-          total: pageInfo.total,
-          pageSize: pageInfo.pageSize,
-          current: pageInfo.pageNo,
+          total: pagination.total,
+          pageSize: pagination.pageSize,
+          current: pagination.pageNo,
         }"
         :scroll="{ x: 100, y: 400 }"
         @page-change="pageChange"
@@ -97,27 +122,19 @@
   import { useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { getCorrectExam } from '@/api/exam';
-  import { ExamQuery } from '@/types/model/query/ExamQuery';
+  import ExamQuery from '@/types/model/query/ExamQuery';
   import { useUserStore } from '@/store';
   import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
-  import { SimplePage } from '@/types/model/po/SimplePage';
+  import usePagination from '@/hooks/pagination';
+  import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
-  const { t } = useI18n();
+  const { pagination, setPagination } = usePagination();
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
+  const { t } = useI18n();
 
   const router = useRouter();
   const userStore = useUserStore();
-
-  // 添加考试模态框开关
-  const addExamVisible = ref<boolean>(false);
 
   // 考试列表
   const ExamList = ref<CorrectExamVO[]>();
@@ -130,10 +147,12 @@
       (res: any) => {
         setLoading(true);
         ExamList.value = res.data.list;
-        pageInfo.value.total = res.data.totalCount;
-        pageInfo.value.pageSize = res.data.pageSize;
-        pageInfo.value.pageNo = res.data.pageNo;
-        pageInfo.value.pageTotal = res.data.pageTotal;
+        setPagination({
+          total: res.data.totalCount,
+          pageSize: res.data.pageSize,
+          pageNo: res.data.pageNo,
+          pageTotal: res.data.pageTotal,
+        });
         setLoading(false);
       }
     );
@@ -148,16 +167,16 @@
     //   // 2. 教师只能获取自己创建的考试
     //   await reloadExamList({ createBy: userStore.id });
     // }
-    await reloadCorrectExam(pageInfo.value);
+    await reloadCorrectExam(examSearch.value);
   });
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    examSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    examSearch.value.pageSize = pageSize;
   };
 
   // 表头列名
@@ -230,13 +249,24 @@
     window.open(`/exam/correct-user-list/${examId}`, '_black');
   };
 
-  // 监视查询数据及其页码变化
+  // 搜索
+  const search = async () => {
+    await reloadCorrectExam(examSearch.value);
+  };
+
+  // 重置
+  const reset = async () => {
+    examSearch.value = new ExamQuery();
+    pagination.value = new SimplePage();
+    await reloadCorrectExam(examSearch.value);
+  };
+
+  // 监视页码变化
   watch(
-    [pageInfo.value, examSearch.value],
-    async ([newPageInfo, oldPageInfo], [newExamSearch, oldExamSearch]) => {
-      await reloadCorrectExam({ ...pageInfo.value, ...examSearch.value });
-    },
-    { deep: true }
+    () => [examSearch.value.pageNo, examSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadCorrectExam(examSearch.value);
+    }
   );
 </script>
 

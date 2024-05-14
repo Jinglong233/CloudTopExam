@@ -7,9 +7,10 @@
         :title="$t('menu.announcement.myMsg')"
         style="height: 680px"
       >
-        <a-space align="center">
+        <a-space align="center" style="margin-bottom: 20px">
           <a-select
-            style="margin-bottom: 20px; width: 200px"
+            v-model="state"
+            style="width: 200px"
             placeholder="请选择读取状态"
             allow-clear
             @change="stateChange"
@@ -17,10 +18,11 @@
             <a-option :value="0">未读</a-option>
             <a-option :value="1">已读</a-option>
           </a-select>
-          <a-button type="outline" shape="circle" @click="reset">
+          <a-button type="outline" @click="reset">
             <template #icon>
               <icon-refresh />
             </template>
+            重置
           </a-button>
         </a-space>
         <a-table
@@ -33,9 +35,9 @@
           :pagination="{
             showTotal: true,
             showPageSize: true,
-            total: pageInfo.total,
-            pageSize: pageInfo.pageSize,
-            current: pageInfo.pageNo,
+            total: pagination.total,
+            pageSize: pagination.pageSize,
+            current: pagination.pageNo,
           }"
           :scroll="{ x: 100, y: 400 }"
           @page-change="pageChange"
@@ -77,7 +79,6 @@
 <script setup lang="ts">
   import { onMounted, ref, watch } from 'vue';
   import { MsgVO } from '@/types/model/vo/MsgVO';
-  import { SimplePage } from '@/types/model/po/SimplePage';
   import {
     getNotification,
     getReadNotification,
@@ -86,6 +87,12 @@
   } from '@/api/msg';
   import { useI18n } from 'vue-i18n';
   import { UpdateMsgUserDTo } from '@/types/model/dto/UpdateMsgUserDTo';
+  import usePagination from '@/hooks/pagination';
+  import useLoading from '@/hooks/loading';
+  import SimplePage from '@/types/model/po/SimplePage';
+
+  const { loading, setLoading } = useLoading(true);
+  const { pagination, setPagination } = usePagination();
 
   const { t } = useI18n();
 
@@ -96,18 +103,10 @@
   const currentRecord = ref<MsgVO>({ msgUser: {} });
 
   const msgList = ref<MsgVO[]>([]);
-  const loading = ref<boolean>(false);
 
   // 当前列表信息的状态（-1是获取所有信息）
-  const state = ref<number>(-1);
+  const state = ref<number>();
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 5,
-    pageTotal: 0,
-    total: 0,
-  });
   const columns = [
     {
       title: t('announcement.columns.title'),
@@ -126,48 +125,57 @@
     },
   ];
 
+  const pageInfo = ref<SimplePage>(new SimplePage());
+
   const reloadNotification = async (page: SimplePage) => {
-    loading.value = true;
+    setLoading(true);
     await getNotification(page).then((res: any) => {
       msgList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
-    loading.value = false;
-  };
-
-  const reset = () => {
-    state.value = -1;
+    setLoading(false);
   };
 
   const reloadReadNotification = async (page: SimplePage) => {
-    loading.value = true;
+    setLoading(true);
     await getReadNotification(page).then((res: any) => {
       msgList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
-    loading.value = false;
+    setLoading(false);
   };
 
   const reloadUnReadNotification = async (page: SimplePage) => {
-    loading.value = true;
+    setLoading(true);
     await getUnReadNotification(page).then((res: any) => {
       msgList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
-    loading.value = false;
+    setLoading(false);
   };
   onMounted(async () => {
     await reloadNotification(pageInfo.value);
   });
+
+  const reset = async () => {
+    state.value = undefined;
+    await reloadNotification(new SimplePage());
+  };
 
   // 下拉框改变
   const stateChange = async (value: number) => {
@@ -209,38 +217,27 @@
     () => state.value,
     async (newState, oldState) => {
       if (state.value === 0) {
-        await reloadUnReadNotification({
-          pageSize: 10,
-          pageNo: 1,
-        } as SimplePage);
+        await reloadUnReadNotification(new SimplePage());
       } else if (state.value === 1) {
-        await reloadReadNotification({ pageSize: 10, pageNo: 1 } as SimplePage);
-      } else if (state.value === -1) {
-        await reloadNotification({ pageSize: 10, pageNo: 1 } as SimplePage);
+        await reloadReadNotification(new SimplePage());
+      }
+    }
+  );
+
+  watch(
+    pageInfo.value,
+    async (newPagination, oldPagination) => {
+      if (state.value === 0) {
+        await reloadUnReadNotification(pageInfo.value);
+      } else if (state.value === 1) {
+        await reloadReadNotification(pageInfo.value);
+      } else {
+        await reloadNotification(pageInfo.value);
       }
     },
     {
       deep: true,
-      immediate: true,
     }
-  );
-
-  // 监视读取状态及其页码变化
-  watch(
-    () => pageInfo.value,
-    async (newPageInfo, oldPageInfo) => {
-      if (state.value === 0) {
-        await reloadUnReadNotification({
-          pageSize: 10,
-          pageNo: 1,
-        } as SimplePage);
-      } else if (state.value === 1) {
-        await reloadReadNotification({ pageSize: 10, pageNo: 1 } as SimplePage);
-      } else if (state.value === -1) {
-        await reloadNotification({ pageSize: 10, pageNo: 1 } as SimplePage);
-      }
-    },
-    { deep: true }
   );
 </script>
 

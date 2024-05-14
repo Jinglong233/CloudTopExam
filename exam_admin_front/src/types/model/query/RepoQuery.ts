@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface RepoQuery extends SimplePage {
+class RepoQuery extends SimplePage {
   /**
    * ID
    */
@@ -103,3 +103,4 @@ export interface RepoQuery extends SimplePage {
 
   updateByFuzzy?: string;
 }
+export default RepoQuery;

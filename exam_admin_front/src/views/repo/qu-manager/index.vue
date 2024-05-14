@@ -7,40 +7,66 @@
       :title="$t('menu.repo.quManager')"
     >
       <!--查询栏-->
-      <a-space>
-        <!--题目内容-->
-        <a-input
-          v-model="quSearch.contentFuzzy"
-          :placeholder="$t('quManager.placeholder.content')"
-          style="width: 250px"
-          :allow-clear="true"
-        />
-        <!--题型-->
-        <a-select
-          v-model="quSearch.quType"
-          :placeholder="$t('quManager.placeholder.quType')"
-          allow-clear
-          style="width: 250px"
-        >
-          <a-option value="1">单选题</a-option>
-          <a-option value="2">多选题</a-option>
-          <a-option value="3">判断题</a-option>
-          <a-option value="4">填空题</a-option>
-          <a-option value="5">简答题</a-option>
-        </a-select>
-
-        <!--题库-->
-        <a-select
-          v-model="quSearch.repoId"
-          :placeholder="$t('quManager.placeholder.repo')"
-          allow-clear
-          style="width: 250px"
-        >
-          <a-option v-for="repo in repoList" :key="repo.id" :value="repo.id">
-            {{ repo.title }}
-          </a-option>
-        </a-select>
-      </a-space>
+      <div>
+        <a-row :gutter="5">
+          <!--题目内容-->
+          <a-col :span="6">
+            <a-input
+              v-model="quSearch.contentFuzzy"
+              :placeholder="$t('quManager.placeholder.content')"
+              style="width: 250px"
+              :allow-clear="true"
+            />
+          </a-col>
+          <!--题型-->
+          <a-col :span="6">
+            <a-select
+              v-model="quSearch.quType"
+              :placeholder="$t('quManager.placeholder.quType')"
+              allow-clear
+              style="width: 250px"
+            >
+              <a-option value="1">单选题</a-option>
+              <a-option value="2">多选题</a-option>
+              <a-option value="3">判断题</a-option>
+              <a-option value="4">填空题</a-option>
+              <a-option value="5">简答题</a-option>
+            </a-select>
+          </a-col>
+          <!--题库-->
+          <a-col :span="6">
+            <a-select
+              v-model="quSearch.repoId"
+              :placeholder="$t('quManager.placeholder.repo')"
+              allow-clear
+              style="width: 250px"
+            >
+              <a-option
+                v-for="repo in repoList"
+                :key="repo.id"
+                :value="repo.id"
+              >
+                {{ repo.title }}
+              </a-option>
+            </a-select>
+          </a-col>
+          <!--搜索重置按钮-->
+          <a-col :span="6">
+            <a-button type="primary" style="margin: 0 5px" @click="search">
+              <template #icon>
+                <icon-search />
+              </template>
+              搜索
+            </a-button>
+            <a-button type="primary" style="margin: 0 5px" @click="reset">
+              <template #icon>
+                <icon-refresh />
+              </template>
+              重置
+            </a-button>
+          </a-col>
+        </a-row>
+      </div>
       <a-row style="margin-bottom: 16px; margin-top: 16px">
         <a-col :span="12">
           <a-space>
@@ -96,14 +122,9 @@
                 </a-upload>
               </div>
             </a-modal>
-
-            <a-upload action="/">
-              <template #upload-button>
-                <a-button>
-                  {{ $t('quManager.operation.derive') }}
-                </a-button>
-              </template>
-            </a-upload>
+            <a-button type="primary">
+              {{ $t('quManager.operation.derive') }}
+            </a-button>
           </a-space>
         </a-col>
       </a-row>
@@ -117,9 +138,9 @@
         :pagination="{
           showTotal: true,
           showPageSize: true,
-          total: pageInfo.total,
-          pageSize: pageInfo.pageSize,
-          current: pageInfo.pageNo,
+          total: pagination.total,
+          pageSize: pagination.pageSize,
+          current: pagination.pageNo,
         }"
         :scroll="{ x: 100, y: 400 }"
         @page-change="pageChange"
@@ -157,7 +178,7 @@
   import useLoading from '@/hooks/loading';
   import { useRouter } from 'vue-router';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
-  import { QuQuery } from '@/types/model/query/QuQuery';
+  import QuQuery from '@/types/model/query/QuQuery';
   import { getRepoList } from '@/api/repo';
   import { Repo } from '@/types/model/po/Repo';
   import { deleteQuById, getQuList } from '@/api/qu';
@@ -165,11 +186,14 @@
   import { Message, Modal } from '@arco-design/web-vue';
   import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
   import { useUserStore } from '@/store';
-  import { SimplePage } from '@/types/model/po/SimplePage';
-  import { RepoQuery } from '@/types/model/query/RepoQuery';
+  import RepoQuery from '@/types/model/query/RepoQuery';
+  import usePagination from '@/hooks/pagination';
+  import SimplePage from '@/types/model/po/SimplePage';
   import { getQuestionTypeName } from '../../../utils/common';
 
   const { loading, setLoading } = useLoading(true);
+  const { pagination, setPagination } = usePagination();
+
   const { t } = useI18n();
 
   // 批量导入题目对话框
@@ -178,14 +202,6 @@
   const userStore = useUserStore();
   const token = ref();
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
-
   // 题目列表
   const quList = ref<Qu[]>([]);
 
@@ -193,7 +209,7 @@
   const repoList = ref<Repo[]>([]);
 
   // 查询表单
-  const quSearch = ref<QuQuery>({} as QuQuery);
+  const quSearch = ref<QuQuery>(new QuQuery());
 
   // 选择的上传题库
   const uploadRepo = ref<string>('');
@@ -216,15 +232,17 @@
     // 获取题目列表
     await getQuList(arg).then((res: any) => {
       quList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
-      setLoading(false);
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
+    setLoading(false);
   };
   onMounted(async () => {
-    await reloadQuList(pageInfo.value);
+    await reloadQuList(quSearch.value);
     await reloadRepoList();
     token.value = userStore.token;
     // 上传题目默认是第一个题库
@@ -235,11 +253,11 @@
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    quSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    quSearch.value.pageSize = pageSize;
   };
 
   const handleClick = () => {
@@ -316,7 +334,7 @@
               content: '删除失败',
             });
           }
-          await reloadQuList(pageInfo.value);
+          await reloadQuList(pagination.value);
         });
       },
     });
@@ -342,13 +360,25 @@
     uploadRepo.value = repo;
   };
 
-  watch(pageInfo.value, async (newValue, oldValue) => {
-    await reloadQuList({ ...pageInfo.value, ...quSearch.value });
-  });
+  // 搜索
+  const search = async () => {
+    await reloadQuList(quSearch.value);
+  };
 
-  watch(quSearch.value, async (newValue, oldValue) => {
-    await reloadQuList({ ...pageInfo.value, ...quSearch.value });
-  });
+  // 重置
+  const reset = async () => {
+    quSearch.value = new QuQuery();
+    pagination.value = new SimplePage();
+    await reloadQuList(quSearch.value);
+  };
+
+  // 监视页码变化
+  watch(
+    () => [quSearch.value.pageNo, quSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadQuList(quSearch.value);
+    }
+  );
 </script>
 
 <style scoped lang="less">

@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface MsgQuery extends SimplePage {
+class MsgQuery extends SimplePage {
   /**
    * ID
    */
@@ -72,3 +72,4 @@ export interface MsgQuery extends SimplePage {
 
   createUserTextFuzzy?: string;
 }
+export default MsgQuery;

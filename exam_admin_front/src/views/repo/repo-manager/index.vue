@@ -4,45 +4,81 @@
     <a-row :gutter="20" align="stretch">
       <a-col :span="24">
         <a-card class="general-card" :title="$t('menu.repo.repoManager')">
-          <a-row justify="space-between">
-            <a-space>
+          <div>
+            <a-row :gutter="5" style="margin-bottom: 16px">
               <!--学科搜索-->
-              <a-tree-select
-                v-model="searchForm.subjectId"
-                :data="subjectTree"
-                :field-names="{
-                  key: 'id',
-                  title: 'title',
-                  children: 'children',
-                }"
-                :style="{ width: '250px' }"
-                placeholder="请选择学科"
-                allow-clear
-              />
+              <a-col :span="6">
+                <a-tree-select
+                  v-model="searchForm.subjectId"
+                  :data="subjectTree"
+                  :field-names="{
+                    key: 'id',
+                    title: 'title',
+                    children: 'children',
+                  }"
+                  :style="{ width: '250px' }"
+                  placeholder="请选择学科"
+                  allow-clear
+                />
+              </a-col>
               <!--部门搜索-->
-              <a-tree-select
-                v-model="searchForm.deptCodeFuzzy"
-                placeholder="选择题库所属部门"
-                :data="deptTree"
-                :field-names="{
-                  key: 'deptCode',
-                  title: 'deptName',
-                  children: 'children',
-                }"
-                :style="{ width: '250px' }"
-                :allow-clear="true"
-                @change="handleSelectChange"
-              />
-              <a-checkbox @change="handleExamChange">是否用于考试</a-checkbox>
-              <a-checkbox @change="handleTrainChange">是否用于训练</a-checkbox>
+              <a-col :span="6">
+                <a-tree-select
+                  v-model="searchForm.deptCodeFuzzy"
+                  placeholder="选择题库所属部门"
+                  :data="deptTree"
+                  :field-names="{
+                    key: 'deptCode',
+                    title: 'deptName',
+                    children: 'children',
+                  }"
+                  :style="{ width: '250px' }"
+                  :allow-clear="true"
+                  @change="handleSelectChange"
+                />
+              </a-col>
+              <!--是否用于训练考试-->
+              <a-col :span="6">
+                <a-checkbox
+                  :model-value="searchForm.isExam ? true : false"
+                  @change="handleExamChange"
+                >
+                  是否用于考试
+                </a-checkbox>
+                <a-checkbox
+                  :model-value="searchForm.isTrain ? true : false"
+                  @change="handleTrainChange"
+                >
+                  是否用于训练
+                </a-checkbox>
+              </a-col>
+            </a-row>
+            <a-row :gutter="5" style="margin-bottom: 16px">
               <!--标题搜索-->
-              <a-input-search
-                v-model="searchForm.titleFuzzy"
-                placeholder="输入题库名称搜索"
-                style="width: 240px; position: absolute; top: 60px; right: 20px"
-              />
-            </a-space>
-          </a-row>
+              <a-col :span="6">
+                <a-input-search
+                  v-model="searchForm.titleFuzzy"
+                  placeholder="输入题库名称搜索"
+                  style="width: 250px"
+                />
+              </a-col>
+              <!--搜索重置按钮-->
+              <a-col :span="6">
+                <a-button type="primary" style="margin: 0 5px" @click="search">
+                  <template #icon>
+                    <icon-search />
+                  </template>
+                  搜索
+                </a-button>
+                <a-button type="primary" style="margin: 0 5px" @click="reset">
+                  <template #icon>
+                    <icon-refresh />
+                  </template>
+                  重置
+                </a-button>
+              </a-col>
+            </a-row>
+          </div>
           <a-divider />
           <a-row>
             <a-scrollbar style="height: 450px; overflow: auto">
@@ -58,9 +94,9 @@
                 style="float: right"
                 :show-total="true"
                 :show-page-size="true"
-                :total="pageInfo.total"
-                :page-size="pageInfo.pageSize"
-                :current="pageInfo.pageNo"
+                :total="pagination.total"
+                :page-size="pagination.pageSize"
+                :current="pagination.pageNo"
                 @change="pageChange"
                 @page-size-change="pageSizeChange"
               />
@@ -73,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { RepoQuery } from '@/types/model/query/RepoQuery';
+  import RepoQuery from '@/types/model/query/RepoQuery';
   import { onMounted, ref, watch } from 'vue';
   import BankList from '@/views/repo/repo-manager/components/bank-list.vue';
   import { getDeptTree } from '@/api/department';
@@ -81,17 +117,12 @@
   import { Repo } from '@/types/model/po/Repo';
   import { SubjectTreeVO } from '@/types/model/vo/SubjectTreeVO';
   import { getSubjectTree } from '@/api/subject';
-  import { SimplePage } from '@/types/model/po/SimplePage';
+  import usePagination from '@/hooks/pagination';
+  import useLoading from '@/hooks/loading';
+  import SimplePage from '@/types/model/po/SimplePage';
 
-  const loading = ref<boolean>(false);
-
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
+  const { loading, setLoading } = useLoading(true);
+  const { pagination, setPagination } = usePagination();
 
   // 部门树列表
   const deptTree = ref<[]>();
@@ -100,24 +131,26 @@
   // 题库列表
   const repoList = ref<Repo[]>([]);
   // 查询表单
-  const searchForm = ref<RepoQuery>({} as RepoQuery);
+  const searchForm = ref<RepoQuery>(new RepoQuery());
   const reloadRepoList = async (repoQuery: RepoQuery) => {
-    loading.value = true;
+    setLoading(true);
     await getRepoList(repoQuery).then((res: any) => {
       repoList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
-    loading.value = false;
+    setLoading(false);
   };
 
   onMounted(async () => {
     await getDeptTree().then((res: any) => {
       deptTree.value = res.data;
     });
-    await reloadRepoList({ ...pageInfo.value } as RepoQuery);
+    await reloadRepoList(searchForm.value);
     await getSubjectTree().then((res: any) => {
       subjectTree.value = res.data;
     });
@@ -125,11 +158,11 @@
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    searchForm.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    searchForm.value.pageSize = pageSize;
   };
 
   // 处理下拉框变化
@@ -153,13 +186,25 @@
     }
   };
 
+  // 搜索
+  const search = async () => {
+    await reloadRepoList(searchForm.value);
+  };
+
+  // 重置
+  const reset = async () => {
+    searchForm.value = new RepoQuery();
+    delete searchForm.value.isTrain;
+    delete searchForm.value.isExam;
+    pagination.value = new SimplePage();
+    await reloadRepoList(searchForm.value);
+  };
+
+  // 监视页码变化
   watch(
-    [pageInfo.value, searchForm.value],
-    async ([newPageInfo, oldPageInfo], [newSearchForm, oldSearchForm]) => {
-      await reloadRepoList({ ...pageInfo.value, ...searchForm.value });
-    },
-    {
-      deep: true,
+    () => [searchForm.value.pageNo, searchForm.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadRepoList(searchForm.value);
     }
   );
 </script>

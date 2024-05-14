@@ -49,8 +49,8 @@ export default {
   // placeholder
   'examManager.placeholder.deptCode': '请选择部门',
   'examManager.placeholder.openType': '请选择开放类型',
-  'examManager.placeholder.startTime': '请选择考试开始时间',
-  'examManager.placeholder.endTime': '请选择考试结束时间',
+  'examManager.placeholder.startTime': '开始时间',
+  'examManager.placeholder.endTime': '结束时间',
   'examManager.placeholder.title': '输入考试名称',
 
   // size

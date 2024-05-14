@@ -9,40 +9,64 @@
       >
         <a-alert>注意：公告默认所有人读取，没有关联具体用户</a-alert>
         <!--查询栏-->
-        <a-space align="center" style="margin: 10px 0">
-          <!--消息标题-->
-          <a-input
-            v-model="messageSearch.titleFuzzy"
-            placeholder="请输入消息标题"
-            style="width: 200px"
-          />
-
-          <!--消息标题-->
-          <a-input
-            v-model="messageSearch.createUserTextFuzzy"
-            placeholder="请输入创建人姓名"
-            style="width: 200px"
-          />
-
-          <!--消息类型-->
-          <a-select
-            v-model="messageSearch.msgType"
-            placeholder="请选择消息类型"
-            style="width: 250px"
-            allow-clear
-          >
-            <a-option :value="0">公告</a-option>
-            <a-option :value="1">通知</a-option>
-            <a-option :value="2">邮件</a-option>
-          </a-select>
-
-          <!--消息时间-->
-          <a-range-picker
-            :placeholder="['请选择开始时间范围', '请选择结束时间范围']"
-            style="width: 380px"
-            @change="onDateChange"
-          />
-        </a-space>
+        <div style="margin-top: 10px">
+          <a-row style="margin-bottom: 16px" :gutter="5">
+            <!--消息标题-->
+            <a-col :span="6">
+              <a-input
+                v-model="messageSearch.titleFuzzy"
+                placeholder="请输入消息标题"
+                style="width: 250px"
+              />
+            </a-col>
+            <!--消息标题-->
+            <a-col :span="6">
+              <a-input
+                v-model="messageSearch.createUserTextFuzzy"
+                placeholder="请输入创建人姓名"
+                style="width: 250px"
+              />
+            </a-col>
+            <!--消息类型-->
+            <a-col :span="6">
+              <a-select
+                v-model="messageSearch.msgType"
+                placeholder="请选择消息类型"
+                style="width: 250px"
+                allow-clear
+              >
+                <a-option :value="0">公告</a-option>
+                <a-option :value="1">通知</a-option>
+                <a-option :value="2">邮件</a-option>
+              </a-select>
+            </a-col>
+          </a-row>
+          <a-row style="margin-bottom: 16px" :gutter="5">
+            <!--消息时间-->
+            <a-col :span="6">
+              <a-range-picker
+                :placeholder="['开始时间', '结束时间']"
+                style="width: 250px"
+                @change="onDateChange"
+              />
+            </a-col>
+            <!--搜索重置按钮-->
+            <a-col :span="6">
+              <a-button type="primary" style="margin: 0 5px" @click="search">
+                <template #icon>
+                  <icon-search />
+                </template>
+                搜索
+              </a-button>
+              <a-button type="primary" style="margin: 0 5px" @click="reset">
+                <template #icon>
+                  <icon-refresh />
+                </template>
+                重置
+              </a-button>
+            </a-col>
+          </a-row>
+        </div>
 
         <a-table
           row-key="id"
@@ -54,11 +78,11 @@
           :pagination="{
             showTotal: true,
             showPageSize: true,
-            total: pageInfo.total,
-            pageSize: pageInfo.pageSize,
-            current: pageInfo.pageNo,
+            total: pagination.total,
+            pageSize: pagination.pageSize,
+            current: pagination.pageNo,
           }"
-          :scroll="{ x: 100, y: 440 }"
+          :scroll="{ x: 100, y: 350 }"
           @row-click="getMsgUser"
           @page-change="pageChange"
           @page-size-change="pageSizeChange"
@@ -86,32 +110,28 @@
 
 <script setup lang="ts">
   import { onMounted, ref, watch } from 'vue';
-  import { SimplePage } from '@/types/model/po/SimplePage';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { useI18n } from 'vue-i18n';
   import { Msg } from '@/types/model/po/Msg';
-  import { MsgQuery } from '@/types/model/query/MsgQuery';
+  import MsgQuery from '@/types/model/query/MsgQuery';
   import { getMessageRecord } from '@/api/message';
   import useLoading from '@/hooks/loading';
   import { Message } from '@arco-design/web-vue';
   import MsgUserList from '@/views/msg-center/message-record/component/MsgUserList.vue';
+  import usePagination from '@/hooks/pagination';
+  import ExamQuery from '@/types/model/query/ExamQuery';
+  import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
+  const { pagination, setPagination } = usePagination();
 
   const { t } = useI18n();
-
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
 
   // 当前行记录
   const currentMsgId = ref();
 
   // 查询表单
-  const messageSearch = ref<MsgQuery>({} as MsgQuery);
+  const messageSearch = ref<MsgQuery>(new MsgQuery());
   const messageList = ref<Msg[]>([]);
   // 消息详情对话框
   const visible = ref(false);
@@ -120,24 +140,26 @@
     setLoading(true);
     await getMessageRecord(msgQuery).then((res: any) => {
       messageList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
     setLoading(false);
   };
   onMounted(async () => {
-    await reloadMessageList(pageInfo.value);
+    await reloadMessageList(messageSearch.value);
   });
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    messageSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    messageSearch.value.pageSize = pageSize;
   };
 
   // 获取当前消息关联的用户
@@ -231,13 +253,24 @@
     }
   };
 
-  // 监视查询数据及其页码变化
+  // 搜索
+  const search = async () => {
+    await reloadMessageList(messageSearch.value);
+  };
+
+  // 重置
+  const reset = async () => {
+    messageSearch.value = new MsgQuery();
+    pagination.value = new SimplePage();
+    await reloadMessageList(messageSearch.value);
+  };
+
+  // 监视页码变化
   watch(
-    [pageInfo.value, messageSearch.value],
-    async ([newPageInfo, oldPageInfo], [newMsgSearch, oldMsgSearch]) => {
-      await reloadMessageList({ ...pageInfo.value, ...messageSearch.value });
-    },
-    { deep: true, immediate: true }
+    () => [messageSearch.value.pageNo, messageSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadMessageList(messageSearch.value);
+    }
   );
 </script>
 

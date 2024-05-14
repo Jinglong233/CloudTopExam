@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface QuQuery extends SimplePage {
+class QuQuery extends SimplePage {
   /**
    * ID
    */
@@ -85,3 +85,4 @@ export interface QuQuery extends SimplePage {
    */
   quType?: number;
 }
+export default QuQuery;

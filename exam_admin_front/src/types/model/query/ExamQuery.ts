@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface ExamQuery extends SimplePage {
+class ExamQuery extends SimplePage {
   /**
    * ID
    */
@@ -117,3 +117,4 @@ export interface ExamQuery extends SimplePage {
 
   createByFuzzy?: string;
 }
+export default ExamQuery;

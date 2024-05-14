@@ -8,39 +8,63 @@
         style="height: 680px"
       >
         <!--查询栏-->
-        <a-space align="center" style="margin: 10px 0">
-          <!--登录用户名-->
-          <a-input
-            v-model="loginLogSearch.userNameFuzzy"
-            placeholder="请输入登录用户名"
-            style="width: 200px"
-          />
-
-          <!--登录地址-->
-          <a-input
-            v-model="loginLogSearch.loginAddressFuzzy"
-            placeholder="请输入登录地址"
-            style="width: 200px"
-          />
-
-          <!--登录状态-->
-          <a-select
-            v-model="loginLogSearch.loginState"
-            placeholder="请选择登录状态"
-            style="width: 250px"
-            allow-clear
-          >
-            <a-option :value="0">失败</a-option>
-            <a-option :value="1">成功</a-option>
-          </a-select>
-
-          <!--登录时间-->
-          <a-range-picker
-            :placeholder="['请选择开始时间范围', '请选择结束时间范围']"
-            style="width: 380px"
-            @change="onDateChange"
-          />
-        </a-space>
+        <div>
+          <a-row style="margin: 10px 0" :gutter="2">
+            <!--登录用户名-->
+            <a-col :span="6">
+              <a-input
+                v-model="loginLogSearch.userNameFuzzy"
+                placeholder="请输入登录用户名"
+                style="width: 250px"
+              />
+            </a-col>
+            <!--登录地址-->
+            <a-col :span="6">
+              <a-input
+                v-model="loginLogSearch.loginAddressFuzzy"
+                placeholder="请输入登录地址"
+                style="width: 250px"
+              />
+            </a-col>
+            <!--登录状态-->
+            <a-col :span="6">
+              <a-select
+                v-model="loginLogSearch.loginState"
+                placeholder="请选择登录状态"
+                style="width: 250px"
+                allow-clear
+              >
+                <a-option :value="0">失败</a-option>
+                <a-option :value="1">成功</a-option>
+              </a-select>
+            </a-col>
+          </a-row>
+          <a-row style="margin: 10px 0" :gutter="2">
+            <!--登录时间-->
+            <a-col :span="8">
+              <a-range-picker
+                :placeholder="['请选择开始时间范围', '请选择结束时间范围']"
+                style="width: 380px"
+                @change="onDateChange"
+              />
+            </a-col>
+            <!--搜索重置按钮-->
+            <a-col :span="8" style="margin-left: 10px">
+              <a-button type="primary" style="margin: 0 5px" @click="search">
+                <template #icon>
+                  <icon-search />
+                </template>
+                搜索
+              </a-button>
+              <a-button type="primary" style="margin: 0 5px" @click="reset">
+                <template #icon>
+                  <icon-refresh />
+                </template>
+                重置
+              </a-button>
+            </a-col>
+          </a-row>
+        </div>
 
         <a-table
           row-key="id"
@@ -52,9 +76,9 @@
           :pagination="{
             showTotal: true,
             showPageSize: true,
-            total: pageInfo.total,
-            pageSize: pageInfo.pageSize,
-            current: pageInfo.pageNo,
+            total: pagination.total,
+            pageSize: pagination.pageSize,
+            current: pagination.pageNo,
           }"
           :scroll="{ x: 100, y: 440 }"
           @page-change="pageChange"
@@ -77,31 +101,27 @@
 
 <script setup lang="ts">
   import { onMounted, ref, watch } from 'vue';
-  import { SimplePage } from '@/types/model/po/SimplePage';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import MsgUserList from '@/views/msg-center/message-record/component/MsgUserList.vue';
-  import { LoginLogQuery } from '@/types/model/query/LoginLogQuery';
   import { LoginLog } from '@/types/model/po/LoginLog';
   import { getLoginLogList } from '@/api/log';
+  import usePagination from '@/hooks/pagination';
+  import LoginLogQuery from '@/types/model/query/LoginLogQuery';
+  import PaperQuery from '@/types/model/query/PaperQuery';
+  import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
+  const { pagination, setPagination } = usePagination();
 
   const { t } = useI18n();
-
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
 
   // 当前行记录
   const currentMsgId = ref();
 
   // 查询表单
-  const loginLogSearch = ref<LoginLogQuery>({} as LoginLogQuery);
+  const loginLogSearch = ref<LoginLogQuery>(new LoginLogQuery());
   const loginLog = ref<LoginLog[]>([]);
   // 消息详情对话框
   const visible = ref(false);
@@ -110,30 +130,32 @@
     setLoading(true);
     await getLoginLogList(loginLogQuery).then((res: any) => {
       loginLog.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
     });
     setLoading(false);
   };
   onMounted(async () => {
-    await reloadLoginLog(pageInfo.value);
+    await reloadLoginLog(loginLogSearch.value);
   });
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    loginLogSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    loginLogSearch.value.pageSize = pageSize;
   };
 
   // 表头列名
   const columns = ref<TableColumnData[]>([
     {
-      title: t('log.columns.userName'),
+      title: t('log.loginLog.columns.userName'),
       dataIndex: 'userName',
       slotName: 'userName',
       width: 100,
@@ -141,7 +163,7 @@
       tooltip: true,
     },
     {
-      title: t('log.columns.ip'),
+      title: t('log.loginLog.columns.ip'),
       dataIndex: 'ip',
       slotName: 'ip',
       width: 80,
@@ -149,7 +171,7 @@
       tooltip: true,
     },
     {
-      title: t('log.columns.loginAddress'),
+      title: t('log.loginLog.columns.loginAddress'),
       dataIndex: 'loginAddress',
       slotName: 'loginAddress',
       width: 150,
@@ -157,7 +179,7 @@
       tooltip: true,
     },
     {
-      title: t('log.columns.loginState'),
+      title: t('log.loginLog.columns.loginState'),
       dataIndex: 'loginState',
       slotName: 'loginState',
       width: 100,
@@ -165,7 +187,7 @@
       ellipsis: true,
     },
     {
-      title: t('log.columns.operMsg'),
+      title: t('log.loginLog.columns.operMsg'),
       dataIndex: 'operMsg',
       slotName: 'operMsg',
       width: 80,
@@ -173,7 +195,7 @@
       tooltip: true,
     },
     {
-      title: t('log.columns.loginTime'),
+      title: t('log.loginLog.columns.loginTime'),
       dataIndex: 'loginTime',
       slotName: 'loginTime',
       width: 200,
@@ -193,16 +215,24 @@
     }
   };
 
-  // 监视查询数据及其页码变化
+  // 搜索
+  const search = async () => {
+    await reloadLoginLog(loginLogSearch.value);
+  };
+
+  // 重置
+  const reset = async () => {
+    loginLogSearch.value = new LoginLogQuery();
+    pagination.value = new SimplePage();
+    await reloadLoginLog(loginLogSearch.value);
+  };
+
+  // 监视页码变化
   watch(
-    [pageInfo.value, loginLogSearch.value],
-    async (
-      [newPageInfo, oldPageInfo],
-      [newLoginLogSearch, oldLoginLogSearch]
-    ) => {
-      await reloadLoginLog({ ...pageInfo.value, ...loginLogSearch.value });
-    },
-    { deep: true, immediate: true }
+    () => [loginLogSearch.value.pageNo, loginLogSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadLoginLog(loginLogSearch.value);
+    }
   );
 </script>
 

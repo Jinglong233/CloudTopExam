@@ -41,6 +41,19 @@
           <a-option value="0">正常</a-option>
           <a-option value="1">异常</a-option>
         </a-select>
+
+        <a-button type="primary" style="margin: 0 5px" @click="search">
+          <template #icon>
+            <icon-search />
+          </template>
+          搜索
+        </a-button>
+        <a-button type="primary" style="margin: 0 5px" @click="reset">
+          <template #icon>
+            <icon-refresh />
+          </template>
+          重置
+        </a-button>
       </a-space>
       <a-divider style="margin-top: 0" />
       <a-table
@@ -53,9 +66,9 @@
         :pagination="{
           showTotal: true,
           showPageSize: true,
-          total: pageInfo.total,
-          pageSize: pageInfo.pageSize,
-          current: pageInfo.pageNo,
+          total: pagination.total,
+          pageSize: pagination.pageSize,
+          current: pagination.pageNo,
         }"
         :scroll="{ x: 100, y: 400 }"
         @page-change="pageChange"
@@ -128,19 +141,14 @@
   import { useUserStore } from '@/store';
   import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
   import { Message } from '@arco-design/web-vue';
-  import { SimplePage } from '@/types/model/po/SimplePage';
-  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import ExamRecordQuery from '@/types/model/query/ExamRecordQuery';
+  import usePagination from '@/hooks/pagination';
+  import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
-  const { t } = useI18n();
+  const { pagination, setPagination } = usePagination();
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
+  const { t } = useI18n();
 
   const router = useRouter();
   const route = useRoute();
@@ -161,26 +169,28 @@
     }).then((res: any) => {
       setLoading(true);
       ExamList.value = res.data.list;
-      pageInfo.value.total = res.data.totalCount;
-      pageInfo.value.pageSize = res.data.pageSize;
-      pageInfo.value.pageNo = res.data.pageNo;
-      pageInfo.value.pageTotal = res.data.pageTotal;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
       setLoading(false);
     });
   };
 
   onMounted(async () => {
     examId.value = route.params.examId;
-    await reloadCorrectList(pageInfo.value);
+    await reloadCorrectList(correctSearch.value);
   });
 
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    correctSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    correctSearch.value.pageSize = pageSize;
   };
 
   // 表头列名
@@ -276,16 +286,25 @@
     }
   };
 
-  // 监视查询数据及其页码变化
+  // 搜索
+  const search = async () => {
+    await reloadCorrectList(correctSearch.value);
+  };
+
+  // 重置
+  const reset = async () => {
+    correctSearch.value = new ExamRecordQuery();
+    correctSearch.value.examId = examId.value as string;
+    pagination.value = new SimplePage();
+    await reloadCorrectList(correctSearch.value);
+  };
+
+  // 监视页码变化
   watch(
-    [pageInfo.value, correctSearch.value],
-    async (
-      [newPageInfo, oldPageInfo],
-      [newCorrectSearch, oldCorrectSearch]
-    ) => {
-      await reloadCorrectList({ ...pageInfo.value, ...correctSearch.value });
-    },
-    { deep: true }
+    () => [correctSearch.value.pageNo, correctSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadCorrectList(correctSearch.value);
+    }
   );
 </script>
 

@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 
-export interface LoginLogQuery extends SimplePage {
+class LoginLogQuery extends SimplePage {
   /**
    * ID
    */
@@ -48,3 +48,4 @@ export interface LoginLogQuery extends SimplePage {
 
   loginAddressFuzzy?: string;
 }
+export default LoginLogQuery;
