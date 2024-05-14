@@ -90,7 +90,7 @@
 			<![CDATA[ and oper_time >= str_to_date(#{query.operTimeStart}, '%Y-%m-%d') ]]>
 		</if>
 		<if test="query.operTimeEnd != null and query.operTimeEnd != '' ">
-			<![CDATA[ and oper_time < data_sub(str_to_date(#{query.operTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
+			<![CDATA[ and oper_time < date_sub(str_to_date(#{query.operTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 		<if test="query.requestModeFuzzy != null and query.requestModeFuzzy != '' ">
 			and request_mode like concat('%', #{query.requestModeFuzzy}, '%')
