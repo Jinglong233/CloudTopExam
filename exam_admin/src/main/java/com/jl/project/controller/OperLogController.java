@@ -1,5 +1,7 @@
 package com.jl.project.controller;
 
+import com.jl.project.annotation.GlobalInterceptor;
+import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.OperLog;
 import com.jl.project.entity.query.OperLogQuery;
 import com.jl.project.entity.vo.ResponseVO;
@@ -27,7 +29,8 @@ public class OperLogController extends ABaseController{
 	 * 根据条件分页查询
 	 */
 	@RequestMapping("loadDataList")
-	public ResponseVO loadDatalist(OperLogQuery query) {
+	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
+	public ResponseVO loadDatalist(@RequestBody @VerifyParam(require = true) OperLogQuery query) {
 		return getSuccessResponseVO(operLogService.findListByPage(query));
 	}
 
