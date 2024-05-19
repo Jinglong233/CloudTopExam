@@ -339,7 +339,7 @@ public class QuServiceImpl implements QuService {
                         continue;
                     }
                 }
-                Integer integer = quAnswerMapper.updateById(quAnswer, quAnswerId);
+                Integer integer = quAnswerMapper.insertOrUpdate(quAnswer);
                 if (integer <= 0) {
                     throw new BusinessException("更新选项出错");
                 }

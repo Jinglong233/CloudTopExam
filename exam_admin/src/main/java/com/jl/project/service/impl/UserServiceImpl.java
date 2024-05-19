@@ -27,6 +27,7 @@ import com.jl.project.mapper.UserMapper;
 import com.jl.project.service.EmailService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.MD5Util;
+import com.jl.project.utils.OSSUploadUtil;
 import com.jl.project.utils.UserInfoUtil;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -398,45 +399,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("登录状态错误，请尝试重新登录");
         }
 
-        //1、创建oss客户端连接
-        String url = null;
-        //2、获取文件输入流
-        InputStream inputStream = file.getInputStream();
-        //3、获取原始文件名
-        String originFileName = file.getOriginalFilename();
-
-        // 4. 获取后缀名
-        String extName = FileUtil.extName(originFileName);
-
-        // 使用统一的后缀
-        // 5. 拼接文件名
-        String realFileName = userId + "." + "jpg";
-
-
-        // 6. 拼接dir根目录
-        String dirFileName = env.getProperty("aliyun.oss.dir.prefix") + realFileName;
-
-        // 创建上传对象的元数据（MetaData）
-        com.aliyun.oss.model.ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(inputStream.available());
-        objectMetadata.setCacheControl("no-cache");
-        objectMetadata.setHeader("Pragma", "no-cache");
-        objectMetadata.setContentType(getContentType(realFileName
-                .substring(realFileName.lastIndexOf("."))));
-
-
-        // 7. 创建oss请求，传入三个参数
-        try {
-            ossClient.putObject(env.getProperty("aliyun.oss.bucketName"), dirFileName, inputStream, objectMetadata);
-        } catch (OSSException e) {
-            throw new RuntimeException("上传失败");
-        } catch (ClientException e) {
-            throw new RuntimeException("上传失败");
-        }
-
-        // 8. 拼接图片url路径，方便后续入库
-        url = "https://" + env.getProperty("aliyun.oss.bucketName") + "." + env.getProperty("aliyun.oss.endpoint") + "/" + dirFileName;
-
+        String url = OSSUploadUtil.uploadImage(ossClient, env, file, userId);
 
         // 9. 文件路径保存到数据库
         User user = new User();
@@ -624,46 +587,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * 获取上传文件类型
-     *
-     * @param FilenameExtension
-     * @return
-     */
-    private String getContentType(String FilenameExtension) {
-        if (FilenameExtension.equalsIgnoreCase(".bmp")) {
-            return "image/bmp";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".gif")) {
-            return "image/gif";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".jpeg") ||
-                FilenameExtension.equalsIgnoreCase(".jpg") ||
-                FilenameExtension.equalsIgnoreCase(".png")) {
-            return "image/jpg";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".html")) {
-            return "text/html";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".txt")) {
-            return "text/plain";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".vsd")) {
-            return "application/vnd.visio";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".pptx") ||
-                FilenameExtension.equalsIgnoreCase(".ppt")) {
-            return "application/vnd.ms-powerpoint";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".docx") ||
-                FilenameExtension.equalsIgnoreCase(".doc")) {
-            return "application/msword";
-        }
-        if (FilenameExtension.equalsIgnoreCase(".xml")) {
-            return "text/xml";
-        }
-        return "image/jpg";
-    }
+
 
 
 }
