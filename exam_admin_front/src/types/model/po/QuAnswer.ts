@@ -1,4 +1,4 @@
-export interface QuAnswer {
+export class QuAnswer {
   /**
    * ID
    */
@@ -34,3 +34,5 @@ export interface QuAnswer {
    */
   tag?: string;
 }
+
+export default QuAnswer;

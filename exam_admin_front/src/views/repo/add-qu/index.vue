@@ -4,6 +4,9 @@
     <a-row :gutter="20" align="stretch">
       <a-col :span="24">
         <a-card class="general-card" :title="$t('menu.repo.addQu')">
+          <a-alert type="warning" style="margin-bottom: 10px"
+            >注意：切换添加题型会导致当前未完成添加的题目信息丢失</a-alert
+          >
           <a-row justify="space-between">
             <!--tab标签切换-->
             <a-col :span="24">
@@ -11,6 +14,7 @@
                 ref="tabsRef"
                 v-model="activeKey"
                 :animation="true"
+                :destroy-on-hide="true"
                 :default-active-tab="1"
                 type="rounded"
                 @tab-click="tabChange"
@@ -32,6 +36,7 @@
                       >
                         <a-select
                           :style="{ width: '320px' }"
+                          :model-value="quForm.repoId"
                           placeholder="请选择题库"
                           @change="handleSelectChange"
                         >
@@ -138,7 +143,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >提交
                           </a-button>
                           <a-button type="primary" @click="addOption"
@@ -166,6 +174,7 @@
                       >
                         <a-select
                           :style="{ width: '320px' }"
+                          :model-value="quForm.repoId"
                           placeholder="请选择题库"
                           @change="handleSelectChange"
                         >
@@ -270,7 +279,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >提交
                           </a-button>
                           <a-button type="primary" @click="addOption"
@@ -297,6 +309,7 @@
                       >
                         <a-select
                           :style="{ width: '320px' }"
+                          :model-value="quForm.repoId"
                           placeholder="请选择题库"
                           @change="handleSelectChange"
                         >
@@ -404,7 +417,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >提交
                           </a-button>
                         </a-space>
@@ -428,6 +444,7 @@
                       >
                         <a-select
                           :style="{ width: '320px' }"
+                          :model-value="quForm.repoId"
                           placeholder="请选择题库"
                           @change="handleSelectChange"
                         >
@@ -514,7 +531,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >提交
                           </a-button>
                           <a-button type="primary" @click="addOption"
@@ -545,6 +565,7 @@
                       >
                         <a-select
                           :style="{ width: '320px' }"
+                          :model-value="quForm.repoId"
                           placeholder="请选择题库"
                           @change="handleSelectChange"
                         >
@@ -600,7 +621,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >提交
                           </a-button>
                         </a-space>
@@ -616,15 +640,19 @@
     </a-row>
     <!--富文本编辑器-->
     <a-modal
-      v-model:visible="visible"
+      :visible="visible"
       width="800px"
       @ok="handleEditorOk"
       @cancel="handleEditorCancel"
     >
       <MyEditor
         v-if="visible"
+        :ref="editorRef"
+        :content-confirm-change="contentChange"
         :editor-text="currentEditorText"
         @editor-get-html="handleEditorGetText"
+        @add-delete-picture="addDeletePicture"
+        @add-insert-picture="addInsertPicture"
       />
     </a-modal>
   </div>
@@ -634,7 +662,7 @@
   // 导入
   import MyEditor from '@/components/my-editor/index.vue';
   import { onMounted, ref } from 'vue';
-  import { numberToChar } from '@/utils/common';
+  import { getImgUrl, numberToChar } from '@/utils/common';
   import { Message, Modal } from '@arco-design/web-vue';
 
   import { getRepoList } from '@/api/repo';
@@ -643,9 +671,13 @@
   import { AddQuAndAnswerDTO } from '@/types/model/dto/AddQuAndAnswerDTO';
   import { useRouter } from 'vue-router';
   import { addQuAndQuAnswer } from '@/api/qu';
-  import { RepoQuery } from '@/types/model/query/RepoQuery';
+  import RepoQuery from '@/types/model/query/RepoQuery';
+  import { deleteBatchImage } from '@/api/ossUpload';
+  import useLoading from '@/hooks/loading';
 
+  const editorRef = ref();
   const activeKey = ref<number>();
+  const { loading, setLoading } = useLoading();
 
   const router = useRouter();
   // 答案对象
@@ -656,6 +688,22 @@
     isRight: 0,
     image: '',
     tag: '',
+  };
+
+  // 当前编辑器中的内容是否改变的标志
+  const contentChange = ref<boolean>(false);
+
+  // 删除图片的列表
+  const deletePictureList = ref<string[]>([]);
+
+  // 添加图片的列表
+  const insertPictureList = ref<string[]>([]);
+
+  // 清除添加列表、删除列表、改变标志
+  const clearFlag = () => {
+    contentChange.value = false;
+    deletePictureList.value = [];
+    insertPictureList.value = [];
   };
 
   /**
@@ -673,13 +721,25 @@
   const repoList = ref<Repo[]>([]);
 
   onMounted(async () => {
+    // 监听页面刷新
+    window.addEventListener('beforeunload', (e) => {
+      e = e || window.event;
+      if (e) {
+        e.returnValue = '关闭提示';
+      }
+      return '关闭提示';
+    });
+
+    // todo 刷新之后必须得发送删除一个删除请求
+
     // 获取题库列表
     await getRepoList({} as RepoQuery).then((res: any) => {
       repoList.value = res.data.list;
     });
-  });
 
-  const editorRef = ref({});
+    deletePictureList.value = [];
+    insertPictureList.value = [];
+  });
 
   const visible = ref<boolean>(false);
   // 保存当前选择的输入框
@@ -691,7 +751,7 @@
 
   const quForm = ref<AddQuAndAnswerDTO>({
     quType: 1,
-    quAnswerList: [generateDefaultAnswer(), generateDefaultAnswer()],
+    quAnswerList: [new QuAnswer(), new QuAnswer()],
   });
 
   /**
@@ -713,11 +773,14 @@
     },
   ];
 
-  /**
-   * 切换tab的时候，切换题型，清空原form对象中的数据
-   * @param key
-   */
-  const tabChange = (key: number) => {
+  // 切换tab的时候，切换题型，清空原form对象中的数据
+  const tabChange = async (key: number) => {
+    // 切换的时候得清空OSS相关的状态记录
+    if (insertPictureList.value.length > 0) {
+      await deleteBatchImage(insertPictureList.value);
+    }
+    clearFlag();
+
     quForm.value = {
       quType: Number(key),
       quAnswerList: [generateDefaultAnswer(), generateDefaultAnswer()],
@@ -795,6 +858,8 @@
 
   // 根据不同输入框选择对应的处理情况
   const handleEditorOk = () => {
+    contentChange.value = true;
+
     if (currentSelect.value === 'content') {
       quForm.value.content = currentEditorText.value;
     } else if (currentSelect.value === 'analysis') {
@@ -803,12 +868,17 @@
       quForm.value.quAnswerList[currentSelect.value].content =
         currentEditorText.value;
     }
-    visible.value = false;
+    Promise.resolve().then(() => {
+      visible.value = false;
+    });
     currentEditorText.value = '';
   };
 
   const handleEditorCancel = () => {
-    visible.value = false;
+    contentChange.value = false;
+    Promise.resolve().then(() => {
+      visible.value = false;
+    });
     currentEditorText.value = '';
   };
 
@@ -821,6 +891,22 @@
     quForm.value.repoText = resultRepo?.title;
   };
 
+  // 继续添加题目对话框
+  const continueAddQu = (values: any) => {
+    // 继续添加
+    quForm.value = {
+      repoId: '',
+      repoText: '',
+      quType: values.quType, // 保留当前提醒防止丢失
+      quAnswerList: [new QuAnswer(), new QuAnswer()],
+    } as AddQuAndAnswerDTO;
+    // 判断题提前赋值
+    if (Number(values.quType) === 3 && quForm.value.quAnswerList) {
+      quForm.value.quAnswerList[0].content = '正确';
+      quForm.value.quAnswerList[1].content = '错误';
+    }
+  };
+
   /**
    * 添加提交
    * @param values
@@ -828,42 +914,37 @@
    */
   const handleSubmit = async ({ values, errors }: any) => {
     if (!errors) {
-      await addQuAndQuAnswer(values).then((res: any) => {
-        if (res.data === true) {
-          Message.success({
-            content: '添加成功',
-          });
-          Modal.info({
-            content: '返回列表或者继续添加',
-            hideCancel: false,
-            closable: true,
-            okText: '继续添加',
-            cancelText: '返回列表',
-            okButtonProps: { type: 'primary' },
-            cancelButtonProps: { type: 'primary' },
-            onOk: () => {
-              // 继续添加
-              quForm.value = {
-                quType: values.quType, // 保留当前提醒防止丢失
-                quAnswerList: [
-                  generateDefaultAnswer(),
-                  generateDefaultAnswer(),
-                ],
-              } as AddQuAndAnswerDTO;
-              // 判断题提前赋值
-              if (Number(values.quType) === 3 && quForm.value.quAnswerList) {
-                quForm.value.quAnswerList[0].content = '正确';
-                quForm.value.quAnswerList[1].content = '错误';
-              }
-            },
-            onCancel: () => {
-              // 返回列表
-              router.push({
-                path: '/repo/qu-manager',
+      setLoading(true);
+      // 先修改图片相关，再修改题目信息
+      await deleteBatchImage(deletePictureList.value).then(async (r: any) => {
+        if (r.data === true) {
+          await addQuAndQuAnswer(values).then((res: any) => {
+            if (res.data === true) {
+              Message.success({
+                content: '添加成功',
               });
-            },
+              Modal.info({
+                content: '返回列表或者继续添加',
+                hideCancel: false,
+                closable: true,
+                okText: '继续添加',
+                cancelText: '返回列表',
+                okButtonProps: { type: 'primary' },
+                cancelButtonProps: { type: 'primary' },
+                onOk: () => {
+                  continueAddQu(values);
+                },
+                onCancel: () => {
+                  // 返回列表
+                  router.push({
+                    path: '/repo/qu-manager',
+                  });
+                },
+              });
+            }
           });
         }
+        setLoading(false);
       });
     } else {
       console.log('校验未通过');
@@ -878,6 +959,7 @@
       quForm.value.quAnswerList.push(generateDefaultAnswer());
     }
   };
+
   /**
    * 删除选项按钮
    */
@@ -899,7 +981,21 @@
       });
       return;
     }
+    // 获取删除选项中的图片链接（如果有）
+    deletePictureList.value = deletePictureList.value.concat(
+      getImgUrl(quForm.value.quAnswerList?.[index].content as string)
+    );
     quForm.value.quAnswerList?.splice(index, 1);
+  };
+
+  // 添加删除的图片
+  const addDeletePicture = (deleteList: string[]) => {
+    deletePictureList.value = deletePictureList.value.concat(deleteList);
+  };
+
+  // 添加插入的图片
+  const addInsertPicture = (insertList: string[]) => {
+    insertPictureList.value = insertPictureList.value.concat(insertList);
   };
 </script>
 

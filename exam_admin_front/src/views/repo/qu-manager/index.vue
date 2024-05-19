@@ -161,7 +161,7 @@
             <a-button
               type="primary"
               status="danger"
-              @click="handleDelete(record.id)"
+              @click="handleDelete(record)"
             >
               {{ $t('quManager.columns.delete') }}
             </a-button>
@@ -189,7 +189,8 @@
   import RepoQuery from '@/types/model/query/RepoQuery';
   import usePagination from '@/hooks/pagination';
   import SimplePage from '@/types/model/po/SimplePage';
-  import { getQuestionTypeName } from '../../../utils/common';
+  import { deleteBatchImage } from '@/api/ossUpload';
+  import { getImgUrl, getQuestionTypeName } from '../../../utils/common';
 
   const { loading, setLoading } = useLoading(true);
   const { pagination, setPagination } = usePagination();
@@ -318,13 +319,18 @@
   };
 
   // 删除
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (record: any) => {
     Modal.warning({
       title: '警告',
       content: '确认删除该题目？',
       hideCancel: false,
       onOk: async () => {
-        await deleteQuById(id).then(async (res: any) => {
+        // 删除关联的图片资源（如果有）
+        const deleteImgList = getImgUrl(record.content);
+        if (deleteImgList.length > 0) {
+          await deleteBatchImage(deleteImgList);
+        }
+        await deleteQuById(record.id).then(async (res: any) => {
           if (res.data === true) {
             Message.success({
               content: '删除成功',
@@ -334,7 +340,7 @@
               content: '删除失败',
             });
           }
-          await reloadQuList(pagination.value);
+          await reloadQuList(quSearch.value);
         });
       },
     });

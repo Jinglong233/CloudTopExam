@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getExamList } from '@/api/exam';
 import { useUserStore } from '@/store';
 import { ExamVO } from '@/types/model/vo/ExamVO';
-import { ExamQuery } from '@/types/model/query/ExamQuery';
+import ExamQuery from '@/types/model/query/ExamQuery';
 
 export function queryMyCreateExamList(examQuery: ExamQuery) {
   return axios.post<ExamVO[]>('/api/exam/loadDataList', examQuery);

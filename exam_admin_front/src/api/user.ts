@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { UserState } from '@/store/modules/user/types';
-import { UserQuery } from '@/types/model/query/UserQuery';
+import UserQuery from '@/types/model/query/UserQuery';
 import { User } from '@/types/model/po/User';
 import { UpdateUserDTO } from '@/types/model/dto/UpdateUserDTO';
 import { UpdateUserPasswordDTO } from '@/types/model/dto/UpdateUserPasswordDTO';

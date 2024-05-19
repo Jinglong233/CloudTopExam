@@ -125,3 +125,18 @@ export function getDeptText(deptCode: string, data: any) {
   });
   return result;
 }
+
+/**
+ * 从给定内容中提取img标签中图片的url
+ * @param htmlString
+ */
+export function getImgUrl(htmlString: any) {
+  const regex = /<img[^>]+src="([^">]+)"/g;
+  const matches: string[] = [];
+  let match = regex.exec(htmlString);
+  while (match !== null) {
+    matches.push(match[1]); // 将匹配到的 src 属性值添加到数组中
+    match = regex.exec(htmlString); // 在循环体内重新赋值
+  }
+  return matches;
+}

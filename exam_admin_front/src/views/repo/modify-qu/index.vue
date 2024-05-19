@@ -6,11 +6,7 @@
         <a-card class="general-card" style="padding-top: 50px">
           <a-row justify="space-between">
             <a-col :span="24">
-              <a-tabs
-                :default-active-tab="1"
-                type="rounded"
-                @tab-click="tabChange"
-              >
+              <a-tabs :default-active-tab="1" type="rounded">
                 <a-tab-pane
                   v-if="form.quType === 1"
                   key="1"
@@ -18,7 +14,6 @@
                 >
                   <a-card class="general-card">
                     <a-form
-                      ref="formRef"
                       :model="form"
                       :style="{ width: '600px' }"
                       @submit="handleSubmit"
@@ -137,7 +132,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >修改</a-button
                           >
                           <a-button type="primary" @click="addOption"
@@ -155,7 +153,6 @@
                 >
                   <a-card class="general-card">
                     <a-form
-                      ref="formRef"
                       :model="form"
                       :style="{ width: '600px' }"
                       @submit="handleSubmit"
@@ -275,7 +272,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >修改</a-button
                           >
                           <a-button type="primary" @click="addOption"
@@ -293,7 +293,6 @@
                 >
                   <a-card class="general-card">
                     <a-form
-                      ref="formRef"
                       :model="form"
                       :style="{ width: '600px' }"
                       @submit="handleSubmit"
@@ -413,7 +412,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >修改</a-button
                           >
                         </a-space>
@@ -428,7 +430,6 @@
                 >
                   <a-card class="general-card">
                     <a-form
-                      ref="formRef"
                       :model="form"
                       :style="{ width: '600px' }"
                       @submit="handleSubmit"
@@ -528,7 +529,10 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >修改</a-button
                           >
                           <a-button type="primary" @click="addOption"
@@ -546,7 +550,6 @@
                 >
                   <a-card class="general-card">
                     <a-form
-                      ref="formRef"
                       :model="form"
                       :style="{ width: '600px' }"
                       @submit="handleSubmit"
@@ -615,11 +618,11 @@
                       <!--按钮-->
                       <a-form-item>
                         <a-space>
-                          <a-button type="primary" html-type="submit"
+                          <a-button
+                            type="primary"
+                            html-type="submit"
+                            :loading="loading"
                             >修改</a-button
-                          >
-                          <a-button type="primary" @click="addOption"
-                            >添加选项</a-button
                           >
                         </a-space>
                       </a-form-item>
@@ -634,7 +637,7 @@
     </a-row>
     <!--富文本编辑器-->
     <a-modal
-      v-model:visible="visible"
+      :visible="visible"
       width="800px"
       @ok="handleEditorOk"
       @cancel="handleEditorCancel"
@@ -642,8 +645,11 @@
       <MyEditor
         v-if="visible"
         :ref="editorRef"
+        :content-confirm-change="contentChange"
         :editor-text="currentEditorText"
         @editor-get-html="handleEditorGetText"
+        @add-delete-picture="addDeletePicture"
+        @add-insert-picture="addInsertPicture"
       />
     </a-modal>
   </div>
@@ -652,8 +658,8 @@
 <script lang="ts" setup>
   // 导入
   import MyEditor from '@/components/my-editor/index.vue';
-  import { onMounted, ref, toRaw } from 'vue';
-  import { numberToChar } from '@/utils/common';
+  import { onMounted, ref } from 'vue';
+  import { getImgUrl, numberToChar } from '@/utils/common';
   import { Message } from '@arco-design/web-vue';
 
   import { getRepoList } from '@/api/repo';
@@ -663,11 +669,14 @@
   import { UpdateQuAndAnswerDTO } from '@/types/model/dto/UpdateQuAndAnswerDTO';
   import { Repo } from '@/types/model/po/Repo';
   import { useUserStore } from '@/store';
-  import { RepoQuery } from '@/types/model/query/RepoQuery';
+  import RepoQuery from '@/types/model/query/RepoQuery';
+  import { deleteBatchImage } from '@/api/ossUpload';
+  import useLoading from '@/hooks/loading';
 
   const userStore = useUserStore();
   const route = useRoute();
   const router = useRouter();
+  const { loading, setLoading } = useLoading();
   const defaultQuAnswer: QuAnswer = {
     analysis: '', // 默认为空字符串
     content: '', // 默认为空字符串
@@ -689,7 +698,7 @@
    */
   const repoList = ref<Repo[]>([]);
 
-  const editorRef = ref({});
+  const editorRef = ref();
 
   const visible = ref<boolean>(false);
   // 保存当前选择的输入框
@@ -697,12 +706,31 @@
   // 临时保存编辑器的值
   const currentEditorText = ref<any>('');
 
-  const formRef = ref();
+  // 当前编辑器中的内容是否改变的标志
+  const contentChange = ref<boolean>(false);
+
   const form = ref<UpdateQuAndAnswerDTO>({
     quAnswerList: [],
   });
 
+  // 删除图片的列表
+  const deletePictureList = ref<string[]>([]);
+
+  // 添加图片的列表
+  const insertPictureList = ref<string[]>([]);
+
   onMounted(async () => {
+    // 监听页面刷新
+    window.addEventListener('beforeunload', (e) => {
+      e = e || window.event;
+      if (e) {
+        e.returnValue = '关闭提示';
+      }
+      return '关闭提示';
+    });
+
+    // todo 刷新之后必须得发送删除一个删除请求
+
     // 获取题库列表
     await getRepoList({} as RepoQuery).then((res: any) => {
       repoList.value = res.data.list;
@@ -716,8 +744,19 @@
     await getQuById(quId as string).then((res: any) => {
       form.value = res.data;
     });
+    deletePictureList.value = [];
+    insertPictureList.value = [];
   });
 
+  // 添加删除的图片
+  const addDeletePicture = (deleteList: string[]) => {
+    deletePictureList.value = deletePictureList.value.concat(deleteList);
+  };
+
+  // 添加插入的图片
+  const addInsertPicture = (insertList: string[]) => {
+    insertPictureList.value = insertPictureList.value.concat(insertList);
+  };
   /**
    * 单选题答案校验规则
    */
@@ -736,23 +775,6 @@
       },
     },
   ];
-
-  /**
-   * 切换tab的时候，切换题型，清空原form对象中的数据
-   * @param key
-   */
-  const tabChange = (key: number) => {
-    form.value = {
-      quType: key,
-      quAnswerList: [generateDefaultAnswer(), generateDefaultAnswer()],
-    };
-    // 判断题提前赋值
-    if (Number(key) === 3 && form.value.quAnswerList) {
-      form.value.quAnswerList[0].content = '正确';
-      form.value.quAnswerList[1].content = '错误';
-      console.log('init:', form.value.quAnswerList);
-    }
-  };
 
   /**
    * 多选题答案校验规则
@@ -778,6 +800,8 @@
    * @param index 选项下标
    */
   const handleEditor = (index: any) => {
+    // 重置内容更改标志
+    contentChange.value = false;
     visible.value = true;
     currentSelect.value = index;
     if (index === 'content') {
@@ -821,20 +845,30 @@
   };
 
   const handleEditorOk = () => {
+    contentChange.value = true;
     if (currentSelect.value === 'content') {
-      console.log('题干');
+      // 题干
       form.value.content = currentEditorText.value;
     } else if (currentSelect.value === 'analysis') {
-      console.log('解析');
+      // 解析
       form.value.analysis = currentEditorText.value;
     } else if (form.value.quAnswerList) {
-      console.log('下标');
+      // 下标
       form.value.quAnswerList[currentSelect.value].content =
         currentEditorText.value;
     }
-    visible.value = false;
+    Promise.resolve().then(() => {
+      visible.value = false;
+    });
     currentEditorText.value = '';
-    console.log('文本内容：', form.value);
+  };
+
+  const handleEditorCancel = () => {
+    contentChange.value = false;
+    Promise.resolve().then(() => {
+      visible.value = false;
+    });
+    currentEditorText.value = '';
   };
 
   // 下拉框变化，给repoId和repoText赋值
@@ -846,39 +880,41 @@
     form.value.repoText = resultRepo?.title;
   };
 
-  const handleEditorCancel = () => {
-    visible.value = false;
-    currentEditorText.value = '';
-  };
-
   const handleSubmit = async ({ values, errors }: any) => {
     if (!errors) {
-      values.updateBy = userStore.id;
-      await updateQuById(values).then((res: any) => {
-        if (res.data === true) {
-          Message.success({
-            content: '修改成功',
-          });
-          router.back();
-        } else {
-          Message.error({
-            content: '修改失败',
+      setLoading(true);
+      // 先修改图片相关，再修改题目信息
+      await deleteBatchImage(deletePictureList.value).then(async (r: any) => {
+        if (r.data === true) {
+          // 相关图片处理完毕之后才进行题目信息的修改
+          values.updateBy = userStore.id;
+          await updateQuById(values).then((res: any) => {
+            if (res.data === true) {
+              Message.success({
+                content: '修改成功',
+              });
+              router.back();
+            } else {
+              Message.error({
+                content: '修改失败',
+              });
+            }
           });
         }
+        setLoading(true);
       });
     } else {
       console.log('校验未通过');
     }
   };
 
-  /**
-   * 添加选项按钮
-   */
+  // 添加选项按钮
   const addOption = () => {
     if (form.value.quAnswerList) {
       form.value.quAnswerList.push(generateDefaultAnswer());
     }
   };
+
   /**
    * 删除选项按钮
    */
@@ -900,6 +936,10 @@
       });
       return;
     }
+    // 获取删除选项中的图片链接（如果有）
+    deletePictureList.value = deletePictureList.value.concat(
+      getImgUrl(form.value.quAnswerList?.[index].content as string)
+    );
     form.value.quAnswerList?.splice(index, 1);
   };
 </script>
