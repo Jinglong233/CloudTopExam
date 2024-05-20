@@ -9,7 +9,7 @@ const userManager: AppRouteRecordRaw = {
     locale: 'menu.userManager',
     requiresAuth: true,
     icon: 'icon-user-group',
-    order: 2,
+    order: 5,
   },
   children: [
     {
@@ -19,7 +19,7 @@ const userManager: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.userManager.userList',
         requiresAuth: true,
-        roles: ['*'],
+        roles: ['admin'],
       },
     },
     {

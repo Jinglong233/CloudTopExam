@@ -4,7 +4,7 @@
     <a-row :gutter="10">
       <!--左侧部门筛选-->
       <a-col :span="4">
-        <a-card style="height: 650px">
+        <a-card style="height: 700px">
           <a-space align="center">
             <a-input-search
               v-model="searchTree.deptNameFuzzy"
@@ -36,7 +36,7 @@
       </a-col>
       <a-col :span="20">
         <a-card
-          style="height: 650px"
+          style="height: 700px"
           class="general-card"
           :title="$t('menu.userManager.userList')"
         >
@@ -72,7 +72,7 @@
               </a-select>
             </a-col>
           </a-row>
-          <a-row :gutter="5">
+          <a-row :gutter="5" style="margin: 16px 0">
             <!--状态-->
             <a-col :span="8">
               <a-select
@@ -101,7 +101,7 @@
               </a-button>
             </a-col>
           </a-row>
-          <a-row style="margin-bottom: 16px; margin-top: 16px">
+          <a-row style="margin-bottom: 16px">
             <a-col :span="12">
               <a-space>
                 <!--添加用户-->
@@ -165,9 +165,25 @@
               </span>
             </template>
             <template #state="{ record }">
-              <span v-if="record.state === 1" class="circle" />
-              <span v-else class="circle pass" />
-              {{ $t(`userList.columns.status.${record.state}`) }}
+              <a-switch
+                type="round"
+                :default-checked="Boolean(record.state)"
+                :checked-value="false"
+                :unchecked-value="true"
+                :loading="switchLoading"
+                checked-color="#F53F3F"
+                unchecked-color="#14C9C9"
+                @change="stateChange(record)"
+              >
+                <template #checked> 禁用 </template>
+                <template #unchecked> 正常 </template>
+                <template #checked-icon>
+                  <icon-close />
+                </template>
+                <template #unchecked-icon>
+                  <icon-check />
+                </template>
+              </a-switch>
             </template>
             <template #option="{ record }">
               <a-space>
@@ -471,10 +487,11 @@
   import usePermission from '@/hooks/permission';
   import { useUserStore } from '@/store';
   import usePagination from '@/hooks/pagination';
-  import QuQuery from '@/types/model/query/QuQuery';
   import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
+  const { loading: switchLoading, setLoading: setSwitchLoading } = useLoading();
+
   const { pagination, setPagination } = usePagination();
 
   const { t } = useI18n();
@@ -537,6 +554,27 @@
     });
     await reloadUserList(userSearch.value);
   });
+
+  // 禁用状态改变
+  const stateChange = async (record: any) => {
+    setSwitchLoading(true);
+    record.state = Number(!record.state);
+    record.updateBy = userStore.id;
+    // 更新用户信息
+    await updateUserById({
+      user: record,
+      id: record.id,
+    }).then(async (res: any) => {
+      if (res.data === true) {
+        Message.success({
+          content: '更新成功',
+          duration: 2000,
+        });
+        await reloadUserList({ ...pagination.value, ...userSearch.value });
+      }
+      setSwitchLoading(false);
+    });
+  };
 
   // 清空查询表单
   const clearUserSearch = () => {

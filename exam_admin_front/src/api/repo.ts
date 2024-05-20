@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Repo } from '@/types/model/po/Repo';
-import { RepoQuery } from '@/types/model/query/RepoQuery';
+import RepoQuery from '@/types/model/query/RepoQuery';
 import { AddRepoDTO } from '@/types/model/dto/AddRepoDTO';
 import { UpdateRepoDTO } from '@/types/model/dto/UpdateRepoDTO';
 import { ClassfiyByQuTypeVO } from '@/types/model/vo/ClassfiyByQuTypeVO';

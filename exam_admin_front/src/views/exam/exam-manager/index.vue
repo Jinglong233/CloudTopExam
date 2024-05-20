@@ -31,7 +31,7 @@
             </a-select>
           </a-col>
           <!--只查看我创建的-->
-          <a-col :span="6">
+          <a-col v-permission="['admin']" :span="6">
             <a-checkbox @change="onlyMyCreate">只查看我创建的</a-checkbox>
           </a-col>
         </a-row>
@@ -307,6 +307,9 @@
 
   // 获取考试列表
   const reloadExamList = async (examQuery: ExamQuery) => {
+    if (userStore.role === 'teacher') {
+      examQuery.createBy = userStore.id;
+    }
     setLoading(true);
     await getExamList(examQuery).then((res: any) => {
       ExamList.value = res.data.list;

@@ -9,7 +9,7 @@ const EXAM: AppRouteRecordRaw = {
     locale: 'menu.exam',
     requiresAuth: true,
     icon: 'icon-drive-file',
-    order: 2,
+    order: 3,
   },
   children: [
     {

@@ -143,6 +143,10 @@
   const examSearch = ref<ExamQuery>({} as ExamQuery);
 
   const reloadCorrectExam = async (examQuery: ExamQuery) => {
+    // todo 这里后续添加了批阅关联表之后，应该使用review_user
+    if (userStore.role === 'teacher') {
+      examQuery.createBy = userStore.id;
+    }
     await getCorrectExam({ ...examQuery, createBy: userStore.id }).then(
       (res: any) => {
         setLoading(true);
@@ -159,14 +163,6 @@
   };
 
   onMounted(async () => {
-    // todo
-    // if (userStore.role === 'admin') {
-    //   // 1. 如果是管理员可以查看所有阅卷
-    //   await reloadExamList({});
-    // } else if (userStore.role === 'teacher') {
-    //   // 2. 教师只能获取自己创建的考试
-    //   await reloadExamList({ createBy: userStore.id });
-    // }
     await reloadCorrectExam(examSearch.value);
   });
 

@@ -9,7 +9,7 @@ const USER: AppRouteRecordRaw = {
     locale: 'menu.user',
     icon: 'icon-user',
     requiresAuth: true,
-    order: 7,
+    order: 6,
   },
   children: [
     {
@@ -19,7 +19,7 @@ const USER: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.user.info',
         requiresAuth: true,
-        roles: ['*'],
+        roles: ['admin', 'teacher'],
       },
     },
     {
@@ -29,7 +29,7 @@ const USER: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.user.setting',
         requiresAuth: true,
-        roles: ['*'],
+        roles: ['admin', 'teacher'],
       },
     },
   ],

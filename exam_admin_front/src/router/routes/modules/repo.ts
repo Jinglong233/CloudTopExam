@@ -9,7 +9,7 @@ const Repo: AppRouteRecordRaw = {
     locale: 'menu.repo',
     requiresAuth: true,
     icon: 'icon-home',
-    order: 2,
+    order: 4,
   },
   children: [
     {

@@ -9,7 +9,7 @@ const wrongManage: AppRouteRecordRaw = {
     locale: 'menu.wrongManage',
     requiresAuth: true,
     icon: 'icon-subscribed',
-    order: 1,
+    order: 2,
   },
   children: [
     {

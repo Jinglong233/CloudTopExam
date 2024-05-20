@@ -76,8 +76,8 @@
               重置
             </a-button>
           </a-col>
-          <!--只差看自己的-->
-          <a-col :span="6">
+          <!--只查看自己的-->
+          <a-col v-permission="['admin']" :span="6">
             <a-checkbox @change="onlyMyCreate">只查看我创建的</a-checkbox>
           </a-col>
         </a-row>
@@ -128,6 +128,7 @@
               {{ $t('paperManager.columns.options.edit') }}
             </a-button>
             <a-button
+              v-permission="['admin']"
               type="primary"
               status="danger"
               @click="handleDelete(record.id)"

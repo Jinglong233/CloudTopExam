@@ -9,6 +9,7 @@ const LOG: AppRouteRecordRaw = {
     locale: 'menu.log',
     requiresAuth: true,
     icon: 'icon-bookmark',
+    order: 8,
   },
   children: [
     {
