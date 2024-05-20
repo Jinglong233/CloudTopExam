@@ -34,6 +34,18 @@ public class LoginLogController extends ABaseController{
 		return getSuccessResponseVO(loginLogService.findListByPage(query));
 	}
 
+
+	/**
+	 * 批量删除
+	 */
+	@RequestMapping("deleteBatch")
+	@GlobalInterceptor(checkLogin = true,checkParams = true,checkAdmin = true)
+	public ResponseVO deleteLoginLogBatchById(@RequestBody List<Integer> deleteList) {
+		Boolean result = loginLogService.deleteLoginLogBatchById(deleteList);
+		return getSuccessResponseVO(result);
+	}
+
+
 	/**
 	 * 新增
 	 */
@@ -79,8 +91,14 @@ public class LoginLogController extends ABaseController{
 	 * 根据Id删除
 	 */
 	@RequestMapping("deleteLoginLogById")
-	public ResponseVO deleteLoginLogById(Integer id) {
+	public ResponseVO deleteLoginLogById(@RequestBody Integer id) {
 		this.loginLogService.deleteLoginLogById(id);
+		return getSuccessResponseVO(null);
+	}
+
+	@RequestMapping("test")
+	public ResponseVO test() {
+		loginLogService.test(123);
 		return getSuccessResponseVO(null);
 	}
 

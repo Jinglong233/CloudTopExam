@@ -1,15 +1,12 @@
 package com.jl.project.service;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;;
-import org.springframework.format.annotation.DateTimeFormat;
-import com.jl.project.enums.DateTimePatternEnum;
-import com.jl.project.utils.DateUtils;
-import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.po.LoginLog;
 import com.jl.project.entity.query.LoginLogQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 
 import java.util.List;
+
+;
 /**
  * @Description:登录日志表Service
  * @author:jingLong
@@ -62,4 +59,7 @@ public interface LoginLogService {
 	 */
 	Integer deleteLoginLogById(Integer id);
 
+    Boolean deleteLoginLogBatchById(List<Integer> deleteList);
+
+	void test(Integer deleteList);
 }

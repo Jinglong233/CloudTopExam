@@ -54,7 +54,7 @@ public class SubjectController extends ABaseController{
 	 * 获取学科树列表
 	 */
 	@RequestMapping("treeList")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
+	@GlobalInterceptor(checkLogin = true,checkParams = true)
 	public ResponseVO treeList() throws BusinessException {
 		List<SubjectTreeVO> result = subjectService.treeList();
 		return getSuccessResponseVO(result);

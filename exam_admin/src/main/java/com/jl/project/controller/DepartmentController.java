@@ -47,7 +47,7 @@ public class DepartmentController extends ABaseController {
      * @return
      */
     @RequestMapping("/treeList")
-    @GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
+    @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO getTreeList()  throws BusinessException{
         List<DepartmentTreeVO> result = departmentService.getTreeList();
         return getSuccessResponseVO(result);

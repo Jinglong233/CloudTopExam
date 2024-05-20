@@ -224,6 +224,10 @@ public class StudentServiceImpl implements StudentService {
         if (!encryptPassword.equals(resultUser.getPassword())) {
             throw new BusinessException("密码错误");
         }
+        // 判断该用户是否被禁用
+        if(resultUser.getState() == 1){
+            throw new BusinessException("该用户被禁用");
+        }
 
         // 4. 生成token
         Gson gson = new Gson();

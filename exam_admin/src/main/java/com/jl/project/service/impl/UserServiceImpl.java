@@ -1,14 +1,10 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.ObjectMetadata;
 import com.google.gson.Gson;
 import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.*;
@@ -39,7 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -110,6 +105,11 @@ public class UserServiceImpl implements UserService {
         // 3. 判断加密之后字符串是否相等
         if (!encryptPassword.equals(resultUser.getPassword())) {
             throw new BusinessException("密码错误");
+        }
+
+        // 判断该用户是否被禁用
+        if(resultUser.getState() == 1){
+            throw new BusinessException("该用户被禁用");
         }
 
         // 4. 生成token
