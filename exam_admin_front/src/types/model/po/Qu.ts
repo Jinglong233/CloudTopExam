@@ -1,4 +1,4 @@
-export interface Qu {
+class Qu {
   /**
    * ID
    */
@@ -69,3 +69,4 @@ export interface Qu {
    */
   sort?: number;
 }
+export default Qu;

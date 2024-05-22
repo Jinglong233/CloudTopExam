@@ -16,5 +16,4 @@ export default {
   'log.operLog.columns.operAddress': '操作地址',
   'log.operLog.columns.success': '操作状态',
   'log.operLog.columns.operTime': '操作时间',
-  'log.operLog.columns.operations': '操作',
 };

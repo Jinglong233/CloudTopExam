@@ -62,10 +62,27 @@
                 </template>
                 重置
               </a-button>
+              <a-button
+                type="outline"
+                status="danger"
+                :loading="deleteLoading"
+                style="margin: 0 5px"
+                @click="handleDelete"
+              >
+                <template #icon>
+                  <icon-delete />
+                </template>
+                删除
+              </a-button>
             </a-col>
           </a-row>
         </div>
 
+        <!--:row-selection="{
+        type: 'checkbox',
+        showCheckedAll: true,
+        onlyCurrent: false,
+        }"-->
         <a-table
           row-key="id"
           :loading="loading"
@@ -81,6 +98,8 @@
             current: pagination.pageNo,
           }"
           :scroll="{ x: 100, y: 440 }"
+          @select="rowSelect"
+          @select-all="rowSelectAll"
           @page-change="pageChange"
           @page-size-change="pageSizeChange"
         >
@@ -100,25 +119,30 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref, watch } from 'vue';
+  // todo 行选择器未改善
+  import { onMounted, ref, toRaw, watch } from 'vue';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { useI18n } from 'vue-i18n';
   import useLoading from '@/hooks/loading';
   import MsgUserList from '@/views/msg-center/message-record/component/MsgUserList.vue';
   import { LoginLog } from '@/types/model/po/LoginLog';
-  import { getLoginLogList } from '@/api/log';
+  import { deleteBatchLoginLog, getLoginLogList } from '@/api/log';
   import usePagination from '@/hooks/pagination';
   import LoginLogQuery from '@/types/model/query/LoginLogQuery';
-  import PaperQuery from '@/types/model/query/PaperQuery';
   import SimplePage from '@/types/model/po/SimplePage';
+  import { Message } from '@arco-design/web-vue';
 
   const { loading, setLoading } = useLoading(true);
+  const { loading: deleteLoading, setLoading: setDeleteLoading } = useLoading();
   const { pagination, setPagination } = usePagination();
 
   const { t } = useI18n();
 
   // 当前行记录
   const currentMsgId = ref();
+
+  // 删除列表
+  const logDeleteList = ref<number[]>([]);
 
   // 查询表单
   const loginLogSearch = ref<LoginLogQuery>(new LoginLogQuery());
@@ -225,6 +249,40 @@
     loginLogSearch.value = new LoginLogQuery();
     pagination.value = new SimplePage();
     await reloadLoginLog(loginLogSearch.value);
+  };
+
+  // 全选按钮触发
+  const rowSelectAll = (isAll: boolean) => {
+    if (isAll) {
+      if (loginLog.value) {
+        logDeleteList.value = loginLog.value.map((item: any) => item.id);
+      }
+    } else {
+      logDeleteList.value = [];
+    }
+  };
+
+  // 勾选一行触发添加到删除列表
+  const rowSelect = (
+    rowKeys: string | number[],
+    rowKey: string | number,
+    record: any
+  ) => {
+    logDeleteList.value = rowKeys as number[];
+  };
+
+  // 删除
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    await deleteBatchLoginLog(logDeleteList.value).then((res: any) => {
+      if (res.data === true) {
+        Message.success({
+          content: '删除成功',
+          duration: 2000,
+        });
+      }
+    });
+    setDeleteLoading(false);
   };
 
   // 监视页码变化

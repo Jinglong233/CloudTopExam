@@ -447,6 +447,7 @@
         <a-table
           v-if="addTypeVisible === true"
           ref="tableRef"
+          :loading="tableLoading"
           row-key="id"
           style="margin-top: 20px"
           :data="quList"
@@ -455,8 +456,19 @@
             type: 'checkbox',
             showCheckedAll: true,
           }"
+          :pagination="{
+            showTotal: true,
+            showPageSize: true,
+            total: pagination.total,
+            pageSize: pagination.pageSize,
+            current: pagination.pageNo,
+          }"
+          :scroll="{ x: 100, y: 400 }"
           span-all
+          @page-change="pageChange"
+          @page-size-change="pageSizeChange"
           @select="quTableRowSelect"
+          @select-all="quTableRowSelectAll"
         >
           <template #quType="{ record }">
             {{ getQuestionTypeName(Number(record.quType)) }}
@@ -480,22 +492,25 @@
 
   import { AddPaperDTO } from '@/types/model/dto/AddPaperDTO';
   import { QuestionType } from '@/types/model/QuestionType';
-  import { AddGroupListDTO } from '@/types/model/dto/AddGroupListDTO';
+  import AddGroupListDTO from '@/types/model/dto/AddGroupListDTO';
   import { useRoute, useRouter } from 'vue-router';
   import { RandomSelectQuDTO } from '@/types/model/dto/RandomSelectQuDTO';
   import { getExluceQuDetailList, randomSelectQu } from '@/api/qu';
-  import { Qu } from '@/types/model/po/Qu';
+  import Qu from '@/types/model/po/Qu';
   import { Message } from '@arco-design/web-vue';
   import { addPaper } from '@/api/paper';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { useI18n } from 'vue-i18n';
 
-  import { QuExcludeQuery } from '@/types/model/query/QuExcludeQuery';
-  import { QuAndAnswerVO } from '@/types/model/vo/QuAndAnswerVO';
+  import QuExcludeQuery from '@/types/model/query/QuExcludeQuery';
+  import QuAndAnswerVO from '@/types/model/vo/QuAndAnswerVO';
   import { SubjectTreeVO } from '@/types/model/vo/SubjectTreeVO';
   import { getSubjectTree } from '@/api/subject';
   import { DepartmentTreeVO } from '@/types/model/vo/DepartmentTreeVO';
   import { getDeptTree } from '@/api/department';
+  import RepoQuery from '@/types/model/query/RepoQuery';
+  import usePagination from '@/hooks/pagination';
+  import useLoading from '@/hooks/loading';
   import { getQuestionTypeName } from '../../../utils/common';
 
   const { t } = useI18n();
@@ -503,11 +518,17 @@
   const route = useRoute();
   const router = useRouter();
 
+  // 分页参数
+  const { pagination, setPagination } = usePagination();
+
+  // 题目列表加载
+  const { loading: tableLoading, setLoading: tableSetLoading } = useLoading();
+
   // 题库列表
   const repoList = ref<Repo[]>();
 
   // 题目列表
-  const quList = ref<Qu[]>();
+  const quList = ref<Qu[]>([]);
   // 学科树
   const subjectTree = ref<SubjectTreeVO[]>([]);
   // 部门树
@@ -524,14 +545,7 @@
     groupLists: [],
   });
   // 添加大题的表单
-  const groupList = ref<AddGroupListDTO>({
-    totalScore: 0,
-    perScore: 0,
-    itemRand: 0,
-    quRand: 0,
-    quCount: 0,
-    quList: [],
-  });
+  const groupList = ref<AddGroupListDTO>(new AddGroupListDTO());
 
   // 生成大题对象
   const generateGroupList = () => {
@@ -550,9 +564,31 @@
   });
 
   // 指定选题查询表单
-  const appointSelectQuForm = ref<QuExcludeQuery>({
-    excludes: [],
-  } as QuExcludeQuery);
+  const appointSelectQuForm = ref<QuExcludeQuery>(new QuExcludeQuery());
+
+  // 查询题目排除列表
+  const reloadExcludeQuDetailList = async (query: QuExcludeQuery) => {
+    tableSetLoading(true);
+    await getExluceQuDetailList(query).then((res: any) => {
+      quList.value = res.data.list;
+      setPagination({
+        total: res.data.totalCount,
+        pageSize: res.data.pageSize,
+        pageNo: res.data.pageNo,
+        pageTotal: res.data.pageTotal,
+      });
+    });
+    tableSetLoading(false);
+  };
+
+  // 页码变化
+  const pageChange = (pageNo: number) => {
+    appointSelectQuForm.value.pageNo = pageNo;
+  };
+  // 每页数据量变化
+  const pageSizeChange = (pageSize: number) => {
+    appointSelectQuForm.value.pageSize = pageSize;
+  };
 
   // 问题列表列
   const quColumns = ref<TableColumnData[]>([
@@ -560,26 +596,34 @@
       title: t('quManager.columns.quType'),
       dataIndex: 'quType',
       slotName: 'quType',
+      width: 100,
+      tooltip: true,
     },
     {
       title: t('quManager.columns.content'),
       dataIndex: 'content',
       slotName: 'content',
+      width: 100,
+      tooltip: true,
     },
     {
       title: t('quManager.columns.repoText'),
       dataIndex: 'repoText',
       slotName: 'repoText',
+      width: 100,
+      tooltip: true,
     },
     {
       title: t('quManager.columns.level'),
       dataIndex: 'level',
       slotName: 'level',
+      width: 100,
+      tooltip: true,
     },
   ]);
 
   onMounted(async () => {
-    await getRepoList({}).then((res: any) => {
+    await getRepoList(new RepoQuery()).then((res: any) => {
       repoList.value = res.data.list;
     });
     addPaperForm.value.joinType = Number(route.params.joinType);
@@ -625,11 +669,7 @@
       await handleSelectChange();
     } else if (addPaperForm.value.joinType === 1) {
       appointSelectQuForm.value.quType = type;
-      await getExluceQuDetailList(appointSelectQuForm.value).then(
-        (res: any) => {
-          quList.value = res.data;
-        }
-      );
+      await reloadExcludeQuDetailList(appointSelectQuForm.value);
     }
     // 修改追加标志
     isAdditional.value = true;
@@ -650,11 +690,7 @@
     } else if (addPaperForm.value.joinType === 1) {
       // 对于指定选题，初始化应该加载全部题库的题目
       appointSelectQuForm.value.quType = type;
-      await getExluceQuDetailList(appointSelectQuForm.value).then(
-        (res: any) => {
-          quList.value = res.data;
-        }
-      );
+      await reloadExcludeQuDetailList(appointSelectQuForm.value);
     }
   };
 
@@ -736,13 +772,29 @@
 
   // 指定选题题目搜索表单
   const appointFormChange = async () => {
-    await getExluceQuDetailList(appointSelectQuForm.value).then((res: any) => {
-      quList.value = res.data;
-    });
+    await reloadExcludeQuDetailList(appointSelectQuForm.value);
   };
 
   // 临时存储大题变量（配合指定选题使用）
-  let tempGroup: AddGroupListDTO | undefined;
+  let tempGroup = new AddGroupListDTO();
+
+  // 题目全选
+  const quTableRowSelectAll = (isAll: boolean) => {
+    if (isAll === true) {
+      if (!tempGroup) {
+        tempGroup = generateGroupList();
+      }
+      tempGroup.quCount = quList.value.length;
+      tempGroup.quList = [...quList.value, ...tempGroup.quList];
+      tempGroup.quType = appointSelectQuForm.value.quType;
+      tempGroup.title = getQuestionTypeName(
+        Number(appointSelectQuForm.value.quType)
+      );
+    } else {
+      // 重置临时大题
+      tempGroup = new AddGroupListDTO();
+    }
+  };
 
   // 问题列表行被选择时触发
   const quTableRowSelect = (
@@ -813,24 +865,19 @@
       });
     } else if (addPaperForm.value.joinType === 1) {
       // 重新加载题目列表（因为table使用v-if销毁了）
-      await getExluceQuDetailList(appointSelectQuForm.value).then(
-        (res: any) => {
-          quList.value = res.data;
-        }
-      );
+      await reloadExcludeQuDetailList(appointSelectQuForm.value);
+
       if (isAdditional.value) {
         // 追加
         addPaperForm.value.groupLists?.forEach(
           (group: AddGroupListDTO, index: number) => {
             if (index === additionalIndex.value) {
               group.quList = group.quList?.concat(
-                // todo 待处理
                 tempGroup?.quList as unknown as QuAndAnswerVO
               );
             }
           }
         );
-
         // 追加标志置为false
         isAdditional.value = false;
       } else {
@@ -839,14 +886,7 @@
         addPaperForm.value.groupLists?.push(tempGroup as AddGroupListDTO);
       }
       // 重置临时大题
-      tempGroup = {
-        totalScore: 0,
-        perScore: 0,
-        itemRand: 0,
-        quRand: 0,
-        quCount: 0,
-        quList: [],
-      };
+      tempGroup = new AddGroupListDTO();
     }
     console.log('addPaperForm', toRaw(addPaperForm.value));
     addTypeVisible.value = false;
@@ -855,6 +895,10 @@
   // 取消添加大题
   const cancelAdd = () => {
     addTypeVisible.value = false;
+    // 重置
+    if (addPaperForm.value.joinType === 1) {
+      tempGroup = new AddGroupListDTO();
+    }
   };
 
   // 保存试卷
@@ -905,6 +949,35 @@
     }
   };
 
+  // 阻断标志
+  let stopWatch = false;
+  // 监听模态框的开关
+  watch(
+    () => addTypeVisible.value,
+    (newValue, oldValue) => {
+      // 当模态框关闭的时候，页码都重置
+      if (newValue === false) {
+        stopWatch = true;
+        appointSelectQuForm.value.pageNo = 1;
+        appointSelectQuForm.value.pageSize = 10;
+      }
+      stopWatch = false;
+    }
+  );
+
+  // 监视页码变化
+  watch(
+    () => [
+      appointSelectQuForm.value.pageNo,
+      appointSelectQuForm.value.pageSize,
+    ],
+    async (newValue, oldValue) => {
+      if (!stopWatch) {
+        await reloadExcludeQuDetailList(appointSelectQuForm.value);
+      }
+    }
+  );
+
   // 监听每道题
   watch(
     addPaperForm.value,
@@ -934,6 +1007,7 @@
     },
     {
       deep: true,
+      immediate: true,
     }
   );
 </script>

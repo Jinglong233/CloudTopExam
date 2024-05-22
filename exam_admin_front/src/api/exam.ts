@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ExamQuery } from '@/types/model/query/ExamQuery';
+import ExamQuery from '@/types/model/query/ExamQuery';
 import { AddExamDTO } from '@/types/model/dto/AddExamDTO';
 // eslint-disable-next-line import/namespace
 import { ExamVO } from '@/types/model/vo/ExamVO';
@@ -7,7 +7,7 @@ import { ExamVO } from '@/types/model/vo/ExamVO';
 import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
 import { CorrectExamVO } from '@/types/model/vo/CorrectExamVO';
 import { CorrectUserExamUserVO } from '@/types/model/vo/CorrectUserExamUserVO';
-import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+import ExamRecordQuery from '@/types/model/query/ExamRecordQuery';
 import { WrongQuVO } from '@/types/model/vo/WrongQuVO';
 import { ExamRecord } from '@/types/model/po/ExamRecord';
 

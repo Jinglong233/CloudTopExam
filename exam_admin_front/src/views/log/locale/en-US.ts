@@ -16,5 +16,4 @@ export default {
   'log.operLog.columns.operAddress': 'Operation Address',
   'log.operLog.columns.success': 'Success',
   'log.operLog.columns.operTime': 'Operation Time',
-  'log.operLog.columns.operations': 'Operations',
 };

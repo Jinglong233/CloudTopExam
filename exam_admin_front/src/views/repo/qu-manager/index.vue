@@ -122,9 +122,9 @@
                 </a-upload>
               </div>
             </a-modal>
-            <a-button type="primary">
-              {{ $t('quManager.operation.derive') }}
-            </a-button>
+            <!--<a-button type="primary">-->
+            <!--  {{ $t('quManager.operation.derive') }}-->
+            <!--</a-button>-->
           </a-space>
         </a-col>
       </a-row>

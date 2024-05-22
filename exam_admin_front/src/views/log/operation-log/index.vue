@@ -100,7 +100,13 @@
           :scroll="{ x: 100, y: 440 }"
           @page-change="pageChange"
           @page-size-change="pageSizeChange"
+          @row-click="rowClick"
         >
+          <template #operType="{ record }">
+            <a-tag v-if="record.operType === 0" color="red">新增</a-tag>
+            <a-tag v-if="record.operType === 1" color="green">删除</a-tag>
+            <a-tag v-if="record.operType === 2" color="green">更改</a-tag>
+          </template>
           <template #success="{ record }">
             <a-tag v-if="record.success === 0" color="red">失败</a-tag>
             <a-tag v-if="record.success === 1" color="green">成功</a-tag>
@@ -108,6 +114,50 @@
         </a-table>
       </a-card>
     </a-layout>
+    <a-modal
+      title="日志详情"
+      :visible="visible"
+      :footer="false"
+      @cancel="visible = false"
+    >
+      <a-descriptions :column="1" layout="inline-horizontal">
+        <a-descriptions-item>
+          <template #label>请求地址</template>
+          {{ currentLogData.operationMethod }}
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>登录信息</template>
+          {{ currentLogData.userName }}/{{ currentLogData.ip }}/{{
+            currentLogData.operAddress
+          }}
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>请求方式</template>
+          {{ currentLogData.requestMode }}
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>请求参数</template>
+          {{ currentLogData.requestArg }}
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>返回参数</template>
+          {{
+            currentLogData.returnArg
+              ? JSON.parse(currentLogData.returnArg)
+              : currentLogData.returnArg
+          }}
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>操作状态</template>
+          <a-tag v-if="currentLogData.success === 0" color="red">失败</a-tag>
+          <a-tag v-if="currentLogData.success === 1" color="green">成功</a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item>
+          <template #label>操作时间</template>
+          {{ currentLogData.operTime }}
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-modal>
   </div>
 </template>
 
@@ -121,7 +171,6 @@
   import { getOperationLogList } from '@/api/log';
   import OperLogQuery from '@/types/model/query/OperLogQuery';
   import usePagination from '@/hooks/pagination';
-  import LoginLogQuery from '@/types/model/query/LoginLogQuery';
   import SimplePage from '@/types/model/po/SimplePage';
 
   const { loading, setLoading } = useLoading(true);
@@ -130,14 +179,14 @@
   const { t } = useI18n();
 
   // 当前行记录
-  const currentMsgId = ref();
+  const currentLogData = ref<OperLog>({});
 
   // 查询表单
   const operationLogSearch = ref<OperLogQuery>(new OperLogQuery());
   const operationLog = ref<OperLog[]>([]);
-  // 消息详情对话框
+  // 日志详情对话框
   const visible = ref(false);
-  // 获取消息列表
+  // 获取操作日志列表
   const reloadOperationLog = async (operLogQuery: OperLogQuery) => {
     setLoading(true);
     await getOperationLogList(operLogQuery).then((res: any) => {
@@ -166,6 +215,12 @@
     operationLogSearch.value.pageSize = pageSize;
   };
 
+  // 点击行，查看详细数据
+  const rowClick = (tableData: any) => {
+    visible.value = true;
+    currentLogData.value = tableData;
+  };
+
   // 表头列名
   const columns = ref<TableColumnData[]>([
     {
@@ -187,7 +242,7 @@
     {
       title: t('log.operLog.columns.ip'),
       dataIndex: 'ip',
-      slotName: 'ipinAddress',
+      slotName: 'ip',
       width: 150,
       ellipsis: true,
       tooltip: true,

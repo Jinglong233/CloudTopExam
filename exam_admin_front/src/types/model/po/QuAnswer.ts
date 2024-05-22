@@ -1,4 +1,4 @@
-export class QuAnswer {
+class QuAnswer {
   /**
    * ID
    */

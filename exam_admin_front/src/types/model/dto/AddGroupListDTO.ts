@@ -1,6 +1,6 @@
-import { QuAndAnswerVO } from '@/types/model/vo/QuAndAnswerVO';
+import QuAndAnswerVO from '@/types/model/vo/QuAndAnswerVO';
 
-export interface AddGroupListDTO {
+class AddGroupListDTO {
   /**
    * 所属试卷ID
    */
@@ -44,5 +44,6 @@ export interface AddGroupListDTO {
   /**
    * 题目列表
    */
-  quList?: QuAndAnswerVO[];
+  quList: QuAndAnswerVO[] = [];
 }
+export default AddGroupListDTO;
