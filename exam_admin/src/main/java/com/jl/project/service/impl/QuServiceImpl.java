@@ -554,18 +554,21 @@ public class QuServiceImpl implements QuService {
      * @return
      */
     @Override
-    public List<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query) throws BusinessException {
+    public PaginationResultVO<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query) throws BusinessException {
         List<String> excludes = query.getExcludes();
         QuQuery quQuery = new QuQuery();
         BeanUtil.copyProperties(query, quQuery);
         List<QuAndAnswerVo> quAndAnswerVos = loadQuAndAnswerList(quQuery);
         if (quAndAnswerVos == null) {
-            return Collections.emptyList();
+            return new PaginationResultVO<>();
         }
         quAndAnswerVos = quAndAnswerVos.stream().filter((quAndAnswerVo) -> {
             return !excludes.contains(quAndAnswerVo.getId());
         }).collect(Collectors.toList());
-        return quAndAnswerVos;
+        SimplePage simplePage = new SimplePage();
+        simplePage.setPageNo(query.getPageNo());
+        simplePage.setPageSize(query.getPageSize());
+        return CommonUtil.paginate(quAndAnswerVos, simplePage);
     }
 
     /**

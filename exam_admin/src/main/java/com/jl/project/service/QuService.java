@@ -88,7 +88,7 @@ public interface QuService {
 	 * @param query
 	 * @return
 	 */
-	List<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query);
+	PaginationResultVO<QuAndAnswerVo> loadExcludeQuAnAnswerList(QuExcludeQuery query);
 
 	/**
 	 * 获取题目总数

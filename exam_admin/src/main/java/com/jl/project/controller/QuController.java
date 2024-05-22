@@ -10,6 +10,7 @@ import com.jl.project.entity.dto.UpdateQuAndAnswerDTO;
 import com.jl.project.entity.po.Qu;
 import com.jl.project.entity.query.QuExcludeQuery;
 import com.jl.project.entity.query.QuQuery;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.enums.LogType;
@@ -69,7 +70,7 @@ public class QuController extends ABaseController {
     @RequestMapping("loadExcludeQuAnAnswerList")
     @GlobalInterceptor(checkLogin = true,checkParams = true)
     public ResponseVO loadExcludeQuAnAnswerList(@RequestBody @VerifyParam QuExcludeQuery query) throws BusinessException {
-        List<QuAndAnswerVo> result = quService.loadExcludeQuAnAnswerList(query);
+        PaginationResultVO<QuAndAnswerVo> result = quService.loadExcludeQuAnAnswerList(query);
         return getSuccessResponseVO(result);
     }
 
