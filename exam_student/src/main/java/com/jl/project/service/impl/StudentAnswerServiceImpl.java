@@ -349,6 +349,13 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
             }
         }
 
+        // 过滤正确率100%的。因为正确率100%不是错题
+        if (!result.isEmpty()) {
+            result = result.stream().filter((errorVO) -> {
+                return errorVO.getRightCount() != errorVO.getTotalCount();
+            }).collect(Collectors.toList());
+        }
+
         return result;
     }
 
