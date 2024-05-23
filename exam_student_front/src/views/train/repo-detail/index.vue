@@ -71,7 +71,6 @@
   import { StartTrainDTO } from '@/types/model/dto/StartTrainDTO';
   import { startTrain } from '@/api/train';
   import { useUserStore } from '@/store';
-  import { Message } from '@arco-design/web-vue';
   import { getQuestionTypeName } from '../../../api/common';
 
   const { t } = useI18n();
@@ -122,11 +121,6 @@
           params: {
             trainId: res.data,
           },
-        });
-      } else {
-        Message.warning({
-          content: '创建训练记录失败',
-          duration: 2000,
         });
       }
     });
