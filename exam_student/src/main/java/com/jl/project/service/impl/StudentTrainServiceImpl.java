@@ -2,6 +2,7 @@ package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.jl.project.entity.dto.StartTrainDTO;
@@ -156,6 +157,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
         List<Qu> quList = null;
         QuQuery quQuery = new QuQuery();
+        quQuery.setRepoId(repoId);
         if (mode.equals(TrainMode.QUTYPE.getValue())) { // 指定题型训练
 
             // 设置题型
@@ -169,7 +171,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
             // 获取指定题型题目
             quQuery.setQuType(quType);
-            quQuery.setRepoId(repoId);
             quList = quMapper.selectList(quQuery);
             if (quList == null || quList.isEmpty()) {
                 throw new BusinessException("题库对应题型题目数量为0");
@@ -213,6 +214,9 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         // 创建题目训练记录
         List<TrainRecord> trainRecords = new ArrayList<>();
         int sort = 1;
+        if (quList == null || quList.isEmpty()) {
+            throw new BusinessException("题目为空");
+        }
         for (Qu qu : quList) {
             String trainRecordId = CommonUtil.getRandomId();
             TrainRecord trainRecord = new TrainRecord();
@@ -224,7 +228,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
             trainRecords.add(trainRecord);
         }
 
-        // 批量擦插入
+        // 批量插入
         Integer insert = trainRecordMapper.insertBatch(trainRecords);
 
         // 新增用户答题训练记录
@@ -379,7 +383,8 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         // 更新训练进度
         Integer count = train.getAnswerCount();
         Integer totalCount = train.getTotalCount();
-        train.setPercent(String.valueOf(count / totalCount));
+        String per = NumberUtil.decimalFormat("#.##", (double) count / totalCount);
+        train.setPercent(per);
 
         // 更新最近训练时间
         train.setTrainTime(new Date());
@@ -396,14 +401,15 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         if (train == null) {
             throw new BusinessException("训练记录不存在");
         }
-
         train.setState(1);
+
 
         // 更新
         Integer result = trainMapper.updateById(train, trainId);
         if (result <= 0) {
             throw new BusinessException("更新训练记录失败");
         }
+
 
         // 压缩作答记录节省空间（删除未作答的记录，该部分内容没用）
 
@@ -412,7 +418,9 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         trainRecordQuery.setTrainId(trainId);
 
         List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
-        if (trainRecords != null && !trainRecords.isEmpty()) {
+        // 这里trainRecords.size() != train.getTotalCount()，是回答记录数和总体数一致的时候，就是全部作答了
+        // 不用进行未作答题目的删除
+        if (trainRecords != null && !trainRecords.isEmpty() && trainRecords.size() != train.getTotalCount()) {
             Boolean delete = clearNoAnswerRecord();
             if (delete == false) {
                 throw new BusinessException("提交失败");
@@ -426,6 +434,8 @@ public class StudentTrainServiceImpl implements StudentTrainService {
                 updateBookData(trainRecord, train.getUserId());
             }
         }
+
+
         return true;
     }
 
