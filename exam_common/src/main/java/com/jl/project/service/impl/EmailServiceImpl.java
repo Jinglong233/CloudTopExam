@@ -7,6 +7,7 @@ import com.jl.project.entity.dto.CheckEmailCodeDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.LoginResponseVo;
+import com.jl.project.enums.MsgType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.service.EmailService;
@@ -164,6 +165,7 @@ public class EmailServiceImpl implements EmailService {
             msg.setSendCount(examRecords.size());
             msg.setSendTime(new Date());
             msg.setTitle(tmpl.getTitle());
+            msg.setMsgType(MsgType.EMAIL.getValue());
             msg.setCreateUser(exam.getCreateBy());
             User user = userMapper.selectById(exam.getCreateBy());
             if (user == null) {

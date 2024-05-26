@@ -5,7 +5,6 @@ import com.jl.project.entity.query.LoginLogQuery;
 import com.jl.project.entity.query.SimplePage;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
-import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.LoginLogMapper;
 import com.jl.project.service.LoginLogService;
 import org.springframework.stereotype.Service;
@@ -103,11 +102,13 @@ public class LoginLogServiceImpl implements LoginLogService {
 
     @Override
     public Boolean deleteLoginLogBatchById(List<Integer> deleteList) {
-        if (deleteList == null || deleteList.size() == 0) {
+        return true;
+        // todo 考虑添加
+       /* if (deleteList == null || deleteList.size() == 0) {
             throw new BusinessException("参数为空");
         }
         Integer result = loginLogMapper.deleteLoginLogBatchById(deleteList);
-        return result > 0;
+        return result > 0;*/
     }
 
     @Override

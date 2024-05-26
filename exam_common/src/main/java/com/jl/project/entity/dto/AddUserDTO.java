@@ -17,6 +17,14 @@ public class AddUserDTO {
 
 
     /**
+     * 邮箱
+     */
+    @Schema(description = "邮箱")
+    @VerifyParam(require = true)
+    private String email;
+
+
+    /**
      * 部门编号
      */
     @Schema(description = "部门编号")
@@ -116,6 +124,11 @@ public class AddUserDTO {
         this.role = role;
     }
 
+    public String getEmail() {
+        return email;
+    }
 
-
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

@@ -1,7 +1,6 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -250,11 +249,9 @@ public class ExamServiceImpl implements ExamService {
         }
 
         // 发送考试通知
-        ThreadUtil.execAsync(()->{
-            emailService.setExamNotification(exam);
-            // 创建开始考试任务
-            createExamTask(examId, title, startTime, endTime);
-        });
+        emailService.setExamNotification(exam);
+        // 创建开始考试任务
+        createExamTask(examId, title, startTime, endTime);
         return true;
     }
 

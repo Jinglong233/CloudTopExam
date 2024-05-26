@@ -164,7 +164,7 @@ public class QuServiceImpl implements QuService {
             for (QuAnswer quAnswer : quAnswerList) {
                 quAnswer.setId(CommonUtil.getRandomId());
                 quAnswer.setQuId(quId);
-                if (quType.equals(QuType.MULTI) || quType.equals(QuType.RADIO)) {
+                if (quType.equals(QuType.MULTI.getValue()) || quType.equals(QuType.RADIO.getValue())) {
                     quAnswer.setTag(Character.toString((char) tag++));
                 }
                 // 填空题的所有quAnswer都是正确的
