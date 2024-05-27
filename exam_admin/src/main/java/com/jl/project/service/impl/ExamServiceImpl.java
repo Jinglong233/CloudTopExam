@@ -15,6 +15,7 @@ import com.jl.project.enums.PageSize;
 import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.observer.correctObserver.ReviewSubject;
 import com.jl.project.service.EmailService;
 import com.jl.project.service.ExamService;
 import com.jl.project.service.PaperService;
@@ -52,6 +53,10 @@ public class ExamServiceImpl implements ExamService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
 
+
+
+    @Resource
+    private ReviewSubject reviewSubject;
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
 
@@ -756,7 +761,6 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = new Exam();
         // 修改考试状态
         exam.setStatue(2);
-        logger.info("重新调度考试任务：{}",666);
         // 2. 更新考试信息
         Integer integer = examMapper.updateById(exam, examId);
         if (integer <= 0) {
@@ -788,6 +792,7 @@ public class ExamServiceImpl implements ExamService {
                         Integer reviewQuire = exam.getReviewQuire();
                         // 只处理不需要批阅的
                         if (reviewQuire == 0) {
+                            List<String> wrongList = null;
                             // 设置已处理状态
                             examRecord.setHandState(1);
                             UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
@@ -796,6 +801,7 @@ public class ExamServiceImpl implements ExamService {
                             List<UserAnswer> list = userAnswerMapper.selectList(userAnswerQuery);
                             Integer totalScore = 0;
                             if (list != null && list.size() != 0) {
+                                wrongList = new ArrayList<>();
                                 for (UserAnswer userAnswer : list) {
                                     // 获取得分
                                     totalScore += userAnswer.getScore();
@@ -803,7 +809,9 @@ public class ExamServiceImpl implements ExamService {
                                     // 判断是否答对
                                     Integer isRight = userAnswer.getIsRight();
                                     if (isRight == 0) {
-                                        updateBookData(userAnswer);
+//                                        updateBookData(userAnswer);
+                                        // 搜集错题
+                                        wrongList.add(userAnswer.getQuId());
                                     }
                                 }
                             }
@@ -823,6 +831,9 @@ public class ExamServiceImpl implements ExamService {
                             if (result <= 0) {
                                 throw new BusinessException("更新考试记录失败");
                             }
+
+                            // 搜集错题
+                            reviewSubject.notifyBookUpdate(wrongList,examRecord.getUserId());
                         }
 
                     }
