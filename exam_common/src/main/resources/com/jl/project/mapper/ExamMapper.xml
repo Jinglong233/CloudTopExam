@@ -20,7 +20,7 @@
 		<result column="end_time" property="endTime"/>
 		<!-- 考试状态 0:未开始1:已开始2:已结束 -->
 		<result column="statue" property="statue"/>
-		<!-- 开放权限 0:完全公开 1:指定学生 -->
+		<!-- 开放权限 0:完全公开 1:指定学生2:指定部门 -->
 		<result column="open_type" property="openType"/>
 		<!-- 考试时长 -->
 		<result column="duration" property="duration"/>
@@ -44,10 +44,14 @@
 		<result column="update_time" property="updateTime"/>
 		<!-- 更新者 -->
 		<result column="update_by" property="updateBy"/>
+		<!-- 开始考试任务Id -->
+		<result column="start_job_id" property="startJobId"/>
+		<!-- 停止考试任务Id -->
+		<result column="stop_job_id" property="stopJobId"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by
+		id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by,start_job_id,stop_job_id
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -111,6 +115,12 @@
 		<if test="query.updateBy != null and query.updateBy!= ''">
 			and update_by = #{query.updateBy}
 		</if>
+		<if test="query.startJobId != null">
+			and start_job_id = #{query.startJobId}
+		</if>
+		<if test="query.stopJobId != null">
+			and stop_job_id = #{query.stopJobId}
+		</if>
 	</sql>
 	<!--扩展查询条件-->
 	<sql id="base_query_condition_extend">
@@ -130,16 +140,16 @@
 			and dept_text like concat('%', #{query.deptTextFuzzy}, '%')
 		</if>
 		<if test="query.startTimeStart != null and query.startTimeStart != '' ">
-			<![CDATA[ and start_time >= str_to_date(#{query.startTimeStart}, '%Y-%m-%d %H:%i:%s') ]]>
+			<![CDATA[ and start_time >= str_to_date(#{query.startTimeStart}, '%Y-%m-%d') ]]>
 		</if>
 		<if test="query.startTimeEnd != null and query.startTimeEnd != '' ">
-			<![CDATA[ and start_time < str_to_date(#{query.startTimeEnd}, '%Y-%m-%d %H:%i:%s') ]]>
+			<![CDATA[ and start_time < date_sub(str_to_date(#{query.startTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 		<if test="query.endTimeStart != null and query.endTimeStart != '' ">
-			<![CDATA[ and end_time >= str_to_date(#{query.endTimeStart}, '%Y-%m-%d %H:%i:%s') ]]>
+			<![CDATA[ and end_time >= str_to_date(#{query.endTimeStart}, '%Y-%m-%d') ]]>
 		</if>
 		<if test="query.endTimeEnd != null and query.endTimeEnd != '' ">
-			<![CDATA[ and end_time < str_to_date(#{query.endTimeEnd}, '%Y-%m-%d %H:%i:%s') ]]>
+			<![CDATA[ and end_time < date_sub(str_to_date(#{query.endTimeEnd}, '%Y-%m-%d'), interval -1 day) ]]>
 		</if>
 		<if test="query.thanksFuzzy != null and query.thanksFuzzy != '' ">
 			and thanks like concat('%', #{query.thanksFuzzy}, '%')
@@ -254,6 +264,12 @@
 			<if test="bean.updateBy != null">
 				update_by,
 			</if>
+			<if test="bean.startJobId != null">
+				start_job_id,
+			</if>
+			<if test="bean.stopJobId != null">
+				stop_job_id,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -315,6 +331,12 @@
 			</if>
 			<if test="bean.updateBy != null">
 				#{bean.updateBy},
+			</if>
+			<if test="bean.startJobId != null">
+				#{bean.startJobId},
+			</if>
+			<if test="bean.stopJobId != null">
+				#{bean.stopJobId},
 			</if>
 		</trim>
 	</insert>
@@ -383,6 +405,12 @@
 			<if test="bean.updateBy != null">
 				update_by,
 			</if>
+			<if test="bean.startJobId != null">
+				start_job_id,
+			</if>
+			<if test="bean.stopJobId != null">
+				stop_job_id,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -445,6 +473,12 @@
 			<if test="bean.updateBy != null">
 				#{bean.updateBy},
 			</if>
+			<if test="bean.startJobId != null">
+				#{bean.startJobId},
+			</if>
+			<if test="bean.stopJobId != null">
+				#{bean.stopJobId},
+			</if>
 		</trim>
 		on DUPLICATE key update
 		<trim prefix="" suffix="" suffixOverrides=",">
@@ -505,25 +539,31 @@
 			<if test="bean.updateBy != null">
 				update_by= VALUES(update_by),
 			</if>
+			<if test="bean.startJobId != null">
+				start_job_id= VALUES(start_job_id),
+			</if>
+			<if test="bean.stopJobId != null">
+				stop_job_id= VALUES(stop_job_id),
+			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Exam">
-		INSERT INTO exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by)values
+		INSERT INTO exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by,start_job_id,stop_job_id)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.startJobId},#{item.stopJobId})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Exam">
 		INSERT INTO 
-		exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by)values
+		exam(id,paper_id,title,dept_code,dept_text,start_time,end_time,statue,open_type,duration,thanks,late_max,hand_min,result_type,qualify_score,review_quire,create_time,create_by,update_time,update_by,start_job_id,stop_job_id)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
+			(#{item.id},#{item.paperId},#{item.title},#{item.deptCode},#{item.deptText},#{item.startTime},#{item.endTime},#{item.statue},#{item.openType},#{item.duration},#{item.thanks},#{item.lateMax},#{item.handMin},#{item.resultType},#{item.qualifyScore},#{item.reviewQuire},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.startJobId},#{item.stopJobId})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),paper_id= VALUES(paper_id),title= VALUES(title),dept_code= VALUES(dept_code),dept_text= VALUES(dept_text),start_time= VALUES(start_time),end_time= VALUES(end_time),statue= VALUES(statue),open_type= VALUES(open_type),duration= VALUES(duration),thanks= VALUES(thanks),late_max= VALUES(late_max),hand_min= VALUES(hand_min),result_type= VALUES(result_type),qualify_score= VALUES(qualify_score),review_quire= VALUES(review_quire),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+			on DUPLICATE key update id= VALUES(id),paper_id= VALUES(paper_id),title= VALUES(title),dept_code= VALUES(dept_code),dept_text= VALUES(dept_text),start_time= VALUES(start_time),end_time= VALUES(end_time),statue= VALUES(statue),open_type= VALUES(open_type),duration= VALUES(duration),thanks= VALUES(thanks),late_max= VALUES(late_max),hand_min= VALUES(hand_min),result_type= VALUES(result_type),qualify_score= VALUES(qualify_score),review_quire= VALUES(review_quire),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by),start_job_id= VALUES(start_job_id),stop_job_id= VALUES(stop_job_id)
 	</insert>
 
 
@@ -597,6 +637,12 @@
 			</if>
 			<if test="bean.updateBy != null">
 				update_by = #{bean.updateBy},
+			</if>
+			<if test="bean.startJobId != null">
+				start_job_id = #{bean.startJobId},
+			</if>
+			<if test="bean.stopJobId != null">
+				stop_job_id = #{bean.stopJobId},
 			</if>
 		</set>
 		where id=#{id}

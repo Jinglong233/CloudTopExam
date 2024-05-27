@@ -50,7 +50,7 @@ import java.util.List;
 @Service("examService")
 public class ExamServiceImpl implements ExamService {
 
-    private static final Logger logge = LoggerFactory.getLogger(ExamServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
 
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
@@ -443,8 +443,9 @@ public class ExamServiceImpl implements ExamService {
         if (new Date().after(oldStartTime)) {
             throw new BusinessException("考试已开始，禁止修改");
         }
-        createExamTask(examId, title, startTime, endTime);
-
+        // 更新考试调度任务
+        ResponseEntity<String> response = XxlJobUtil.updateXxlJob(oladExam.getStartJobId(), "2",examId,title, startTime,"startExam");
+        ResponseEntity<String> response1 = XxlJobUtil.updateXxlJob(oladExam.getStopJobId(), "3",examId,title, endTime,"stopExam");
         return true;
     }
 
@@ -456,16 +457,32 @@ public class ExamServiceImpl implements ExamService {
      * @param startTime
      * @param endTime
      */
-    private static void createExamTask(String examId, String title, Date startTime, Date endTime) {
+    private void createExamTask(String examId, String title, Date startTime, Date endTime) {
         // 创建开始考试任务
-        ResponseEntity<String> startResp = XxlJobUtil.addXxlJob(title, startTime, examId, "startExam");
+        ResponseEntity<String> startResp = XxlJobUtil.addExamXxlJob(title, "2", startTime, examId, "startExam");
         JSONObject startRespObject = JSONUtil.parseObj(startResp.getBody());
-
+        Integer code = (Integer) startRespObject.get("code");
+        if (code != 200) {
+            throw new BusinessException("创建考试开始任务失败");
+        }
         // 创建结束考试任务
-        ResponseEntity<String> endResp = XxlJobUtil.addXxlJob(title, endTime, examId, "stopExam");
+        ResponseEntity<String> endResp = XxlJobUtil.addExamXxlJob(title, "3", endTime, examId, "stopExam");
         JSONObject endRespObject = JSONUtil.parseObj(endResp.getBody());
-        logge.info("创建开始考试任务：" + title + "  " + startRespObject);
-        logge.info("创建结束考试人数：" + title + "  " + endRespObject);
+        code = (Integer) endRespObject.get("code");
+        if (code != 200) {
+            throw new BusinessException("创建考试结束任务失败");
+        }
+
+        // 更新考试开始、结束任务Id
+        Exam exam = examMapper.selectById(examId);
+        exam.setStartJobId(Integer.valueOf(startRespObject.get("content", String.class)));
+        exam.setStopJobId(Integer.valueOf(endRespObject.get("content", String.class)));
+        Integer update = examMapper.updateById(exam,examId);
+        if (update <= 0){
+            throw new BusinessException("创建考试失败");
+        }
+        logger.info("创建开始考试任务：" + title + "  " + startRespObject);
+        logger.info("创建结束考试人数：" + title + "  " + endRespObject);
     }
 
     /**
@@ -518,6 +535,11 @@ public class ExamServiceImpl implements ExamService {
                 }
             }
         }
+
+
+        // 5. 删除考试任务
+        ResponseEntity<String> response = XxlJobUtil.deleteXxlJob(exam.getStartJobId());
+        ResponseEntity<String> response1 = XxlJobUtil.deleteXxlJob(exam.getStopJobId());
         return true;
     }
 
@@ -696,6 +718,8 @@ public class ExamServiceImpl implements ExamService {
     }
 
 
+
+
     /**
      * 开始考试
      */
@@ -732,12 +756,13 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = new Exam();
         // 修改考试状态
         exam.setStatue(2);
+        logger.info("重新调度考试任务：{}",666);
         // 2. 更新考试信息
         Integer integer = examMapper.updateById(exam, examId);
         if (integer <= 0) {
-            logge.info("更改考试状态失败");
+            logger.info("更改考试状态失败");
         } else {
-            logge.info("更改考试状态成功");
+            logger.info("更改考试状态成功");
             // 3. 获取该考试考生的一些考试记录信息
             ExamRecordQuery examRecordQuery = new ExamRecordQuery();
             examRecordQuery.setExamId(examId);
