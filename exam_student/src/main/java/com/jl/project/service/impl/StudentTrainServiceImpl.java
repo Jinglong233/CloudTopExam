@@ -16,6 +16,7 @@ import com.jl.project.enums.QuType;
 import com.jl.project.enums.TrainMode;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.observer.correctObserver.TrainSubject;
 import com.jl.project.service.RecommendService;
 import com.jl.project.service.StudentTrainService;
 import com.jl.project.utils.CommonUtil;
@@ -36,6 +37,9 @@ public class StudentTrainServiceImpl implements StudentTrainService {
     private BookMapper<Book, BookQuery> bookMapper;
     @Resource
     private TrainMapper<Train, TrainQuery> trainMapper;
+
+    @Resource
+    private TrainSubject trainSubject;
 
 
     @Resource
@@ -417,22 +421,25 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         TrainRecordQuery trainRecordQuery = new TrainRecordQuery();
         trainRecordQuery.setTrainId(trainId);
 
-        List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
-        // 这里trainRecords.size() != train.getTotalCount()，是回答记录数和总体数一致的时候，就是全部作答了
-        // 不用进行未作答题目的删除
-        if (trainRecords != null && !trainRecords.isEmpty() && trainRecords.size() != train.getTotalCount()) {
-            Boolean delete = clearNoAnswerRecord();
-            if (delete == false) {
-                throw new BusinessException("提交失败");
-            }
+        // 进行未作答题目的删除
+        try {
+            trainRecordMapper.deleteNoAnswerRecord();
+        } catch (Exception e) {
+            throw new BusinessException("提交失败");
         }
 
         // 获取此次训练的所有答题记录，做错题统计
-        trainRecords = trainRecordMapper.selectList(trainRecordQuery);
+        List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
         if (trainRecords != null && trainRecords.size() != 0) {
+            List<String> wrongList = new ArrayList<>();
             for (TrainRecord trainRecord : trainRecords) {
-                updateBookData(trainRecord, train.getUserId());
+                // 错题搜集
+                if (trainRecord.getIsRight() == 0) {
+                    wrongList.add(trainRecord.getQuId());
+                }
             }
+            // 搜集错题
+            trainSubject.notifyBookUpdate(wrongList, train.getUserId());
         }
 
 
@@ -486,10 +493,6 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         return result;
     }
 
-    private Boolean clearNoAnswerRecord() {
-        Integer integer = trainRecordMapper.deleteNoAnswerRecord();
-        return integer > 0;
-    }
 
     /**
      * 根据用户答案记录更新错题数据

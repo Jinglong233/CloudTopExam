@@ -1,6 +1,7 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import com.jl.project.entity.dto.SubmitExamDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
@@ -9,8 +10,8 @@ import com.jl.project.entity.vo.ExamVO;
 import com.jl.project.enums.ExamRecordStateType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.observer.correctObserver.ReviewSubject;
 import com.jl.project.service.StudentExamService;
-import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,12 +22,16 @@ import java.util.List;
 
 
 @Service("studentExamService")
-public class StudentExamServiceImpl implements StudentExamService {
+public class StudentExamServiceImpl implements StudentExamService{
     @Resource
     private ExamMapper<Exam, ExamQuery> examMapper;
 
     @Resource
     private PaperMapper<Paper, PaperQuery> paperMapper;
+
+    // 提交试卷被观察者对象
+    @Resource
+    private ReviewSubject reviewSubject;
 
 
     @Resource
@@ -89,21 +94,13 @@ public class StudentExamServiceImpl implements StudentExamService {
     }
 
     @Override
-    public Double submitExam(SubmitExamDTO submitExamDTO) {
+    public Boolean submitExam(SubmitExamDTO submitExamDTO) {
         String recordId = submitExamDTO.getExamRecordId();
-
         ExamRecord oldRecord = examRecordMapper.selectById(recordId);
         if (oldRecord == null) {
             throw new BusinessException("考试记录数据不存在");
         }
-
-        // 1. 修改答卷结束时间
-        oldRecord.setEndTime(new Date());
-
-        // 2. 修改记录状态
-        oldRecord.setState(ExamRecordStateType.SUBMITTED.getValue());
-
-        // 3. 获取对应的考试信息
+        // 1. 获取对应的考试信息
         String examId = oldRecord.getExamId();
         if (examId == null) {
             throw new BusinessException("缺少考试信息");
@@ -115,8 +112,28 @@ public class StudentExamServiceImpl implements StudentExamService {
         Integer totalScore = 0;
 
 
+        // 判断是否到达允许提交的最小时间
+        Integer handMin = exam.getHandMin();
+        if (handMin != 0) {
+            Date startTime = exam.getStartTime();
+            Date date = new Date();
+            if (date.before(DateUtil.offsetMinute(startTime, handMin))) {
+                throw new BusinessException("未到最小交卷时间");
+            }
+        }
+
+
+        // 2. 修改答卷结束时间
+        oldRecord.setEndTime(new Date());
+
+        // 3. 修改记录状态
+        oldRecord.setState(ExamRecordStateType.SUBMITTED.getValue());
+
+
         // 4. 判断是否需要阅卷
         Integer reviewQuire = exam.getReviewQuire();
+
+        String userId = null;
         // 不需要手动判题；同时可以更新错题统计表
         if (reviewQuire == 0) {
             List<Qu> quList = submitExamDTO.getQuList();
@@ -125,7 +142,7 @@ public class StudentExamServiceImpl implements StudentExamService {
             }
             UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
 
-
+            List<String> wrongList = new ArrayList<>();
             // 4.1 遍历题目列表的题目信息
             for (Qu qu : quList) {
                 String quId = qu.getId();
@@ -142,9 +159,16 @@ public class StudentExamServiceImpl implements StudentExamService {
                 UserAnswer userAnswer = userAnswerList.get(0);
                 Integer score = userAnswer.getScore();
                 totalScore += score;
-
-                updateBookData(userAnswer);
+                userId = userAnswer.getUserId();
+                if(userAnswer.getIsRight() == 0){
+                    // 错题列表
+                    wrongList.add(quId);
+                }
             }
+
+            // 搜集错题
+            reviewSubject.notifyBookUpdate(wrongList,userId);
+
             // 不需要则设置考试记录状态为已处理
             oldRecord.setHandState(1);
         }
@@ -169,39 +193,7 @@ public class StudentExamServiceImpl implements StudentExamService {
         }
 
 
-        return Double.valueOf(totalScore);
-    }
-
-    /**
-     * 根据用户答案记录更新错题数据
-     *
-     * @param userAnswer
-     */
-    private void updateBookData(UserAnswer userAnswer) {
-        // 同时更新错题本数据
-        BookQuery bookQuery = new BookQuery();
-        bookQuery.setQuId(userAnswer.getQuId());
-        bookQuery.setUserId(userAnswer.getUserId());
-        List<Book> list = bookMapper.selectList(bookQuery);
-        if (list != null && list.size() != 0) {
-            // 存在，则直接进行更改
-            Book book = list.get(0);
-            book.setWrongCount(book.getWrongCount() + 1);
-            Integer integer = bookMapper.updateById(book, book.getId());
-            if (integer <= 0) {
-                throw new BusinessException("更新错题表失败");
-            }
-        } else {
-            Book book = new Book();
-            book.setId(CommonUtil.getRandomId());
-            book.setQuId(userAnswer.getQuId());
-            book.setUserId(userAnswer.getUserId());
-            book.setWrongCount(1);
-            Integer insert = bookMapper.insert(book);
-            if (insert <= 0) {
-                throw new BusinessException("更新错题表失败");
-            }
-        }
+        return true;
     }
 
     @Override
@@ -229,8 +221,6 @@ public class StudentExamServiceImpl implements StudentExamService {
         examResultVO.setIsHandle(handState);
         examResultVO.setTotalScore(Double.valueOf(totalScore));
         examResultVO.setReviewQuire(reviewQuire);
-
         return examResultVO;
-
     }
 }

@@ -12,6 +12,7 @@ import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.enums.PageSize;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.observer.correctObserver.ReviewSubject;
 import com.jl.project.service.ExamRecordService;
 import com.jl.project.utils.CommonUtil;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,9 @@ public class ExamRecordServiceImpl implements ExamRecordService {
 
     @Resource
     private UserMapper<User, UserQuery> userMapper;
+
+    @Resource
+    private ReviewSubject reviewSubject;
 
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
@@ -135,10 +139,18 @@ public class ExamRecordServiceImpl implements ExamRecordService {
             userAnswerQuery.setExamRecordId(oldRecord.getId());
             List<UserAnswer> list = userAnswerMapper.selectList(userAnswerQuery);
             if (list != null && list.size() != 0) {
+                List<String> wrongList = new ArrayList<>();
                 for (UserAnswer userAnswer : list) {
-                    updateBookData(userAnswer);
+                    Integer isRight = userAnswer.getIsRight();
+                    if (isRight == 0){ // 只搜集错的
+                        wrongList.add(userAnswer.getQuId());
+                    }
                 }
+                // 搜集错题
+                reviewSubject.notifyBookUpdate(wrongList,examRecord.getUserId());
             }
+
+
         }
 
 

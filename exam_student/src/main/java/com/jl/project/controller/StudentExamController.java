@@ -44,7 +44,7 @@ public class StudentExamController extends ABaseController {
     @RequestMapping("submitExam")
     @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
     public ResponseVO submitExam(@RequestBody @VerifyParam SubmitExamDTO submitExamDTO) {
-        Double result = studentExamService.submitExam(submitExamDTO);
+        Boolean result = studentExamService.submitExam(submitExamDTO);
         return getSuccessResponseVO(result);
     }
 

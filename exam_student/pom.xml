@@ -15,6 +15,7 @@
     <name>exam_student</name>
     <description>exam_student</description>
 
+
     <repositories>
         <repository>
             <id>jitpack.io</id>
@@ -28,12 +29,28 @@
             <artifactId>exam_common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-
-
     </dependencies>
 
+    <packaging>jar</packaging>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <mainClass>com.jl.project.EntranceApplication</mainClass>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 
 </project>

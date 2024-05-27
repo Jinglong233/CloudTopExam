@@ -1,6 +1,7 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import com.jl.project.entity.po.Exam;
 import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.po.User;
@@ -84,11 +85,25 @@ public class StudentExamRecordServiceImpl implements StudentExamRecordService {
         if (examId == null) {
             throw new BusinessException("缺少参数");
         }
+        Exam exam = examMapper.selectById(examId);
+        if (exam == null) {
+            throw new BusinessException("该场考试不存在");
+        }
+
+
         ExamRecord examRecord = list.get(0);
         Date startTime = null;
         // 判断该考生是否已经开始考试
         Integer state = examRecord.getState();
         if (state.equals(ExamRecordStateType.NOREPLY.getValue())) { // 没有开始考试初始化考试记录信息
+            // 判断是否超过允许迟到时间
+            Integer lateMax = exam.getLateMax();
+            if (lateMax != 0) {
+                Date date = new Date();
+                if (date.after(DateUtil.offsetMinute(exam.getStartTime(), lateMax))) {
+                    throw new BusinessException("未在指定时间内参加考试，禁止进入");
+                }
+            }
             // 设置开始作答时间
             startTime = new Date();
             examRecord.setStartTime(startTime);
@@ -103,10 +118,6 @@ public class StudentExamRecordServiceImpl implements StudentExamRecordService {
         } else if (state.equals(ExamRecordStateType.UNCOMPLETED.getValue())) {
             // 如果是未完成状态，则还需判断是否超过作答时间
             Date date = new Date();
-            Exam exam = examMapper.selectById(examId);
-            if (exam == null) {
-                throw new BusinessException("该场考试不存在");
-            }
             if (date.after(exam.getEndTime())) {
                 examRecord.setEndTime(exam.getEndTime());
                 examRecord.setState(ExamRecordStateType.SUBMITTED.getValue());
@@ -145,7 +156,7 @@ public class StudentExamRecordServiceImpl implements StudentExamRecordService {
 
                 String examId = examRecord.getExamId();
                 Exam exam = examMapper.selectById(examId);
-                if (exam!=null){
+                if (exam != null) {
                     answeredRecordVO.setTitle(exam.getTitle());
                 }
                 return answeredRecordVO;

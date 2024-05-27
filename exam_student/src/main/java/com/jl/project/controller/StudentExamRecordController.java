@@ -58,7 +58,7 @@ public class StudentExamRecordController extends ABaseController {
     @GlobalInterceptor(checkLogin = true, checkParams = true)
     public ResponseVO startAnswer(@RequestBody @VerifyParam ExamRecordQuery query) {
         Date result = studentExamRecordService.startAnswer(query);
-        return getSuccessResponseVO(result, "开始考试");
+        return getSuccessResponseVO(result);
     }
 
 
