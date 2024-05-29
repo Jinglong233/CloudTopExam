@@ -1,4 +1,4 @@
-export interface Exam {
+class Exam {
   /**
    * ID
    */
@@ -99,3 +99,4 @@ export interface Exam {
    */
   updateBy?: string;
 }
+export default Exam;

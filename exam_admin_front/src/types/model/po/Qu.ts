@@ -68,5 +68,11 @@ class Qu {
    * 排序(从关联表获得)
    */
   sort?: number;
+
+
+  /**
+   * 知识点
+   */
+  knowledge?:string;
 }
 export default Qu;

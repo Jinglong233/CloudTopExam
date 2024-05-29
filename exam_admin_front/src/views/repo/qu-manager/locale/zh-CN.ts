@@ -24,6 +24,7 @@ export default {
 
   // placeholder
   'quManager.placeholder.repo': '请选择题库',
+  'quManager.placeholder.knowledge': '请输入知识点',
   'quManager.placeholder.quType': '请选择题型',
   'quManager.placeholder.content': '输入题目内容',
 

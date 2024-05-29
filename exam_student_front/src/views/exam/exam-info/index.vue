@@ -229,16 +229,16 @@
         },
       });
     } else {
-      // 首先得判断是否超过考试进入时间
+      // 首先得判断是否超过考试进入时间(前提是未作答)
       const lateTime = dayjs(examInfo.value.startTime);
       if (
+        examRecordInfo.value.state === 0 &&
         dayjs().isAfter(
           dayjs(lateTime).add(examInfo.value.lateMax as number, 'minute')
         )
       ) {
         // 如果超时，显示不能参加考试
         Message.warning({
-          id: 'timeOut',
           content: '超过考试规定入考时间，禁止考试',
           duration: 2000,
         });

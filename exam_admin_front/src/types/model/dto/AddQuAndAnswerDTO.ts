@@ -1,6 +1,6 @@
-import { QuAnswer } from '@/types/model/po/QuAnswer';
+import QuAnswer from '@/types/model/po/QuAnswer';
 
-export interface AddQuAndAnswerDTO {
+class AddQuAndAnswerDTO {
   /**
    * 所属题库的ID
    */
@@ -37,7 +37,14 @@ export interface AddQuAndAnswerDTO {
   quType?: number;
 
   /**
+   * 知识点
+   */
+  knowledge?:string;
+
+  /**
    * 选项列表
    */
   quAnswerList?: QuAnswer[];
 }
+
+export default AddQuAndAnswerDTO;

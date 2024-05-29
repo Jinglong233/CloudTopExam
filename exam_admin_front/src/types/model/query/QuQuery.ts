@@ -84,5 +84,12 @@ class QuQuery extends SimplePage {
    * 题型
    */
   quType?: number;
+
+  /**
+   * 知识点
+   */
+  knowledge?: string;
+
+  knowledgeFuzzy?: string;
 }
 export default QuQuery;

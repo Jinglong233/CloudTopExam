@@ -4,7 +4,7 @@
     <a-card
       class="general-card"
       :title="$t('menu.exam.examManager')"
-      style="height: 680px"
+      style="height: 750px"
     >
       <!--查询栏-->
       <div>

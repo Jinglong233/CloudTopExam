@@ -117,6 +117,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="form.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -254,6 +264,16 @@
                           :style="{ width: '320px' }"
                           placeholder="请输入题目解析"
                           @focus="handleEditor('analysis')"
+                        />
+                      </a-form-item>
+
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="form.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
                         />
                       </a-form-item>
 
@@ -397,6 +417,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="form.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -514,6 +544,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="form.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -603,6 +643,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="form.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -664,7 +714,7 @@
 
   import { getRepoList } from '@/api/repo';
   import { getQuById, updateQuById } from '@/api/qu';
-  import { QuAnswer } from '@/types/model/po/QuAnswer';
+  import QuAnswer from '@/types/model/po/QuAnswer';
   import { useRoute, useRouter } from 'vue-router';
   import { UpdateQuAndAnswerDTO } from '@/types/model/dto/UpdateQuAndAnswerDTO';
   import { Repo } from '@/types/model/po/Repo';
@@ -682,15 +732,6 @@
     content: '', // 默认为空字符串
     id: '', // 默认为空字符串
     isRight: 0,
-  };
-
-  /**
-   * 产生一个默认的选项对象
-   */
-  const generateDefaultAnswer = (): QuAnswer => {
-    return {
-      ...defaultQuAnswer, // 使用展开运算符创建新对象，而不是引用同一个对象
-    };
   };
 
   /**
@@ -808,6 +849,8 @@
       currentEditorText.value = form.value.content;
     } else if (index === 'analysis') {
       currentEditorText.value = form.value.analysis;
+    } else if (index === 'knowledge') {
+      currentEditorText.value = form.value.knowledge;
     } else if (form.value.quAnswerList) {
       currentEditorText.value =
         form.value.quAnswerList[currentSelect.value].content;
@@ -852,6 +895,9 @@
     } else if (currentSelect.value === 'analysis') {
       // 解析
       form.value.analysis = currentEditorText.value;
+    } else if (currentSelect.value === 'knowledge') {
+      // 知识点
+      form.value.knowledge = currentEditorText.value;
     } else if (form.value.quAnswerList) {
       // 下标
       form.value.quAnswerList[currentSelect.value].content =
@@ -911,7 +957,7 @@
   // 添加选项按钮
   const addOption = () => {
     if (form.value.quAnswerList) {
-      form.value.quAnswerList.push(generateDefaultAnswer());
+      form.value.quAnswerList.push(new QuAnswer());
     }
   };
 

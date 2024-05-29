@@ -1,8 +1,15 @@
-export interface SimplePage {
-  total: number;
+class SimplePage {
+  total?: number;
+
   end?: number;
-  pageNo: number;
-  pageSize: number;
-  pageTotal: number;
+
+  pageNo?: number;
+
+  pageSize?: number;
+
+  pageTotal?: number;
+
   start?: number;
 }
+
+export default SimplePage;

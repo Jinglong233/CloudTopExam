@@ -2,13 +2,13 @@
   <div class="container">
     <Breadcrumb :items="['menu.repo', 'menu.repo.quManager']" />
     <a-card
-      style="height: 650px"
+      style="height: 750px"
       class="general-card"
       :title="$t('menu.repo.quManager')"
     >
       <!--查询栏-->
       <div>
-        <a-row :gutter="5">
+        <a-row :gutter="10">
           <!--题目内容-->
           <a-col :span="6">
             <a-input
@@ -50,6 +50,19 @@
               </a-option>
             </a-select>
           </a-col>
+        </a-row>
+        <div style="margin: 10px 0" />
+        <a-row :gutter="10">
+          <!--知识点-->
+          <a-col :span="6">
+            <a-input
+              v-model="quSearch.knowledgeFuzzy"
+              :placeholder="$t('quManager.placeholder.knowledge')"
+              style="width: 250px"
+              :allow-clear="true"
+            />
+          </a-col>
+
           <!--搜索重置按钮-->
           <a-col :span="6">
             <a-button type="primary" style="margin: 0 5px" @click="search">
@@ -182,7 +195,7 @@
   import { getRepoList } from '@/api/repo';
   import { Repo } from '@/types/model/po/Repo';
   import { deleteQuById, getQuList } from '@/api/qu';
-  import { Qu } from '@/types/model/po/Qu';
+  import Qu from '@/types/model/po/Qu';
   import { Message, Modal } from '@arco-design/web-vue';
   import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
   import { useUserStore } from '@/store';

@@ -128,6 +128,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="quForm.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -261,6 +271,16 @@
                           :style="{ width: '320px' }"
                           placeholder="请输入题目解析"
                           @focus="handleEditor('analysis')"
+                        />
+                      </a-form-item>
+
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="quForm.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
                         />
                       </a-form-item>
 
@@ -402,6 +422,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="quForm.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -516,6 +546,15 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="quForm.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -606,6 +645,16 @@
                         />
                       </a-form-item>
 
+                      <!--知识点-->
+                      <a-form-item field="knowledge" label="知识点">
+                        <a-input
+                          v-model="quForm.knowledge"
+                          :style="{ width: '320px' }"
+                          placeholder="请输入知识点"
+                          @focus="handleEditor('knowledge')"
+                        />
+                      </a-form-item>
+
                       <!--难度-->
                       <a-form-item
                         field="level"
@@ -666,9 +715,9 @@
   import { Message, Modal } from '@arco-design/web-vue';
 
   import { getRepoList } from '@/api/repo';
-  import { QuAnswer } from '@/types/model/po/QuAnswer';
+  import QuAnswer from '@/types/model/po/QuAnswer';
   import { Repo } from '@/types/model/po/Repo';
-  import { AddQuAndAnswerDTO } from '@/types/model/dto/AddQuAndAnswerDTO';
+  import AddQuAndAnswerDTO from '@/types/model/dto/AddQuAndAnswerDTO';
   import { useRouter } from 'vue-router';
   import { addQuAndQuAnswer } from '@/api/qu';
   import RepoQuery from '@/types/model/query/RepoQuery';
@@ -680,15 +729,6 @@
   const { loading, setLoading } = useLoading();
 
   const router = useRouter();
-  // 答案对象
-  const defaultQuAnswer: QuAnswer = {
-    analysis: '', // 默认为空字符串
-    content: '', // 默认为空字符串
-    id: '', // 默认为空字符串
-    isRight: 0,
-    image: '',
-    tag: '',
-  };
 
   // 当前编辑器中的内容是否改变的标志
   const contentChange = ref<boolean>(false);
@@ -704,15 +744,6 @@
     contentChange.value = false;
     deletePictureList.value = [];
     insertPictureList.value = [];
-  };
-
-  /**
-   * 产生一个默认的选项对象
-   */
-  const generateDefaultAnswer = (): QuAnswer => {
-    return {
-      ...defaultQuAnswer, // 使用展开运算符创建新对象，而不是引用同一个对象
-    };
   };
 
   /**
@@ -783,7 +814,7 @@
 
     quForm.value = {
       quType: Number(key),
-      quAnswerList: [generateDefaultAnswer(), generateDefaultAnswer()],
+      quAnswerList: [new QuAnswer(), new QuAnswer()],
     } as AddQuAndAnswerDTO;
     // 判断题提前赋值
     if (Number(key) === 3 && quForm.value.quAnswerList) {
@@ -822,6 +853,8 @@
       currentEditorText.value = quForm.value.content;
     } else if (index === 'analysis') {
       currentEditorText.value = quForm.value.analysis;
+    } else if (index === 'knowledge') {
+      currentEditorText.value = quForm.value.knowledge;
     } else {
       currentEditorText.value =
         quForm.value.quAnswerList?.[currentSelect.value].content;
@@ -864,6 +897,8 @@
       quForm.value.content = currentEditorText.value;
     } else if (currentSelect.value === 'analysis') {
       quForm.value.analysis = currentEditorText.value;
+    } else if (currentSelect.value === 'knowledge') {
+      quForm.value.knowledge = currentEditorText.value;
     } else if (quForm.value.quAnswerList) {
       quForm.value.quAnswerList[currentSelect.value].content =
         currentEditorText.value;
@@ -956,7 +991,7 @@
    */
   const addOption = () => {
     if (quForm.value.quAnswerList) {
-      quForm.value.quAnswerList.push(generateDefaultAnswer());
+      quForm.value.quAnswerList.push(new QuAnswer());
     }
   };
 

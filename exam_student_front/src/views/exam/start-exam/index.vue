@@ -40,10 +40,11 @@
     <a-col :span="4" style="margin-top: 20px">
       <a-card style="height: 720px; margin-right: 20px; text-align: center">
         <a-typography-title :heading="6"> 剩余时间 </a-typography-title>
+        <a-countdown :value="compTimeDiff()" :now="now" />
         <a-countdown
-          :value="Date.now() + compTimeDiff()"
-          :now="Date.now()"
-          :start="true"
+          title="Countdown"
+          :value="now + 1000 * 60 * 60 * 2"
+          :now="now"
         />
         <a-divider />
         <a-button type="primary" @click="submitExam">提交试卷</a-button>
@@ -76,12 +77,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, onMounted, ref } from 'vue';
+  import { onBeforeUnmount, onMounted, ref, toRaw } from 'vue';
   import { useAppStore, useUserStore } from '@/store';
   import { Message, Modal } from '@arco-design/web-vue';
   import { useRoute, useRouter } from 'vue-router';
   import { getExamById, submitMyExam } from '@/api/exam';
-  import { ExamVO } from '@/types/model/vo/ExamVO';
+  import ExamVO from '@/types/model/vo/ExamVO';
   import { PaperAndQuVO } from '@/types/model/vo/PaperAndQuVO';
   import { getPaperDetail } from '@/api/paper';
   import { getExamRecord, startAnswer } from '@/api/examRecord';
@@ -99,6 +100,9 @@
   import { GroupList } from '@/types/model/po/GroupList';
   import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
 
+  // 当前时间
+  const now = Date.now();
+
   dayjs.extend(duration);
 
   const appStore = useAppStore();
@@ -112,7 +116,7 @@
 
   // stopDebug(router);
 
-  const exam = ref<ExamVO>({});
+  const exam = ref<ExamVO>(new ExamVO());
   const paper = ref<PaperAndQuVO>({});
   const examRecordInfo = ref();
   const userAnswerList = ref<UserAnswer[]>([]);
@@ -174,7 +178,6 @@
       }
     });
   };
-
   onMounted(async () => {
     // 隐藏导航栏
     appStore.updateSettings({
@@ -188,6 +191,7 @@
     await getExamById(examId).then((res: any) => {
       exam.value = res.data;
     });
+
     if (!exam.value.paperId) {
       router.back();
     }
@@ -197,6 +201,7 @@
     } as ExamRecordQuery).then((res: any) => {
       examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
+
     if (examRecordInfo.value.state === 2) {
       // 已提交就到结果回显页面
       router.push({
@@ -204,8 +209,6 @@
         params: { examRecordId: examRecordInfo.value.id },
       });
     }
-    console.log('789');
-
     // 在此处修改该用户该考试记录的相关信息
     await startAnswer({
       userId: userStore.id,
@@ -213,14 +216,12 @@
     } as ExamRecordQuery).then((res: any) => {
       if (res.data !== undefined) {
         Message.success({
-          id: 'startAnswer',
           content: res.info,
           duration: 2000,
         });
         startTime.value = res.data;
       } else {
         Message.error({
-          id: 'startAnswer1',
           content: res.info,
           duration: 2000,
         });
@@ -262,17 +263,18 @@
     });
   });
 
+  // 倒计时计算
+  // 计算时差
+  const compTimeDiff = () => {
+    return dayjs(exam.value.endTime).diff(Date.now());
+  };
+
   onBeforeUnmount(() => {
     // 显示导航栏
     appStore.updateSettings({
       navbar: true,
     });
   });
-
-  // 计算时差
-  const compTimeDiff = () => {
-    return dayjs(exam.value.endTime).diff(Date.now());
-  };
 
   // 跳转下一题
   const skipNextProblem = () => {
@@ -333,19 +335,12 @@
               content: '提交成功',
               duration: 2000,
             });
-          } else {
-            Message.success({
-              id: 'submitErrorInfo',
-              content: res.info,
-              duration: 2000,
+            // 提交成功前往考试结果页面
+            router.push({
+              name: 'ExamResult',
+              params: { examRecordId: examRecordInfo.value.id },
             });
           }
-        });
-        // 提交成功前往考试结果页面
-
-        router.push({
-          name: 'ExamResult',
-          params: { examRecordId: examRecordInfo.value.id },
         });
       },
       onCancel: () => {

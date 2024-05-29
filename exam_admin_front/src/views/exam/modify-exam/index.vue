@@ -47,7 +47,6 @@
                         placeholder="请选择考试开始时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        :time-picker-props="{ defaultValue: '09:09:06' }"
                         format="YYYY-MM-DD HH:mm:ss"
                         :disabled-date="
                           (current) =>
@@ -343,7 +342,7 @@
   import { onMounted, ref, toRaw, watch } from 'vue';
   import { Paper } from '@/types/model/po/Paper';
   import { getPaperDetail } from '@/api/paper';
-  import { UserQuery } from '@/types/model/query/UserQuery';
+  import UserQuery from '@/types/model/query/UserQuery';
   import { getDeptTree } from '@/api/department';
   import { getDeptUserList, getUserList } from '@/api/user';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
@@ -353,8 +352,8 @@
   import { useUserStore } from '@/store';
   import { getExamById, getExamRecord, updateExamById } from '@/api/exam';
   import { UpdateExamDTO } from '@/types/model/dto/UpdateExamDTO';
-  import { SimplePage } from '@/types/model/po/SimplePage';
-  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import SimplePage from '@/types/model/po/SimplePage';
+  import ExamRecordQuery from '@/types/model/query/ExamRecordQuery';
   import { removeObjByProperty } from '@/utils/common';
   import { ExamRecord } from '@/types/model/po/ExamRecord';
 

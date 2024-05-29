@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { ExamVO } from '@/types/model/vo/ExamVO';
+import ExamVO from '@/types/model/vo/ExamVO';
 import { ExamQuery } from '@/types/model/query/ExamQuery';
 import { SubmitExamDTO } from '@/types/model/dto/SubmitExamDTO';
 import { ErrorVO } from '@/types/model/vo/ErrorVO';
+import BookQuery from '@/types/model/query/BookQuery';
 
 // eslint-disable-next-line import/prefer-default-export
 export function getMyExamList(examQuery: ExamQuery) {
@@ -33,10 +34,6 @@ export function submitMyExam(submitExamDTO: SubmitExamDTO) {
 }
 
 // 获取错题统计
-export function getErrorCount(userId: string) {
-  return axios.post<ErrorVO[]>('/api/studentAnswer/errorCount', userId, {
-    headers: {
-      'Content-Type': 'text/plain',
-    },
-  });
+export function getErrorCount(bookSearch: BookQuery) {
+  return axios.post<ErrorVO[]>('/api/studentAnswer/errorCount', bookSearch);
 }

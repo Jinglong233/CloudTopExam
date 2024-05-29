@@ -24,6 +24,7 @@ export default {
 
   // placeholder
   'quManager.placeholder.repo': 'Select a Repository',
+  'quManager.placeholder.knowledge': 'Enter knowledge',
   'quManager.placeholder.quType': 'Select a Question Type',
   'quManager.placeholder.content': 'Enter Question Content',
 

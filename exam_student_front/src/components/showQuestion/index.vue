@@ -129,7 +129,10 @@
               <SimpleEditor
                 style="margin-bottom: 15px"
                 :content="nowUserQuAnswer.answer ? nowUserQuAnswer.answer : ''"
+                :content-confirm-change="contentConfirmChange"
                 @editor-get-html="getEditorAnswer"
+                @add-insert-picture="addInsertPicture"
+                @add-delete-picture="addDeletePicture"
               />
             </a-typography-text>
           </a-space>
@@ -150,6 +153,7 @@
   import { QuestionType } from '@/types/model/QuestionType';
   import { UserAnswer } from '@/types/model/po/UserAnswer';
   import SimpleEditor from '@/components/simple-editor/index.vue';
+  import { deleteBatchImage } from '@/api/ossUpload';
 
   const props = defineProps({
     nowQuestion: {
@@ -161,6 +165,25 @@
   });
 
   const emits = defineEmits(['getAnswerId']);
+
+  // 确认改变标志
+  const contentConfirmChange = ref(false);
+
+  // 删除图片的列表
+  const deletePictureList = ref<string[]>([]);
+
+  // 添加图片的列表
+  const insertPictureList = ref<string[]>([]);
+
+  // 添加删除的图片
+  const addDeletePicture = (deleteList: string[]) => {
+    deletePictureList.value = deletePictureList.value.concat(deleteList);
+  };
+
+  // 添加插入的图片
+  const addInsertPicture = (insertList: string[]) => {
+    insertPictureList.value = insertPictureList.value.concat(insertList);
+  };
 
   const userAnswer = ref<any>({});
 
@@ -208,9 +231,21 @@
     userAnswer.value.answer = answer;
   };
 
-  const sendEditorAnswer = () => {
-    // 触发事件
-    emits('getAnswerId', toRaw(userAnswer.value));
+  const sendEditorAnswer = async () => {
+    contentConfirmChange.value = true;
+    if (deletePictureList.value.length === 0) {
+      emits('getAnswerId', toRaw(userAnswer.value));
+      contentConfirmChange.value = false;
+      return;
+    }
+    // 先删除待删除的图片
+    await deleteBatchImage(deletePictureList.value).then(async (res: any) => {
+      if (res.data === true) {
+        // 触发事件
+        emits('getAnswerId', toRaw(userAnswer.value));
+        contentConfirmChange.value = false;
+      }
+    });
   };
 
   const isContainCurrentAnswer = (answerId: string) => {

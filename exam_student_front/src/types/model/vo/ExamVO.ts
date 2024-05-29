@@ -1,5 +1,6 @@
-import { Exam } from "@/types/model/po/Exam";
+import Exam from '@/types/model/po/Exam';
 
-export interface ExamVO extends Exam{
+class ExamVO extends Exam {
   totalCount?: number;
 }
+export default ExamVO;
