@@ -65,14 +65,6 @@ public class QuServiceImpl implements QuService {
     @Resource
     private QuAnswerMapper<QuAnswer, QuAnswerQuery> quAnswerMapper;
 
-
-    @Resource
-    private KnMapper<Kn, KnQuery> knMapper;
-
-    @Resource
-    private KnQuMapper<KnQu, KnQuQuery> knQuMapper;
-
-
     @Resource
     private DepartmentMapper<Department, DepartmentQuery> departmentMapper;
 
@@ -737,37 +729,7 @@ public class QuServiceImpl implements QuService {
             // 知识点
             String knowledge = row.getCell(13).getStringCellValue();
             if (!StrUtil.isEmpty(knowledge)) {
-                String knId = null;
-                KnQuery knQuery = new KnQuery();
-                knQuery.setContent(knowledge.trim());
-                List<Kn> list = knMapper.selectList(knQuery);
-                // 查知识点是否已经存在
-                if (list != null && list.size() != 0) {
-                    Kn kn = list.get(0);
-                    knId = kn.getId();
-                } else {
-                    // 不存在则直接创建
-                    Kn kn = new Kn();
-                    knId = CommonUtil.getRandomId();
-                    kn.setContent(knowledge);
-                    kn.setCreateBy(loginUserInfo.getId());
-                    kn.setCreateTime(new Date());
-                    kn.setId(knId);
-                    Integer insert = knMapper.insert(kn);
-                    if (insert <= 0) {
-                        logger.info("知识点：{},创建失败", knowledge);
-                    }
-                }
-                // 创建问题知识点关联
-                KnQu knQu = new KnQu();
-                knQu.setId(CommonUtil.getRandomId());
-                knQu.setQuId(quId);
-                knQu.setKnId(knId);
-                // 插入
-                Integer insert = knQuMapper.insert(knQu);
-                if (insert <= 0) {
-                    logger.info("知识点：{},和题目：{},关联失败", knowledge, content);
-                }
+                qu.setKnowledge(knowledge);
             }
 
 

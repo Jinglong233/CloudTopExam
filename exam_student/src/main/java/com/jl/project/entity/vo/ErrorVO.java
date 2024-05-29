@@ -1,6 +1,9 @@
 package com.jl.project.entity.vo;
 
+import com.jl.project.entity.po.Book;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Map;
 
 /**
  * 错题集合
@@ -13,21 +16,38 @@ public class ErrorVO {
      */
     @Schema(description = "题目信息")
     private QuAndAnswerVo quAndAnswerVo;
+
     /**
-     * 正确次数
+     * 错题信息
      */
-    @Schema(description = "正确次数")
-    private Integer rightCount;
+    private Book book;
+
     /**
-     * 错误次数
+     * 错题选项分布统计（非填空、简答）
      */
-    @Schema(description = "错误次数")
-    private Integer wrongCount;
+    private Map<String,Integer> wrongAnswerCount;
+
     /**
-     * 总回答次数
+     * 答题总数（考试+训练）
+     * @return
      */
-    @Schema(description = "总回答次数")
-    private Integer totalCount;
+    private Integer answerCount;
+
+    public Integer getAnswerCount() {
+        return answerCount;
+    }
+
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
+    }
+
+    public void setAnswerCount(Integer answerCount) {
+        this.answerCount = answerCount;
+    }
 
     public QuAndAnswerVo getQuAndAnswerVo() {
         return quAndAnswerVo;
@@ -37,27 +57,11 @@ public class ErrorVO {
         this.quAndAnswerVo = quAndAnswerVo;
     }
 
-    public Integer getRightCount() {
-        return rightCount;
+    public Map<String, Integer> getWrongAnswerCount() {
+        return wrongAnswerCount;
     }
 
-    public void setRightCount(Integer rightCount) {
-        this.rightCount = rightCount;
-    }
-
-    public Integer getWrongCount() {
-        return wrongCount;
-    }
-
-    public void setWrongCount(Integer wrongCount) {
-        this.wrongCount = wrongCount;
-    }
-
-    public Integer getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(Integer totalCount) {
-        this.totalCount = totalCount;
+    public void setWrongAnswerCount(Map<String, Integer> wrongAnswerCount) {
+        this.wrongAnswerCount = wrongAnswerCount;
     }
 }

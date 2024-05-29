@@ -10,13 +10,21 @@
         <result column="user_id" property="userId"/>
         <!-- 题目ID -->
         <result column="qu_id" property="quId"/>
+        <!-- 题目内容 -->
+        <result column="qu_content" property="quContent"/>
+        <!-- 学科id -->
+        <result column="subject_id" property="subjectId"/>
         <!-- 答错次数 -->
         <result column="wrong_count" property="wrongCount"/>
+        <!-- 题型 -->
+        <result column="qu_type" property="quType"/>
+        <!-- 知识点内容 -->
+        <result column="kn_content" property="knContent"/>
     </resultMap>
     <!--通用查询列-->
     <sql id="base_column_list">
         id
-        ,user_id,qu_id,wrong_count
+        ,user_id,qu_id,qu_content,subject_id,wrong_count,qu_type,kn_content
     </sql>
     <!--基础查询条件-->
     <sql id="base_query_condition">
@@ -29,8 +37,20 @@
         <if test="query.quId != null and query.quId!= ''">
             and qu_id = #{query.quId}
         </if>
+        <if test="query.quContent != null and query.quContent!= ''">
+            and qu_content = #{query.quContent}
+        </if>
+        <if test="query.subjectId != null and query.subjectId!= ''">
+            and subject_id = #{query.subjectId}
+        </if>
         <if test="query.wrongCount != null">
             and wrong_count = #{query.wrongCount}
+        </if>
+        <if test="query.quType != null">
+            and qu_type = #{query.quType}
+        </if>
+        <if test="query.knContent != null and query.knContent!= ''">
+            and kn_content = #{query.knContent}
         </if>
     </sql>
     <!--扩展查询条件-->
@@ -43,6 +63,15 @@
         </if>
         <if test="query.quIdFuzzy != null and query.quIdFuzzy != '' ">
             and qu_id like concat('%', #{query.quIdFuzzy}, '%')
+        </if>
+        <if test="query.quContentFuzzy != null and query.quContentFuzzy != '' ">
+            and qu_content like concat('%', #{query.quContentFuzzy}, '%')
+        </if>
+        <if test="query.subjectIdFuzzy != null and query.subjectIdFuzzy != '' ">
+            and subject_id like concat('%', #{query.subjectIdFuzzy}, '%')
+        </if>
+        <if test="query.knContentFuzzy != null and query.knContentFuzzy != '' ">
+            and kn_content like concat('%', #{query.knContentFuzzy}, '%')
         </if>
     </sql>
     <!--通用查询条件-->
@@ -85,8 +114,20 @@
             <if test="bean.quId != null">
                 qu_id,
             </if>
+            <if test="bean.quContent != null">
+                qu_content,
+            </if>
+            <if test="bean.subjectId != null">
+                subject_id,
+            </if>
             <if test="bean.wrongCount != null">
                 wrong_count,
+            </if>
+            <if test="bean.quType != null">
+                qu_type,
+            </if>
+            <if test="bean.knContent != null">
+                kn_content,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -99,8 +140,20 @@
             <if test="bean.quId != null">
                 #{bean.quId},
             </if>
+            <if test="bean.quContent != null">
+                #{bean.quContent},
+            </if>
+            <if test="bean.subjectId != null">
+                #{bean.subjectId},
+            </if>
             <if test="bean.wrongCount != null">
                 #{bean.wrongCount},
+            </if>
+            <if test="bean.quType != null">
+                #{bean.quType},
+            </if>
+            <if test="bean.knContent != null">
+                #{bean.knContent},
             </if>
         </trim>
     </insert>
@@ -118,8 +171,20 @@
             <if test="bean.quId != null">
                 qu_id,
             </if>
+            <if test="bean.quContent != null">
+                qu_content,
+            </if>
+            <if test="bean.subjectId != null">
+                subject_id,
+            </if>
             <if test="bean.wrongCount != null">
                 wrong_count,
+            </if>
+            <if test="bean.quType != null">
+                qu_type,
+            </if>
+            <if test="bean.knContent != null">
+                kn_content,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -132,8 +197,20 @@
             <if test="bean.quId != null">
                 #{bean.quId},
             </if>
+            <if test="bean.quContent != null">
+                #{bean.quContent},
+            </if>
+            <if test="bean.subjectId != null">
+                #{bean.subjectId},
+            </if>
             <if test="bean.wrongCount != null">
                 #{bean.wrongCount},
+            </if>
+            <if test="bean.quType != null">
+                #{bean.quType},
+            </if>
+            <if test="bean.knContent != null">
+                #{bean.knContent},
             </if>
         </trim>
         on DUPLICATE key update
@@ -144,29 +221,42 @@
             <if test="bean.quId != null">
                 qu_id= VALUES(qu_id),
             </if>
+            <if test="bean.quContent != null">
+                qu_content= VALUES(qu_content),
+            </if>
+            <if test="bean.subjectId != null">
+                subject_id= VALUES(subject_id),
+            </if>
             <if test="bean.wrongCount != null">
                 wrong_count= VALUES(wrong_count),
+            </if>
+            <if test="bean.quType != null">
+                qu_type= VALUES(qu_type),
+            </if>
+            <if test="bean.knContent != null">
+                kn_content= VALUES(kn_content),
             </if>
         </trim>
     </insert>
 
     <!--添加（批量插入）-->
     <insert id="insertBatch" parameterType="com.jl.project.entity.po.Book">
-        INSERT INTO book(id,user_id,qu_id,wrong_count)values
+        INSERT INTO book(id,user_id,qu_id,qu_content,subject_id,wrong_count,qu_type,kn_content)values
         <foreach collection="list" item="item" separator=",">
-            (#{item.id},#{item.userId},#{item.quId},#{item.wrongCount})
+            (#{item.id},#{item.userId},#{item.quId},#{item.quContent},#{item.subjectId},#{item.wrongCount},#{item.quType},#{item.knContent})
         </foreach>
     </insert>
 
     <!--批量插入或更新-->
     <insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Book">
         INSERT INTO
-        book(id,user_id,qu_id,wrong_count)values
+        book(id,user_id,qu_id,qu_content,subject_id,wrong_count,qu_type,kn_content)values
         <foreach collection="list" item="item" separator=",">
-            (#{item.id},#{item.userId},#{item.quId},#{item.wrongCount})
+            (#{item.id},#{item.userId},#{item.quId},#{item.quContent},#{item.subjectId},#{item.wrongCount},#{item.quType},#{item.knContent})
         </foreach>
-        on DUPLICATE key update id= VALUES(id),user_id= VALUES(user_id),qu_id= VALUES(qu_id),wrong_count=
-        VALUES(wrong_count)
+        on DUPLICATE key update id= VALUES(id),user_id= VALUES(user_id),qu_id= VALUES(qu_id),qu_content=
+        VALUES(qu_content),subject_id= VALUES(subject_id),wrong_count= VALUES(wrong_count),qu_type=
+        VALUES(qu_type),kn_content= VALUES(kn_content)
     </insert>
 
 
@@ -176,7 +266,6 @@
         <include refid="base_column_list"/>
         from book where id=#{id}
     </select>
-
 
     <!--根据Id更新-->
     <update id="updateById" parameterType="com.jl.project.entity.po.Book">
@@ -191,8 +280,20 @@
             <if test="bean.quId != null">
                 qu_id = #{bean.quId},
             </if>
+            <if test="bean.quContent != null">
+                qu_content = #{bean.quContent},
+            </if>
+            <if test="bean.subjectId != null">
+                subject_id = #{bean.subjectId},
+            </if>
             <if test="bean.wrongCount != null">
                 wrong_count = #{bean.wrongCount},
+            </if>
+            <if test="bean.quType != null">
+                qu_type = #{bean.quType},
+            </if>
+            <if test="bean.knContent != null">
+                kn_content = #{bean.knContent},
             </if>
         </set>
         where id=#{id}
@@ -213,5 +314,6 @@
             #{userId}
         </foreach>
     </select>
+
 </mapper>
 

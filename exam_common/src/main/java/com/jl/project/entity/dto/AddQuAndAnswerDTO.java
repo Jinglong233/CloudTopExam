@@ -48,6 +48,13 @@ public class AddQuAndAnswerDTO {
 
 
     /**
+     * 知识点
+     */
+    @Schema(description = "知识点")
+    private String knowledge;
+
+
+    /**
      * 题型
      */
     @Schema(description = "题型")
@@ -86,6 +93,14 @@ public class AddQuAndAnswerDTO {
 
     public Integer getLevel() {
         return level;
+    }
+
+    public String getKnowledge() {
+        return knowledge;
+    }
+
+    public void setKnowledge(String knowledge) {
+        this.knowledge = knowledge;
     }
 
     public void setLevel(Integer level) {

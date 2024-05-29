@@ -8,6 +8,7 @@
         <artifactId>exam</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+    <packaging>jar</packaging>
 
     <groupId>com.jl.project</groupId>
     <artifactId>entrance</artifactId>
@@ -15,12 +16,9 @@
     <name>entrance</name>
     <description>entrance</description>
 
+
+
     <dependencies>
-        <dependency>
-            <groupId>com.jl.project</groupId>
-            <artifactId>exam_common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>com.jl.project</groupId>
             <artifactId>exam_admin</artifactId>
@@ -33,6 +31,24 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <mainClass>com.jl.project.EntranceApplication</mainClass>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 
 </project>

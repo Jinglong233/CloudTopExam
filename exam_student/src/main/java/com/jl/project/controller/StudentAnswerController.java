@@ -4,9 +4,11 @@ import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
+import com.jl.project.entity.query.BookQuery;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
 import com.jl.project.entity.vo.ErrorVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.StudentAnswerService;
@@ -71,10 +73,10 @@ public class StudentAnswerController extends ABaseController {
      */
     @RequestMapping("errorCount")
     @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
-    public ResponseVO errorCount(@RequestBody String userId) {
-        List<ErrorVO> result = null;
+    public ResponseVO errorCount(@RequestBody BookQuery bookQuery) {
+        PaginationResultVO<ErrorVO> result = null;
         try {
-            result = studentAnswerService.errorCount(userId);
+            result = studentAnswerService.errorCount(bookQuery);
         } catch (BusinessException e) {
             return getErrorResponseVO(null, e.getCode(), e.getMessage());
         }

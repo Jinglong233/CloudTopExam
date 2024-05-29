@@ -139,15 +139,15 @@ public class ExamRecordServiceImpl implements ExamRecordService {
             userAnswerQuery.setExamRecordId(oldRecord.getId());
             List<UserAnswer> list = userAnswerMapper.selectList(userAnswerQuery);
             if (list != null && list.size() != 0) {
-                List<String> wrongList = new ArrayList<>();
+                List<UserAnswer> wrongList = new ArrayList<>();
                 for (UserAnswer userAnswer : list) {
                     Integer isRight = userAnswer.getIsRight();
                     if (isRight == 0){ // 只搜集错的
-                        wrongList.add(userAnswer.getQuId());
+                        wrongList.add(userAnswer);
                     }
                 }
                 // 搜集错题
-                reviewSubject.notifyBookUpdate(wrongList,examRecord.getUserId());
+                reviewSubject.notifyBookUpdate(wrongList);
             }
 
 

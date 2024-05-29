@@ -1,5 +1,6 @@
 package com.jl.project.observer.correctObserver;
 
+import com.jl.project.entity.po.UserAnswer;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -26,9 +27,9 @@ public class TrainSubject implements CorrectSubject {
     }
 
     @Override
-    public void notifyBookUpdate(List<String> wrongList, String userId) {
+    public void notifyBookUpdate(List<UserAnswer> userAnswerList) {
         for (CorrectObserver correctObserver : correctObservers) {
-            correctObserver.insertErrorCollection(wrongList, userId);
+            correctObserver.insertErrorCollection(userAnswerList);
         }
     }
 }

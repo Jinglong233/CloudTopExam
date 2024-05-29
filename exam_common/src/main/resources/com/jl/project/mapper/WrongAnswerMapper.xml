@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jl.project.mapper.WrongAnswerMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.jl.project.entity.po.WrongAnswer">
+		<!-- ID -->
+		<id column="id" property="id"/>
+		<!-- 错题id（非题目id） -->
+		<result column="book_id" property="bookId"/>
+		<!-- 选项id -->
+		<result column="answer_id" property="answerId"/>
+		<!-- 选项次数 -->
+		<result column="wrong_count" property="wrongCount"/>
+	</resultMap>
+	<!--通用查询列-->
+	<sql id="base_column_list">
+		id,book_id,answer_id,wrong_count
+	</sql>
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id != null">
+			and id = #{query.id}
+		</if>
+		<if test="query.bookId != null and query.bookId!= ''">
+			and book_id = #{query.bookId}
+		</if>
+		<if test="query.answerId != null and query.answerId!= ''">
+			and answer_id = #{query.answerId}
+		</if>
+		<if test="query.wrongCount != null">
+			and wrong_count = #{query.wrongCount}
+		</if>
+	</sql>
+	<!--扩展查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.bookIdFuzzy != null and query.bookIdFuzzy != '' ">
+			and book_id like concat('%', #{query.bookIdFuzzy}, '%')
+		</if>
+		<if test="query.answerIdFuzzy != null and query.answerIdFuzzy != '' ">
+			and answer_id like concat('%', #{query.answerIdFuzzy}, '%')
+		</if>
+	</sql>
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM wrong_answer
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+			order by ${query.OrderBy}
+		</if>
+		<if test="query.simplePage!=null">
+			limit #{query.simplePage.start},#{query.simplePage.end}
+		</if>
+	</select>
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM wrong_answer
+		<include refid="query_condition"/>
+	</select>
+	<!--插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.jl.project.entity.po.WrongAnswer">
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		INSERT INTO wrong_answer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.bookId != null">
+				book_id,
+			</if>
+			<if test="bean.answerId != null">
+				answer_id,
+			</if>
+			<if test="bean.wrongCount != null">
+				wrong_count,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.bookId != null">
+				#{bean.bookId},
+			</if>
+			<if test="bean.answerId != null">
+				#{bean.answerId},
+			</if>
+			<if test="bean.wrongCount != null">
+				#{bean.wrongCount},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入（匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.jl.project.entity.po.WrongAnswer">
+		INSERT INTO wrong_answer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.bookId != null">
+				book_id,
+			</if>
+			<if test="bean.answerId != null">
+				answer_id,
+			</if>
+			<if test="bean.wrongCount != null">
+				wrong_count,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.bookId != null">
+				#{bean.bookId},
+			</if>
+			<if test="bean.answerId != null">
+				#{bean.answerId},
+			</if>
+			<if test="bean.wrongCount != null">
+				#{bean.wrongCount},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.bookId != null">
+				book_id= VALUES(book_id),
+			</if>
+			<if test="bean.answerId != null">
+				answer_id= VALUES(answer_id),
+			</if>
+			<if test="bean.wrongCount != null">
+				wrong_count= VALUES(wrong_count),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加（批量插入）-->
+	<insert id="insertBatch" parameterType="com.jl.project.entity.po.WrongAnswer">
+		INSERT INTO wrong_answer(book_id,answer_id,wrong_count)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.bookId},#{item.answerId},#{item.wrongCount})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.WrongAnswer">
+		INSERT INTO 
+		wrong_answer(book_id,answer_id,wrong_count)values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.bookId},#{item.answerId},#{item.wrongCount})
+		</foreach>
+			on DUPLICATE key update id= VALUES(id),book_id= VALUES(book_id),answer_id= VALUES(answer_id),wrong_count= VALUES(wrong_count)
+	</insert>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select 
+		<include refid="base_column_list"/>
+		from wrong_answer where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.jl.project.entity.po.WrongAnswer">
+		update wrong_answer
+		<set>
+			<if test="bean.id != null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.bookId != null">
+				book_id = #{bean.bookId},
+			</if>
+			<if test="bean.answerId != null">
+				answer_id = #{bean.answerId},
+			</if>
+			<if test="bean.wrongCount != null">
+				wrong_count = #{bean.wrongCount},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		delete from wrong_answer where id=#{id}
+	</delete>
+</mapper>
+

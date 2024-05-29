@@ -56,6 +56,12 @@ public class UpdateQuAndAnswerDTO{
     @Schema(description = "题型")
     private Integer quType;
 
+    /**
+     * 知识点
+     */
+    @Schema(description = "知识点")
+    private String knowledge;
+
 
     /**
      * 题目答案列表
@@ -65,6 +71,14 @@ public class UpdateQuAndAnswerDTO{
 
     public List<QuAnswer> getQuAnswerList() {
         return quAnswerList;
+    }
+
+    public String getKnowledge() {
+        return knowledge;
+    }
+
+    public void setKnowledge(String knowledge) {
+        this.knowledge = knowledge;
     }
 
     public void setQuAnswerList(List<QuAnswer> quAnswerList) {

@@ -142,7 +142,7 @@ public class StudentExamServiceImpl implements StudentExamService{
             }
             UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
 
-            List<String> wrongList = new ArrayList<>();
+            List<UserAnswer> wrongList = new ArrayList<>();
             // 4.1 遍历题目列表的题目信息
             for (Qu qu : quList) {
                 String quId = qu.getId();
@@ -162,12 +162,12 @@ public class StudentExamServiceImpl implements StudentExamService{
                 userId = userAnswer.getUserId();
                 if(userAnswer.getIsRight() == 0){
                     // 错题列表
-                    wrongList.add(quId);
+                    wrongList.add(userAnswer);
                 }
             }
 
             // 搜集错题
-            reviewSubject.notifyBookUpdate(wrongList,userId);
+            reviewSubject.notifyBookUpdate(wrongList);
 
             // 不需要则设置考试记录状态为已处理
             oldRecord.setHandState(1);

@@ -2,6 +2,7 @@ package com.jl.project.service;
 
 import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
+import com.jl.project.entity.query.BookQuery;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
 import com.jl.project.entity.vo.ErrorVO;
@@ -61,5 +62,5 @@ public interface StudentAnswerService {
      */
     Integer deleteUserAnswerById(String id);
 
-    List<ErrorVO> errorCount(String userId);
+    PaginationResultVO<ErrorVO> errorCount(BookQuery bookQuery);
 }

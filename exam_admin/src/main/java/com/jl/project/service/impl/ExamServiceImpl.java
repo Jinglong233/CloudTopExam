@@ -54,7 +54,6 @@ public class ExamServiceImpl implements ExamService {
     private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
 
 
-
     @Resource
     private ReviewSubject reviewSubject;
     @Resource
@@ -449,8 +448,8 @@ public class ExamServiceImpl implements ExamService {
             throw new BusinessException("考试已开始，禁止修改");
         }
         // 更新考试调度任务
-        ResponseEntity<String> response = XxlJobUtil.updateXxlJob(oladExam.getStartJobId(), "2",examId,title, startTime,"startExam");
-        ResponseEntity<String> response1 = XxlJobUtil.updateXxlJob(oladExam.getStopJobId(), "3",examId,title, endTime,"stopExam");
+        ResponseEntity<String> response = XxlJobUtil.updateXxlJob(oladExam.getStartJobId(), "2", examId, title, startTime, "startExam");
+        ResponseEntity<String> response1 = XxlJobUtil.updateXxlJob(oladExam.getStopJobId(), "3", examId, title, endTime, "stopExam");
         return true;
     }
 
@@ -482,8 +481,8 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examMapper.selectById(examId);
         exam.setStartJobId(Integer.valueOf(startRespObject.get("content", String.class)));
         exam.setStopJobId(Integer.valueOf(endRespObject.get("content", String.class)));
-        Integer update = examMapper.updateById(exam,examId);
-        if (update <= 0){
+        Integer update = examMapper.updateById(exam, examId);
+        if (update <= 0) {
             throw new BusinessException("创建考试失败");
         }
         logger.info("创建开始考试任务：" + title + "  " + startRespObject);
@@ -723,8 +722,6 @@ public class ExamServiceImpl implements ExamService {
     }
 
 
-
-
     /**
      * 开始考试
      */
@@ -792,7 +789,7 @@ public class ExamServiceImpl implements ExamService {
                         Integer reviewQuire = exam.getReviewQuire();
                         // 只处理不需要批阅的
                         if (reviewQuire == 0) {
-                            List<String> wrongList = null;
+                            List<UserAnswer> wrongList = null;
                             // 设置已处理状态
                             examRecord.setHandState(1);
                             UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
@@ -805,13 +802,11 @@ public class ExamServiceImpl implements ExamService {
                                 for (UserAnswer userAnswer : list) {
                                     // 获取得分
                                     totalScore += userAnswer.getScore();
-
                                     // 判断是否答对
                                     Integer isRight = userAnswer.getIsRight();
                                     if (isRight == 0) {
-//                                        updateBookData(userAnswer);
                                         // 搜集错题
-                                        wrongList.add(userAnswer.getQuId());
+                                        wrongList.add(userAnswer);
                                     }
                                 }
                             }
@@ -833,14 +828,11 @@ public class ExamServiceImpl implements ExamService {
                             }
 
                             // 搜集错题
-                            reviewSubject.notifyBookUpdate(wrongList,examRecord.getUserId());
+                            reviewSubject.notifyBookUpdate(wrongList);
                         }
-
                     }
-
                 }
             }
-
         }
     }
 

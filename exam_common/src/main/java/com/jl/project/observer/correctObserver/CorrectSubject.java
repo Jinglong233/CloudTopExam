@@ -1,5 +1,7 @@
 package com.jl.project.observer.correctObserver;
 
+import com.jl.project.entity.po.UserAnswer;
+
 import java.util.List;
 
 /**
@@ -11,5 +13,5 @@ public interface CorrectSubject {
 
     void detach();
     // 发送更新通知
-    void notifyBookUpdate(List<String> quList, String userId);
+    void notifyBookUpdate(List<UserAnswer> userAnswerList);
 }

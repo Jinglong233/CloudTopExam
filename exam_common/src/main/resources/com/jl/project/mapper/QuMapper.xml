@@ -28,10 +28,12 @@
 		<result column="update_by" property="updateBy"/>
 		<!-- 题型 -->
 		<result column="qu_type" property="quType"/>
+		<!-- 知识点 -->
+		<result column="knowledge" property="knowledge"/>
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type
+		id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type,knowledge
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -71,6 +73,9 @@
 		<if test="query.quType != null">
 			and qu_type = #{query.quType}
 		</if>
+		<if test="query.knowledge != null and query.knowledge!= ''">
+			and knowledge = #{query.knowledge}
+		</if>
 	</sql>
 	<!--扩展查询条件-->
 	<sql id="base_query_condition_extend">
@@ -109,6 +114,9 @@
 		</if>
 		<if test="query.updateByFuzzy != null and query.updateByFuzzy != '' ">
 			and update_by like concat('%', #{query.updateByFuzzy}, '%')
+		</if>
+		<if test="query.knowledgeFuzzy != null and query.knowledgeFuzzy != '' ">
+			and knowledge like concat('%', #{query.knowledgeFuzzy}, '%')
 		</if>
 	</sql>
 	<!--通用查询条件-->
@@ -178,6 +186,9 @@
 			<if test="bean.quType != null">
 				qu_type,
 			</if>
+			<if test="bean.knowledge != null">
+				knowledge,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -215,6 +226,9 @@
 			</if>
 			<if test="bean.quType != null">
 				#{bean.quType},
+			</if>
+			<if test="bean.knowledge != null">
+				#{bean.knowledge},
 			</if>
 		</trim>
 	</insert>
@@ -259,6 +273,9 @@
 			<if test="bean.quType != null">
 				qu_type,
 			</if>
+			<if test="bean.knowledge != null">
+				knowledge,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -297,6 +314,9 @@
 			<if test="bean.quType != null">
 				#{bean.quType},
 			</if>
+			<if test="bean.knowledge != null">
+				#{bean.knowledge},
+			</if>
 		</trim>
 		on DUPLICATE key update
 		<trim prefix="" suffix="" suffixOverrides=",">
@@ -333,25 +353,28 @@
 			<if test="bean.quType != null">
 				qu_type= VALUES(qu_type),
 			</if>
+			<if test="bean.knowledge != null">
+				knowledge= VALUES(knowledge),
+			</if>
 		</trim>
 	</insert>
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Qu">
-		INSERT INTO qu(id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type)values
+		INSERT INTO qu(id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type,knowledge)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.repoId},#{item.repoText},#{item.content},#{item.image},#{item.level},#{item.analysis},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.quType})
+			(#{item.id},#{item.repoId},#{item.repoText},#{item.content},#{item.image},#{item.level},#{item.analysis},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.quType},#{item.knowledge})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Qu">
 		INSERT INTO 
-		qu(id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type)values
+		qu(id,repo_id,repo_text,content,image,level,analysis,create_time,create_by,update_time,update_by,qu_type,knowledge)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.repoId},#{item.repoText},#{item.content},#{item.image},#{item.level},#{item.analysis},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.quType})
+			(#{item.id},#{item.repoId},#{item.repoText},#{item.content},#{item.image},#{item.level},#{item.analysis},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy},#{item.quType},#{item.knowledge})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),repo_id= VALUES(repo_id),repo_text= VALUES(repo_text),content= VALUES(content),image= VALUES(image),level= VALUES(level),analysis= VALUES(analysis),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by),qu_type= VALUES(qu_type)
+			on DUPLICATE key update id= VALUES(id),repo_id= VALUES(repo_id),repo_text= VALUES(repo_text),content= VALUES(content),image= VALUES(image),level= VALUES(level),analysis= VALUES(analysis),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by),qu_type= VALUES(qu_type),knowledge= VALUES(knowledge)
 	</insert>
 
 
@@ -361,8 +384,6 @@
 		<include refid="base_column_list"/>
 		from qu where id=#{id}
 	</select>
-
-
 
 	<!--根据Id更新-->
 	<update id="updateById" parameterType="com.jl.project.entity.po.Qu">
@@ -404,6 +425,9 @@
 			<if test="bean.quType != null">
 				qu_type = #{bean.quType},
 			</if>
+			<if test="bean.knowledge != null">
+				knowledge = #{bean.knowledge},
+			</if>
 		</set>
 		where id=#{id}
 	</update>
@@ -412,17 +436,5 @@
 	<delete id="deleteById">
 		delete from qu where id=#{id}
 	</delete>
-
-
-	<!-- 根据给定的题目列表返回对应的问题列表（排除填空和简答） -->
-	<select id="getQuListByIds" resultType="com.jl.project.entity.po.Qu">
-        SELECT * FROM qu
-        WHERE id IN
-        <foreach collection="quIds" item="quId" open="(" separator="," close=")">
-            #{quId}
-        </foreach>
-		AND qu_type != 5
-    	AND qu_type != 4
-    </select>
 </mapper>
 

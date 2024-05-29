@@ -5,20 +5,28 @@ import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.*;
 import com.jl.project.enums.PageSize;
+import com.jl.project.enums.QuType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
+import com.jl.project.service.BookService;
 import com.jl.project.service.QuService;
 import com.jl.project.service.StudentAnswerService;
 import com.jl.project.strategy.JudeProblemStrategyContext;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.UserInfoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Description:用户答案表Service
@@ -28,28 +36,36 @@ import java.util.stream.Collectors;
 @Service("studentAnswerService")
 public class StudentAnswerServiceImpl implements StudentAnswerService {
 
+    private static final Logger logger = LoggerFactory.getLogger(StudentAnswerServiceImpl.class);
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    BookService bookService;
+
+
     @Resource
     private UserAnswerMapper<UserAnswer, UserAnswerQuery> userAnswerMapper;
 
+    @Resource
+    private TrainRecordMapper<TrainRecord, TrainRecordQuery> trainRecordMapper;
 
     @Resource
-    private UserMapper<User, UserQuery> userMapper;
+    private QuService quService;
+
+
+    @Resource
+    private BookMapper<Book, BookQuery> bookMapper;
+
+    @Resource
+    private WrongAnswerMapper<WrongAnswer, WrongAnswerQuery> wrongAnswerMapper;
+
     @Resource
     private QuMapper<Qu, QuQuery> quMapper;
 
     @Resource
     private GlQuMapper<GlQu, GlQuQuery> glQuMapper;
-
-
-    @Resource
-    private TrainRecordMapper<TrainRecord, TrainRecordQuQuery> trainRecordMapper;
-
-    @Resource
-    private TrainMapper<Train, TrainQuery> trainMapper;
-
-    @Resource
-    private QuService quService;
-
 
     @Resource
     private JudeProblemStrategyContext strategyContext;
@@ -254,109 +270,77 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
     }
 
     @Override
-    public List<ErrorVO> errorCount(String userId) throws BusinessException {
+    public PaginationResultVO<ErrorVO> errorCount(BookQuery bookQuery) throws BusinessException {
+        PaginationResultVO<ErrorVO> resultVO = new PaginationResultVO<>();
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        String userId = loginUserInfo.getId();
         if (userId == null) {
             throw new BusinessException("缺少参数");
         }
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException("用户不存在");
-        }
-        // 获取考试中的错题
-        UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
-        userAnswerQuery.setUserId(userId);
-        List<UserAnswer> userAnswers =
-                userAnswerMapper.selectList(userAnswerQuery);
-        // 抽取题目回答的正确错误次数(考试记录中：1是答对，null和0是答错)
-        // 注意：true是答对的，false是答错的
-        Map<String, Map<Boolean, Long>> examCount = userAnswers.stream()
-                .collect(Collectors.groupingBy(p -> p.getQuId(),
-                        Collectors.partitioningBy(p -> p.getIsRight() != null && p.getIsRight() == 1,
-                                Collectors.counting())));
-
-
-        List<TrainRecord> trainRecordCount = new ArrayList<>();
-        // 获取训练记录
-        TrainQuery trainQuery = new TrainQuery();
-        trainQuery.setUserId(userId);
-        List<Train> trains = trainMapper.selectList(trainQuery);
-        if (trains != null && !trains.isEmpty()) {
-            // 遍历记录，获取答题记录
-            for (Train train : trains) {
-                Integer answerCount = train.getAnswerCount();
-                // 如果训练回答题目数量为0，则题目记录就不存在
-                if (answerCount <= 0) {
+        List<ErrorVO> result = new ArrayList<>();
+        // 获取错题记录中的题目
+        bookQuery.setUserId(userId);
+        PaginationResultVO<Book> bookPage = bookService.findListByPage(bookQuery);
+        List<Book> bookList = bookPage.getList();
+        if (bookList != null && !bookList.isEmpty()) {
+            for (Book book : bookList) {
+                Integer quAnswerCount = 0;
+                ErrorVO errorVO = new ErrorVO();
+                Integer quType = book.getQuType();
+                // 获取该道题目的详情和选项数据
+                QuAndAnswerVo qu = quService.getQuById(book.getQuId());
+                if (qu == null) {
+                    logger.error("题目不存在,题目Id:{}", book.getQuId());
                     continue;
                 }
+                // 统计答题总数
+                UserAnswerQuery userAnswerQuery = new UserAnswerQuery();
+                userAnswerQuery.setQuId(qu.getId());
+                userAnswerQuery.setUserId(userId);
+                // 考试答题次数
+                Integer examAnswerCount = userAnswerMapper.selectCount(userAnswerQuery);
+                // 训练答题次数
                 TrainRecordQuery trainRecordQuery = new TrainRecordQuery();
-                trainRecordQuery.setTrainId(train.getId());
-                List<TrainRecord> trainRecords =
-                        trainRecordMapper.selectList(trainRecordQuery);
-                trainRecordCount.addAll(trainRecords);
-            }
-        }
+                trainRecordQuery.setAnswered(1); // 避免将未提交的训练题目统计
+                trainRecordQuery.setQuId(qu.getId());
+                Integer trainCount = trainRecordMapper.selectCount(trainRecordQuery);
+                quAnswerCount = trainCount + examAnswerCount;
+                errorVO.setAnswerCount(quAnswerCount);
 
-        // 统计训练的错题
-        Map<String, Map<Boolean, Long>> trainCount = trainRecordCount.stream()
-                .filter(p -> p.getIsRight() != null) // 过滤p.getIsRight()的情况（因为训练的null没意义，训练结束后会删除）
-                .collect(Collectors.groupingBy(p -> p.getQuId(),
-                        Collectors.partitioningBy(p -> p.getIsRight() == 1,
-                                Collectors.counting())));
-
-        // 统计总记录
-        // 创建一个新的Map用于存储合并后的结果
-        Map<String, Map<Boolean, Long>> resultCount = new HashMap<>();
-
-        // 将trainCount1的内容添加到mergedTrainCount中
-        for (Map.Entry<String, Map<Boolean, Long>> entry : examCount.entrySet()) {
-            String key = entry.getKey();
-            Map<Boolean, Long> value = entry.getValue();
-            resultCount.put(key, new HashMap<>(value));
-        }
-
-        // 将trainCount2的内容添加到mergedTrainCount中
-        for (Map.Entry<String, Map<Boolean, Long>> entry : trainCount.entrySet()) {
-            String key = entry.getKey();
-            Map<Boolean, Long> value = entry.getValue();
-            if (!resultCount.containsKey(key)) {
-                resultCount.put(key, new HashMap<>(value));
-            } else {
-                Map<Boolean, Long> existingValue = resultCount.get(key);
-                for (Map.Entry<Boolean, Long> subEntry : value.entrySet()) {
-                    Boolean subKey = subEntry.getKey();
-                    Long subValue = subEntry.getValue();
-                    existingValue.put(subKey, existingValue.getOrDefault(subKey, 0L) + subValue);
+                errorVO.setQuAndAnswerVo(qu);
+                if (quType != QuType.FILL.getValue() && quType != QuType.SHORTANSWER.getValue()) {
+                    Map<String, Integer> wrongAnswerMap = new HashMap<>();
+                    List<QuAnswer> quAnswerList = qu.getQuAnswerList();
+                    if (quAnswerList != null && !quAnswerList.isEmpty()) {
+                        // 建立选项和次数累计
+                        for (QuAnswer quAnswer : quAnswerList) {
+                            WrongAnswerQuery wrongAnswerQuery = new WrongAnswerQuery();
+                            wrongAnswerQuery.setBookId(book.getId());
+                            wrongAnswerQuery.setAnswerId(quAnswer.getId());
+                            List<WrongAnswer> list = wrongAnswerMapper.selectList(wrongAnswerQuery);
+                            if (list != null && !list.isEmpty()) {
+                                wrongAnswerMap.put(quAnswer.getTag(), list.get(0).getWrongCount());
+                            } else {
+                                wrongAnswerMap.put(quAnswer.getTag(), 0);
+                            }
+                            errorVO.setWrongAnswerCount(wrongAnswerMap);
+                        }
+                    }
                 }
-            }
-        }
-
-        List<ErrorVO> result = new ArrayList<>();
-
-        // 查询题目的具体信息
-        for (Map.Entry<String, Map<Boolean, Long>> quEntry : resultCount.entrySet()) {
-            String quId = quEntry.getKey();
-            Map<Boolean, Long> value = quEntry.getValue();
-            QuAndAnswerVo quAndAnswerVo = quService.getQuById(quId);
-            if (quAndAnswerVo != null) {
-                ErrorVO errorVO = new ErrorVO();
-                errorVO.setQuAndAnswerVo(quAndAnswerVo);
-                Integer rightCount = Integer.valueOf(value.get(true).toString());
-                Integer wrongCount = Integer.valueOf(value.get(false).toString());
-                errorVO.setRightCount(rightCount);
-                errorVO.setWrongCount(wrongCount);
-                errorVO.setTotalCount(rightCount + wrongCount);
+                errorVO.setBook(book);
                 result.add(errorVO);
             }
         }
 
-        // 过滤正确率100%的。因为正确率100%不是错题
-        if (!result.isEmpty()) {
-            result = result.stream().filter((errorVO) -> {
-                return errorVO.getRightCount() != errorVO.getTotalCount();
-            }).collect(Collectors.toList());
-        }
+        resultVO.setPageTotal(bookPage.getPageTotal());
+        resultVO.setTotalCount(bookPage.getTotalCount());
+        resultVO.setPageNo(bookPage.getPageNo());
+        resultVO.setPageSize(bookPage.getPageSize());
+        resultVO.setList(result);
+        return resultVO;
 
-        return result;
     }
 
 }

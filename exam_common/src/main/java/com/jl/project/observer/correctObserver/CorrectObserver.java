@@ -1,5 +1,7 @@
 package com.jl.project.observer.correctObserver;
 
+import com.jl.project.entity.po.UserAnswer;
+
 import java.util.List;
 
 /**
@@ -13,5 +15,5 @@ public interface CorrectObserver {
      * @param wrongList 错题列表
      * @param userId
      */
-    void insertErrorCollection(List<String> wrongList, String userId);
+    void insertErrorCollection(List<UserAnswer> wrongList);
 }

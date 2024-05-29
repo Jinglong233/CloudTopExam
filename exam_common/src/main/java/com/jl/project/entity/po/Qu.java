@@ -1,6 +1,8 @@
 package com.jl.project.entity.po;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jl.project.enums.DateTimePatternEnum;
+import com.jl.project.utils.DateUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -12,9 +14,9 @@ import java.util.Date;
 /**
  * @Description:题目表
  * @author:jingLong
- * @date:2023/11/27
+ * @date:2024/05/29
  */
-@Schema(description = "题目表")
+@Schema(description = ":题目表")
 public class Qu implements Serializable {
     /**
      * ID
@@ -103,6 +105,28 @@ public class Qu implements Serializable {
      */
     @Schema(description = "排序（从其他表获取）")
     private Integer sort;
+
+    /**
+     * 知识点
+     */
+    @Schema(description = "知识点")
+    private String knowledge;
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -200,40 +224,17 @@ public class Qu implements Serializable {
         return this.quType;
     }
 
-    public Integer getScore() {
-        return score;
+    public void setKnowledge(String knowledge) {
+        this.knowledge = knowledge;
     }
 
-    public void setScore(Integer score) {
-        this.score = score;
+    public String getKnowledge() {
+        return this.knowledge;
     }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
 
     @Override
     public String toString() {
-        return "Qu{" +
-                "id='" + id + '\'' +
-                ", repoId='" + repoId + '\'' +
-                ", repoText='" + repoText + '\'' +
-                ", content='" + content + '\'' +
-                ", image='" + image + '\'' +
-                ", level=" + level +
-                ", analysis='" + analysis + '\'' +
-                ", createTime=" + createTime +
-                ", createBy='" + createBy + '\'' +
-                ", updateTime=" + updateTime +
-                ", updateBy='" + updateBy + '\'' +
-                ", quType=" + quType +
-                ", score=" + score +
-                ", sort=" + sort +
-                '}';
+        return "ID:" + (id == null ? "空" : id) + ",所属题库的ID:" + (repoId == null ? "空" : repoId) + ",关联题库标题:" + (repoText == null ? "空" : repoText) + ",题目内容:" + (content == null ? "空" : content) + ",题目图片:" + (image == null ? "空" : image) + ",题目难度0:简单1:困难:" + (level == null ? "空" : level) + ",题目分析:" + (analysis == null ? "空" : analysis) + ",创建时间:" + (createTime == null ? "空" : DateUtils.format(createTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",创建者:" + (createBy == null ? "空" : createBy) + ",更新时间:" + (updateTime == null ? "空" : DateUtils.format(updateTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_ss.getPattern())) + ",更新者:" + (updateBy == null ? "空" : updateBy) + ",题型:" + (quType == null ? "空" : quType) + ",知识点:" + (knowledge == null ? "空" : knowledge);
     }
+
 }

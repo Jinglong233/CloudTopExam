@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @Service("studentTrainService")
 public class StudentTrainServiceImpl implements StudentTrainService {
 
+
     @Resource
     private RepoMapper<Repo, RepoQuery> repoMapper;
 
@@ -400,7 +401,7 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
     @Override
     public Boolean stopTrain(String trainId) throws BusinessException {
-        // 更新训练状态
+       // 更新训练状态
         Train train = trainMapper.selectById(trainId);
         if (train == null) {
             throw new BusinessException("训练记录不存在");
@@ -431,18 +432,20 @@ public class StudentTrainServiceImpl implements StudentTrainService {
         // 获取此次训练的所有答题记录，做错题统计
         List<TrainRecord> trainRecords = trainRecordMapper.selectList(trainRecordQuery);
         if (trainRecords != null && trainRecords.size() != 0) {
-            List<String> wrongList = new ArrayList<>();
+            List<UserAnswer> wrongList = new ArrayList<>();
             for (TrainRecord trainRecord : trainRecords) {
                 // 错题搜集
                 if (trainRecord.getIsRight() == 0) {
-                    wrongList.add(trainRecord.getQuId());
+                    UserAnswer userAnswer = new UserAnswer();
+                    // 这里训练记录中没userId,得加上
+                    userAnswer.setUserId(train.getUserId());
+                    BeanUtil.copyProperties(trainRecord,userAnswer);
+                    wrongList.add(userAnswer);
                 }
             }
             // 搜集错题
-            trainSubject.notifyBookUpdate(wrongList, train.getUserId());
+            trainSubject.notifyBookUpdate(wrongList);
         }
-
-
         return true;
     }
 
