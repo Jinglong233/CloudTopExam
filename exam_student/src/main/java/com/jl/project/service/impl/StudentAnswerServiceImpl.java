@@ -321,9 +321,11 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
                             wrongAnswerQuery.setAnswerId(quAnswer.getId());
                             List<WrongAnswer> list = wrongAnswerMapper.selectList(wrongAnswerQuery);
                             if (list != null && !list.isEmpty()) {
-                                wrongAnswerMap.put(quAnswer.getTag(), list.get(0).getWrongCount());
+                                wrongAnswerMap.put(
+                                        quType.equals(QuType.JUDGE.getValue()) ? quAnswer.getContent() : quAnswer.getTag(),
+                                        list.get(0).getWrongCount());
                             } else {
-                                wrongAnswerMap.put(quAnswer.getTag(), 0);
+                                wrongAnswerMap.put(quType.equals(QuType.JUDGE.getValue()) ? quAnswer.getContent() : quAnswer.getTag(), 0);
                             }
                             errorVO.setWrongAnswerCount(wrongAnswerMap);
                         }

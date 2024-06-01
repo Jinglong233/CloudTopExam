@@ -35,7 +35,7 @@ public class StudentAnswerController extends ABaseController {
 
 
     /**
-     * 新增
+     * 获取用户作答列表
      */
     @RequestMapping("getDataList")
     @GlobalInterceptor(checkLogin = true, checkParams = true)
