@@ -181,7 +181,7 @@
           </template>
 
           <!--大题乱序选项-->
-          <template #extra>
+          <!--<template #extra>
             <a-checkbox
               type="checkbox"
               :value="1"
@@ -195,7 +195,8 @@
               @change="checkBoxChange($event, groupList, 'itemRand')"
               >选项乱序</a-checkbox
             >
-          </template>
+          </template>-->
+
           <!--题目展示部分-->
           <a-card
             v-for="(qu, index) in groupList.quList"
@@ -205,12 +206,12 @@
             <!--锚点位置-->
             <div :id="`单选${index + 1}`"></div>
             <!--问题部分-->
-            <template #title>
-              <a-space>
-                <BookMark :number="index + 1" />
+            <a-space>
+              <BookMark :number="index + 1" />
+              <a-typography-text>
                 <div v-html="qu.content" />
-              </a-space>
-            </template>
+              </a-typography-text>
+            </a-space>
             <a-row :gutter="10">
               <a-col :span="17">
                 <!--非简答部分-->
@@ -285,11 +286,11 @@
                           color: '#1D2129',
                         }"
                       >
-                        <a-typography-text type="primary">
-                          答案：
-                        </a-typography-text>
                         <a-typography-text>
-                          <div v-html="qu.analysis" />
+                          答案：
+                          <div style="display: inline-block">
+                            <div v-html="qu.analysis" />
+                          </div>
                         </a-typography-text>
                       </a-space>
                     </div>
