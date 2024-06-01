@@ -107,7 +107,7 @@
   const fetchData = async () => {
     setLoading(true);
     try {
-      console.log('123');
+      // console.log('123');
     } catch (err) {
       // you can report use errorHandler or other
     } finally {

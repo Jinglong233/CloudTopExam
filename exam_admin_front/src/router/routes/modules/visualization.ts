@@ -1,7 +1,6 @@
 import { DEFAULT_LAYOUT } from '../base';
 import { AppRouteRecordRaw } from '../types';
 
-// todo 隐藏分析菜单栏
 const VISUALIZATION: AppRouteRecordRaw = {
   path: '/visualization',
   name: 'visualization',
@@ -9,7 +8,6 @@ const VISUALIZATION: AppRouteRecordRaw = {
   meta: {
     locale: 'menu.visualization',
     requiresAuth: true,
-    hideInMenu: true,
     icon: 'icon-apps',
     order: 1,
   },
@@ -21,7 +19,6 @@ const VISUALIZATION: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.visualization.dataAnalysis',
         requiresAuth: true,
-        hideInMenu: true,
         roles: ['admin'],
       },
     },

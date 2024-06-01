@@ -1,8 +1,8 @@
 <template>
   <a-spin :loading="loading" style="width: 100%">
     <a-card :bordered="false" :style="cardStyle">
-      <div class="content-wrap">
-        <div class="content">
+      <div class="content-wrap" style="width: 100%">
+        <div class="content" style="width: 55%">
           <a-statistic
             :title="title"
             :value="renderData.count"
@@ -12,15 +12,15 @@
           />
           <div class="desc">
             <a-typography-text type="secondary" class="label">
-              {{ $t('dataAnalysis.card.yesterday') }}
+              {{ $t('dataAnalysis.card.statisticalTime') }}
             </a-typography-text>
             <a-typography-text type="danger">
-              {{ renderData.growth }}
-              <icon-arrow-rise />
+              {{ renderData.statisticalTime }}
+              <icon-clock-circle />
             </a-typography-text>
           </div>
         </div>
-        <div class="chart">
+        <div class="chart" style="width: 45%">
           <Chart v-if="!loading" :option="chartOption" />
         </div>
       </div>
@@ -29,52 +29,11 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, PropType, CSSProperties } from 'vue';
+  import { CSSProperties, PropType, ref } from 'vue';
   import useLoading from '@/hooks/loading';
-  import {
-    queryPublicOpinionAnalysis,
-    PublicOpinionAnalysis,
-    PublicOpinionAnalysisRes,
-  } from '@/api/visualization';
+  import { PublicOpinionAnalysis } from '@/api/visualization';
   import useChartOption from '@/hooks/chart-option';
-
-  const barChartOptionsFactory = () => {
-    const data = ref<any>([]);
-    const { chartOption } = useChartOption(() => {
-      return {
-        grid: {
-          left: 0,
-          right: 0,
-          top: 10,
-          bottom: 0,
-        },
-        xAxis: {
-          type: 'category',
-          show: false,
-        },
-        yAxis: {
-          show: false,
-        },
-        tooltip: {
-          show: true,
-          trigger: 'axis',
-        },
-        series: {
-          name: 'total',
-          data,
-          type: 'bar',
-          barWidth: 7,
-          itemStyle: {
-            borderRadius: 2,
-          },
-        },
-      };
-    });
-    return {
-      data,
-      chartOption,
-    };
-  };
+  import { getQuTypeProportion } from '@/api/dataAnalysis';
 
   const lineChartOptionsFactory = () => {
     const data = ref<number[][]>([[], []]);
@@ -130,60 +89,8 @@
     };
   };
 
-  const pieChartOptionsFactory = () => {
-    const data = ref<any>([]);
-    const { chartOption } = useChartOption(() => {
-      return {
-        grid: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        legend: {
-          show: true,
-          top: 'center',
-          right: '0',
-          orient: 'vertical',
-          icon: 'circle',
-          itemWidth: 6,
-          itemHeight: 6,
-          textStyle: {
-            color: '#4E5969',
-          },
-        },
-        tooltip: {
-          show: true,
-        },
-        series: [
-          {
-            name: '总计',
-            type: 'pie',
-            radius: ['50%', '70%'],
-            label: {
-              show: false,
-            },
-            data,
-          },
-        ],
-      };
-    });
-    return {
-      data,
-      chartOption,
-    };
-  };
-
   const props = defineProps({
     title: {
-      type: String,
-      default: '',
-    },
-    quota: {
-      type: String,
-      default: '',
-    },
-    chartType: {
       type: String,
       default: '',
     },
@@ -194,57 +101,37 @@
       },
     },
   });
-
   const { loading, setLoading } = useLoading(true);
   const { chartOption: lineChartOption, data: lineData } =
     lineChartOptionsFactory();
-  const { chartOption: barChartOption, data: barData } =
-    barChartOptionsFactory();
-  const { chartOption: pieChartOption, data: pieData } =
-    pieChartOptionsFactory();
-  const renderData = ref<PublicOpinionAnalysisRes>({
+  const renderData = ref({
     count: 0,
-    growth: 0,
+    date: 0,
     chartData: [],
   });
   const chartOption = ref({});
+  // 获取数据
   const fetchData = async (params: PublicOpinionAnalysis) => {
     try {
-      const { data } = await queryPublicOpinionAnalysis(params);
+      const { data } = await getQuTypeProportion();
       renderData.value = data;
       const { chartData } = data;
-      if (props.chartType === 'bar') {
-        chartData.forEach((el, idx) => {
-          barData.value.push({
-            value: el.y,
-            itemStyle: {
-              color: idx % 2 ? '#2CAB40' : '#86DF6C',
-            },
-          });
-        });
-        chartOption.value = barChartOption.value;
-      } else if (props.chartType === 'line') {
-        chartData.forEach((el) => {
-          if (el.name === '2021') {
-            lineData.value[0].push(el.y);
-          } else {
-            lineData.value[1].push(el.y);
-          }
-        });
-        chartOption.value = lineChartOption.value;
-      } else {
-        chartData.forEach((el) => {
-          pieData.value.push(el);
-        });
-        chartOption.value = pieChartOption.value;
-      }
+
+      chartData.forEach((el: any) => {
+        if (el.name === '2021') {
+          lineData.value[0].push(el.y);
+        } else {
+          lineData.value[1].push(el.y);
+        }
+      });
+      chartOption.value = lineChartOption.value;
     } catch (err) {
       // you can report use errorHandler or other
     } finally {
       setLoading(false);
     }
   };
-  fetchData({ quota: props.quota });
+  fetchData();
 </script>
 
 <style scoped lang="less">
