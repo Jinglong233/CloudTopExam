@@ -117,5 +117,4 @@ public interface UserService {
 
 
     Boolean getRetrievePasswordCode(RetrievePasswordDTO retrievePasswordDTO);
-
 }

@@ -315,5 +315,50 @@
         </foreach>
     </select>
 
+    <!-- 根据知识点分类获取前五的错题知识点 -->
+    <select id="selectByKnowledge" resultType="com.jl.project.entity.vo.ChartVO">
+        SELECT kn_content as name, SUM(wrong_count) AS value
+        FROM book
+        GROUP BY kn_content
+        ORDER BY value DESC
+            LIMIT 5
+    </select>
+    <!-- 分类每个题型中每个知识点的错题总和 -->
+    <select id="selectWrongCountSummary" resultType="com.jl.project.entity.vo.WrongCountSummaryVO">
+        SELECT qu_type, kn_content, SUM(wrong_count) as total_wrong_count
+        FROM book
+        GROUP BY qu_type, kn_content;
+    </select>
+    <!-- 获取错题的知识点列表 -->
+    <select id="selectKnContentList" resultType="java.lang.String">
+        SELECT DISTINCT kn_content
+        FROM book
+    </select>
+
+
+
+    <!-- 获取知识点列表数量 -->
+    <select id="selectErrorCountNumByUserList" resultType="java.lang.Integer">
+        SELECT count(*) FROM book WHERE user_id IN
+        <foreach item="user" index="index" collection="userList" open="(" separator="," close=")">
+            #{user.id}
+        </foreach>
+    </select>
+
+
+    <!-- 根据用户列表获取错题列表 -->
+    <select id="selectErrorCountByUserList" resultType="com.jl.project.entity.po.Book">
+        SELECT * FROM book WHERE user_id IN
+        <foreach item="user" index="index" collection="userList" open="(" separator="," close=")">
+            #{user.id}
+        </foreach>
+        <!-- 当结果不为空时，执行以下语句 -->
+        <if test="query.simplePage!=null">
+            LIMIT #{query.simplePage.start}, #{query.simplePage.end}
+        </if>
+
+    </select>
+
+
 </mapper>
 

@@ -144,28 +144,6 @@ public class ExamController extends ABaseController {
         return getSuccessResponseVO(null);
     }
 
-//    下面接口未测试
-
-
-    /**
-     * 根据参数获取批阅考试
-     */
-    /*@RequestMapping("getCorrectExamByParam")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getCorrectExamByParam(@RequestBody @VerifyParam ExamQuery query) throws BusinessException {
-        List<CorrectExamVO> result = examService.getCorrectExamByParam(query);
-        return getSuccessResponseVO(result);
-    }*/
-
-    /**
-     * 通过用户Id获取考试信息
-     */
-  /*  @RequestMapping("getExamInfoByUserId")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getExamInfoByUserId(@RequestBody @VerifyParam(require = true) String userId) throws BusinessException {
-        List<ExamVO> result = examService.getExamInfoByUserId(userId);
-        return getSuccessResponseVO(result);
-    }*/
 
     /**
      * 批量新增
