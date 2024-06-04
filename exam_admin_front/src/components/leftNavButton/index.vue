@@ -1,6 +1,7 @@
 <template>
   <!--左侧序号按钮-->
   <a-button
+    style="width: 35px"
     :type="isNowNumber(anchorId) ? 'primary' : 'outline'"
     @click="clickAnchor(anchorId)"
   >
