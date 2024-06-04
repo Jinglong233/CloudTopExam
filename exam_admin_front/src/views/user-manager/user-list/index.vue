@@ -307,7 +307,7 @@
               <a-form-item field="createTime" label="创建时间">
                 <a-time-picker
                   v-model="userInfoForm.createTime"
-                  format="YYYY-MM-DD hh:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
                   disabled
                 />
               </a-form-item>
@@ -346,7 +346,7 @@
                 <a-time-picker
                   v-model="userInfoForm.updateTime"
                   disabled
-                  format="YYYY-MM-DD hh:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
                 />
               </a-form-item>
             </a-col>

@@ -41,7 +41,7 @@
                         placeholder="请选择考试开始时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        format="YYYY-MM-DD HH:mm:ss"
+                        format="yyyy-MM-dd HH:mm:ss"
                         :disabled-input="true"
                         :disabled-date="
                           (current) =>
@@ -61,7 +61,7 @@
                         placeholder="请选择考试结束时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        format="YYYY-MM-DD HH:mm:ss"
+                        format="yyyy-MM-dd HH:mm:ss"
                         :disabled-input="true"
                         :disabled-date="
                           (current) =>

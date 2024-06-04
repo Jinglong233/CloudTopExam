@@ -44,7 +44,7 @@
               show-time
               :time-picker-props="{ defaultValue: '09:09:06' }"
               :placeholder="t('examManager.placeholder.startTime')"
-              format="YYYY-MM-DD HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
             />
           </a-col>
           <!--时间-->
