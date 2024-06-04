@@ -160,7 +160,7 @@ public class StudentExamServiceImpl implements StudentExamService{
                 Integer score = userAnswer.getScore();
                 totalScore += score;
                 userId = userAnswer.getUserId();
-                if(userAnswer.getIsRight() == 0){
+                if(userAnswer.getIsRight() != null &&userAnswer.getIsRight() == 0){
                     // 错题列表
                     wrongList.add(userAnswer);
                 }
