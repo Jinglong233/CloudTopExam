@@ -37,3 +37,8 @@ export function submitMyExam(submitExamDTO: SubmitExamDTO) {
 export function getErrorCount(bookSearch: BookQuery) {
   return axios.post<ErrorVO[]>('/api/studentAnswer/errorCount', bookSearch);
 }
+
+// 获取服务器时间
+export function getServerTime() {
+  return axios.get('/api/exam/getServerTime');
+}

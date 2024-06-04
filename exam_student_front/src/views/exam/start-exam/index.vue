@@ -19,6 +19,7 @@
               :span="4"
             >
               <a-button
+                style="width: 35px"
                 :type="isNowNumber(qu.id) ? 'primary' : 'outline'"
                 @click="jumpQuestion(qu.id)"
                 >{{ qu.sort }}</a-button
@@ -40,12 +41,19 @@
     <a-col :span="4" style="margin-top: 20px">
       <a-card style="height: 720px; margin-right: 20px; text-align: center">
         <a-typography-title :heading="6"> 剩余时间 </a-typography-title>
-        <a-countdown :value="compTimeDiff()" :now="now" />
-        <a-countdown
-          title="Countdown"
-          :value="now + 1000 * 60 * 60 * 2"
-          :now="now"
-        />
+        <a-typography-title :heading="5">
+          <vue-countdown
+            v-slot="{ days, hours, minutes, seconds }"
+            :time="compTimeDiff()"
+            @end="stopCountdown()"
+          >
+            {{ String(days).padStart(2, '0') }}:{{
+              String(hours).padStart(2, '0')
+            }}:{{ String(minutes).padStart(2, '0') }}:{{
+              String(seconds).padStart(2, '0')
+            }}
+          </vue-countdown>
+        </a-typography-title>
         <a-divider />
         <a-button type="primary" @click="submitExam">提交试卷</a-button>
         <a-divider />
@@ -81,7 +89,7 @@
   import { useAppStore, useUserStore } from '@/store';
   import { Message, Modal } from '@arco-design/web-vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { getExamById, submitMyExam } from '@/api/exam';
+  import { getExamById, getServerTime, submitMyExam } from '@/api/exam';
   import ExamVO from '@/types/model/vo/ExamVO';
   import { PaperAndQuVO } from '@/types/model/vo/PaperAndQuVO';
   import { getPaperDetail } from '@/api/paper';
@@ -99,9 +107,10 @@
   import { QuestionType } from '@/types/model/QuestionType';
   import { GroupList } from '@/types/model/po/GroupList';
   import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import { getNow } from '@arco-design/web-vue/es/_utils/date';
 
   // 当前时间
-  const now = Date.now();
+  const now = ref('');
 
   dayjs.extend(duration);
 
@@ -137,7 +146,7 @@
 
   // 当前这个答案用户所选的答案列表
   const getNowUserQuAnswer = () => {
-    return userAnswerList.value.find((userAnswer) => {
+    return userAnswerList.value.find((userAnswer: any) => {
       if ((nowQuestion.value.id as string) === userAnswer.quId) {
         return true;
       }
@@ -261,12 +270,17 @@
         nowUserQuAnswer.value = getNowUserQuAnswer();
       }
     });
+
+    // 获取服务器时间
+    await getServerTime().then((res: any) => {
+      now.value = res.data;
+    });
   });
 
   // 倒计时计算
   // 计算时差
   const compTimeDiff = () => {
-    return dayjs(exam.value.endTime).diff(Date.now());
+    return dayjs(exam.value.endTime).diff(now.value);
   };
 
   onBeforeUnmount(() => {
@@ -396,6 +410,26 @@
     } else {
       showSubmitModal('确认提交试卷？');
     }
+  };
+
+  const stopCountdown = async () => {
+    await submitMyExam({
+      examRecordId: examRecordInfo.value.id,
+      quList: allQuestion.value as Qu[],
+    }).then((res: any) => {
+      if (res.data === true) {
+        Message.success({
+          id: 'submitSuccessInfo',
+          content: '提交成功',
+          duration: 2000,
+        });
+        // 提交成功前往考试结果页面
+        router.push({
+          name: 'ExamResult',
+          params: { examRecordId: examRecordInfo.value.id },
+        });
+      }
+    });
   };
 </script>
 

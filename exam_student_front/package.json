@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.44.7",
+    "@chenfengyuan/vue-countdown": "2",
     "@icon-park/vue-next": "^1.4.2",
     "@vueuse/core": "^9.3.0",
     "@wangeditor/editor": "^5.1.23",
@@ -47,7 +48,7 @@
     "pinia": "^2.0.23",
     "query-string": "^8.0.3",
     "sortablejs": "^1.15.0",
-    "vue": "^3.2.40",
+    "vue": "3",
     "vue-echarts": "^6.2.3",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.0.14"
