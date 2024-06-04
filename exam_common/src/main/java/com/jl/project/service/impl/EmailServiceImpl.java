@@ -108,7 +108,7 @@ public class EmailServiceImpl implements EmailService {
         mailContent.setSubject(title);
         String tmplContent = tmpl.getContent();
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String startTime = simpleDateFormat.format(exam.getStartTime());
         String endTime = simpleDateFormat.format(exam.getEndTime());
         String mailContext = String.format(tmplContent, exam.getTitle(), startTime, endTime);

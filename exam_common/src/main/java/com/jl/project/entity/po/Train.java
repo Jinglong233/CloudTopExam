@@ -74,8 +74,8 @@ public class Train implements Serializable{
 	 * 最近训练时间
 	 */
 	@Schema(description = "最近训练时间")
-	@JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss",timezone="GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date trainTime;
 
 	/**
