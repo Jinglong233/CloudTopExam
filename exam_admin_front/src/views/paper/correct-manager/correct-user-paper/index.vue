@@ -25,7 +25,11 @@
                   style="margin-top: 10px"
                   :span="4"
                 >
-                  <LeftNavButton :anchor-id="qu.id" :qu-sort="qu.sort" />
+                  <LeftNavButton
+                    :user-answer-list="userAnswerList"
+                    :anchor-id="qu.id"
+                    :qu-sort="qu.sort"
+                  />
                 </a-col>
               </a-row>
             </template>
@@ -56,7 +60,11 @@
                     style="margin-top: 10px"
                     :span="4"
                   >
-                    <LeftNavButton :qu-sort="qu.sort" :anchor-id="qu.id" />
+                    <LeftNavButton
+                      :user-answer-list="userAnswerList"
+                      :qu-sort="qu.sort"
+                      :anchor-id="qu.id"
+                    />
                   </a-col>
                 </a-row>
               </template>
@@ -64,7 +72,6 @@
           </VerticalNav>
         </a-col>
       </template>
-
       <!--问题预览部分（看所有题）-->
       <template v-if="!subView">
         <a-col :span="15">
@@ -524,15 +531,14 @@
   import { getPaperDetail } from '@/api/paper';
   import { QuestionType } from '@/types/model/QuestionType';
   import { getUserAnswerList, updateUserAnswerList } from '@/api/userAnswer';
-  import { Qu } from '@/types/model/po/Qu';
+  import Qu from '@/types/model/po/Qu';
   import { Message } from '@arco-design/web-vue';
-  import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
+  import ExamRecordQuery from '@/types/model/query/ExamRecordQuery';
   import VerticalNav from '@/components/verticalNav/index.vue';
   import LeftNavButton from '@/components/leftNavButton/index.vue';
 
   const route = useRoute();
   const router = useRouter();
-
   const exam = ref<ExamVO>({});
   const paper = ref<PaperAndQuVO>({});
   const examRecordInfo = ref<ExamRecord>({});
@@ -579,13 +585,16 @@
       }
     });
 
-    // 获取用户作答记录
-    await getUserAnswerList({
-      userId: examRecordInfo.value.userId,
-      examRecordId,
-    }).then((res: any) => {
+    try {
+      // 获取用户作答记录
+      const res = await getUserAnswerList({
+        userId: examRecordInfo.value.userId,
+        examRecordId,
+      });
       userAnswerList.value = res.data;
-    });
+    } catch (error) {
+      console.error('Failed to fetch user answer list:', error);
+    }
   });
 
   // 更新所有信息
@@ -609,11 +618,6 @@
     } as ExamRecordQuery).then((res: any) => {
       examRecordInfo.value = res.data.list[0] as ExamRecord;
     });
-  };
-
-  // 判断当前显示题目是否是侧边对应的题号
-  const isNowNumber = (id: string) => {
-    return true;
   };
 
   // 获取题目对应的用户作答详情

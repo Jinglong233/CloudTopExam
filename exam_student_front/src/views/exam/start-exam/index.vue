@@ -21,6 +21,7 @@
               <a-button
                 style="width: 35px"
                 :type="isNowNumber(qu.id) ? 'primary' : 'outline'"
+                :status="Number(getAnswered(qu.id)) === 1 ? 'normal' : 'danger'"
                 @click="jumpQuestion(qu.id)"
                 >{{ qu.sort }}</a-button
               >
@@ -328,6 +329,22 @@
   const isNowNumber = (id: string) => {
     const temp = nowQuestion.value as any;
     return id === temp.id;
+  };
+
+  // 获取当前题目的作答状态
+  // eslint-disable-next-line consistent-return
+  const getAnswered = (id: string): number => {
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < userAnswerList.value.length; i++) {
+      if (id === userAnswerList.value[i].quId) {
+        return Number(
+          !userAnswerList.value[i].answered
+            ? 0
+            : userAnswerList.value[i].answered
+        );
+      }
+    }
+    return -1;
   };
 
   const showSubmitModal = (showContext: string) => {
