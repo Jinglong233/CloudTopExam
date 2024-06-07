@@ -39,9 +39,10 @@
   import { Msg } from '@/types/model/po/Msg';
   import { onMounted, ref } from 'vue';
   import { getAnnouncement } from '@/api/msg';
+  import { getErrorKnowledge } from '@/api/studentAnswer';
   import Banner from './components/banner.vue';
   import DataPanel from './components/data-panel.vue';
-  import ExamDataChart from './components/exam-data-chart.vue';
+  import ExamDataChart from './components/error-knowledge-count.vue';
   import UncompletedTrain from './components/uncompleted-train.vue';
   import IntellTraining from './components/intelligent-training.vue';
   import Announcement from './components/announcement.vue';
@@ -51,6 +52,9 @@
   const announceList = ref<Msg[]>([]);
 
   onMounted(async () => {
+    await getErrorKnowledge().then((res: any) => {
+      console.log('sssss', res);
+    });
     await getAnnouncement().then((res: any) => {
       if (res.data && res.data.length > 3) {
         announceList.value = res.data.splice(0, 3);

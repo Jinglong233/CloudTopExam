@@ -17,3 +17,8 @@ export function updateStudentAnswer(
 export function addBatchStudentAnswer(addUserAnswerDTO: AddUserAnswerDTO) {
   return axios.post<boolean>('/api/studentAnswer/add', addUserAnswerDTO);
 }
+
+// 获取错题知识点统计
+export function getErrorKnowledge() {
+  return axios.get('/api/studentAnswer/errorKnowledge');
+}

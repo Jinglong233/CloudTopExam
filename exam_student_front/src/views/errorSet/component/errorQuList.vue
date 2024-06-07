@@ -73,6 +73,13 @@
                 </a-card>
               </template>
 
+              <!--知识点-->
+              <a-space>
+                知识点：<a-tag style="margin: 5px" color="green">{{
+                  qu.quAndAnswerVo.knowledge
+                }}</a-tag>
+              </a-space>
+
               <!--解析-->
               <a-card :style="{ backgroundColor: '#fcfcfc' }">
                 <a-space direction="vertical" fill>
