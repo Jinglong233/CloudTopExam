@@ -6,10 +6,7 @@ import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.BookQuery;
 import com.jl.project.entity.query.UserAnswerQuery;
-import com.jl.project.entity.vo.CorrectUserAnswerDTO;
-import com.jl.project.entity.vo.ErrorVO;
-import com.jl.project.entity.vo.PaginationResultVO;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.*;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.StudentAnswerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,7 +65,7 @@ public class StudentAnswerController extends ABaseController {
     /**
      * 获取错题统计
      *
-     * @param userId
+     * @param bookQuery
      * @return
      */
     @RequestMapping("errorCount")
@@ -83,5 +80,23 @@ public class StudentAnswerController extends ABaseController {
         return getSuccessResponseVO(result);
     }
 
+
+
+    /**
+     * 获取错题知识点列表数量
+     *
+     * @return
+     */
+    @RequestMapping("errorKnowledge")
+    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
+        public ResponseVO getErrorKnowledge() {
+        WrongKnowledgeVO result = null;
+        try {
+            result = studentAnswerService.getErrorKnowledge();
+        } catch (BusinessException e) {
+            return getErrorResponseVO(null, e.getCode(), e.getMessage());
+        }
+        return getSuccessResponseVO(result);
+    }
 
 }

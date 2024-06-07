@@ -55,6 +55,7 @@ public class QuServiceImpl implements QuService {
     /**
      * 分页查询
      */
+    @Override
     public PaginationResultVO<Qu> findListByPage(QuQuery query) {
         Integer count = this.findCountByParam(query);
         Integer pageSize = query.getPageSize() == null ? PageSize.SIZE15.getSize() : query.getPageSize();

@@ -7,6 +7,7 @@ import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.entity.vo.CorrectUserAnswerDTO;
 import com.jl.project.entity.vo.ErrorVO;
 import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.WrongKnowledgeVO;
 
 import java.util.List;
 
@@ -63,4 +64,6 @@ public interface StudentAnswerService {
     Integer deleteUserAnswerById(String id);
 
     PaginationResultVO<ErrorVO> errorCount(BookQuery bookQuery);
+
+    WrongKnowledgeVO getErrorKnowledge();
 }

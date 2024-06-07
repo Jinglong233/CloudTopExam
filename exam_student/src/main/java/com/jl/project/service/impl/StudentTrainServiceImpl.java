@@ -17,6 +17,7 @@ import com.jl.project.enums.TrainMode;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.observer.correctObserver.TrainSubject;
+import com.jl.project.service.QuService;
 import com.jl.project.service.RecommendService;
 import com.jl.project.service.StudentTrainService;
 import com.jl.project.utils.CommonUtil;
@@ -33,6 +34,9 @@ public class StudentTrainServiceImpl implements StudentTrainService {
 
     @Resource
     private RepoMapper<Repo, RepoQuery> repoMapper;
+
+    @Resource
+    private QuService quService;
 
     @Resource
     private BookMapper<Book, BookQuery> bookMapper;
@@ -205,7 +209,12 @@ public class StudentTrainServiceImpl implements StudentTrainService {
             }).collect(Collectors.toList());
         } else if (mode.equals(TrainMode.INTELLIGENT.getValue())) {// 智能推荐训练
             List<String> recommendQuList = recommendService.getRecommendQuList();
-            quList = quMapper.getQuListByIds(recommendQuList);
+            if(recommendQuList!=null && !recommendQuList.isEmpty()){
+                quList = quMapper.getQuListByIds(recommendQuList);
+            }else {
+                PaginationResultVO<Qu> listByPage = quService.findListByPage(new QuQuery());
+                quList = listByPage.getList();
+            }
         }
         // 设置题目总数
         train.setTotalCount(quList.size());

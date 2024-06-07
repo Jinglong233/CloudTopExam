@@ -23,10 +23,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description:用户答案表Service
@@ -343,6 +341,35 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
         resultVO.setList(result);
         return resultVO;
 
+    }
+
+    @Override
+    public WrongKnowledgeVO getErrorKnowledge() {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        List<String> userId = new ArrayList<>();
+        userId.add(loginUserInfo.getId());
+        List<Book> bookList = bookMapper.getBookListByUserIds(userId);
+        List<ChartVO> resultList = null;
+        Long count = 0L;
+        if (!bookList.isEmpty()) {
+
+            Map<String, Long> knowlendgeCountMap = bookList.stream()
+                    .collect(Collectors.groupingBy(Book::getKnContent, Collectors.counting()));
+
+            count = knowlendgeCountMap.values().stream()
+                    .mapToLong(Long::longValue)
+                    .sum();
+            resultList = knowlendgeCountMap.entrySet().stream()
+                    .map(entry -> new ChartVO(entry.getKey(), entry.getValue().intValue()))
+                    .collect(Collectors.toList());
+        }
+
+        WrongKnowledgeVO wrongKnowledgeVO = new WrongKnowledgeVO();
+        wrongKnowledgeVO.setChartData(resultList);
+        wrongKnowledgeVO.setCount(count.intValue());
+        wrongKnowledgeVO.setStatisticalTime(new Date());
+        return wrongKnowledgeVO;
     }
 
 }
