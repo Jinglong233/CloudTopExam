@@ -41,7 +41,7 @@
                         placeholder="请选择考试开始时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        format="yyyy-MM-dd HH:mm:ss"
+                        format="YYYY-MM HH:mm:ss"
                         :disabled-input="true"
                         :disabled-date="
                           (current) =>
@@ -61,7 +61,7 @@
                         placeholder="请选择考试结束时间"
                         style="width: 220px; margin: 0 24px 24px 0"
                         show-time
-                        format="yyyy-MM-dd HH:mm:ss"
+                        format="YYYY-MM HH:mm:ss"
                         :disabled-input="true"
                         :disabled-date="
                           (current) =>
@@ -325,7 +325,7 @@
   import { onMounted, ref, watch } from 'vue';
   import { Paper } from '@/types/model/po/Paper';
   import { getPaperDetail } from '@/api/paper';
-  import { UserQuery } from '@/types/model/query/UserQuery';
+  import UserQuery from '@/types/model/query/UserQuery';
   import { getDeptTree } from '@/api/department';
   import { getUserList } from '@/api/user';
   import { AddExamDTO } from '@/types/model/dto/AddExamDTO';
@@ -333,7 +333,7 @@
   import { User } from '@/types/model/po/User';
   import { Message, ValidatedError } from '@arco-design/web-vue';
   import { useUserStore } from '@/store';
-  import { SimplePage } from '@/types/model/po/SimplePage';
+  import SimplePage from '@/types/model/po/SimplePage';
   import { addExam } from '@/api/exam';
 
   const { t } = useI18n();
