@@ -88,7 +88,7 @@
             }"
           >
             <a-typography-text type="primary"> 答案 </a-typography-text>
-            <a-typography-text @blur="sendEditorAnswer">
+            <a-typography-text>
               <SimpleEditor
                 style="margin-bottom: 15px"
                 :content="nowUserQuAnswer.answer ? nowUserQuAnswer.answer : ''"
@@ -125,7 +125,7 @@
             }"
           >
             <a-typography-text type="primary"> 答案 </a-typography-text>
-            <a-typography-text @blur="sendEditorAnswer">
+            <a-typography-text>
               <SimpleEditor
                 style="margin-bottom: 15px"
                 :content="nowUserQuAnswer.answer ? nowUserQuAnswer.answer : ''"
@@ -149,18 +149,24 @@
 <script lang="ts" setup>
   import { PropType, ref, toRaw } from 'vue';
   import BookMark from '@/components/bookMark/index.vue';
-  import { Qu } from '@/types/model/po/Qu';
+  import Qu from '@/types/model/po/Qu';
   import { QuestionType } from '@/types/model/QuestionType';
-  import { UserAnswer } from '@/types/model/po/UserAnswer';
+  import UserAnswer from '@/types/model/po/UserAnswer';
   import SimpleEditor from '@/components/simple-editor/index.vue';
   import { deleteBatchImage } from '@/api/ossUpload';
 
   const props = defineProps({
     nowQuestion: {
       type: Object as PropType<Qu>,
+      default: () => {
+        return new Qu();
+      },
     },
     nowUserQuAnswer: {
       type: Object as PropType<UserAnswer>,
+      default: () => {
+        return new UserAnswer();
+      },
     },
   });
 
@@ -185,7 +191,7 @@
     insertPictureList.value = insertPictureList.value.concat(insertList);
   };
 
-  const userAnswer = ref<any>({});
+  const userAnswer = ref<UserAnswer>(new UserAnswer());
 
   const sendSelectAnswerId = (content: string, glId: string) => {
     userAnswer.value = props.nowUserQuAnswer;
@@ -206,7 +212,7 @@
       answerIdArray.push(content);
     } else if (answerIdArray.includes(content)) {
       // 判断答案列表中是否已经有该选项
-      answerIdArray = answerIdArray.filter((answer) => answer !== content);
+      answerIdArray = answerIdArray.filter((answer: any) => answer !== content);
     } else if (
       quType === QuestionType.SINGLECHOICE ||
       quType === QuestionType.JUDGING ||
@@ -235,17 +241,16 @@
     contentConfirmChange.value = true;
     if (deletePictureList.value.length === 0) {
       emits('getAnswerId', toRaw(userAnswer.value));
-      contentConfirmChange.value = false;
-      return;
+    } else {
+      // 先删除待删除的图片
+      await deleteBatchImage(deletePictureList.value).then(async (res: any) => {
+        if (res.data === true) {
+          // 触发事件
+          emits('getAnswerId', toRaw(userAnswer.value));
+        }
+      });
     }
-    // 先删除待删除的图片
-    await deleteBatchImage(deletePictureList.value).then(async (res: any) => {
-      if (res.data === true) {
-        // 触发事件
-        emits('getAnswerId', toRaw(userAnswer.value));
-        contentConfirmChange.value = false;
-      }
-    });
+    contentConfirmChange.value = false;
   };
 
   const isContainCurrentAnswer = (answerId: string) => {

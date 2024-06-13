@@ -146,8 +146,11 @@
   const toolbarConfig: Partial<IToolbarConfig> = {
     // 用于去掉不需要的工具栏配置
     excludeKeys: [
-      'insertVideo', // 去掉插入视频功能
       'fullScreen', // 去掉全屏功能
+      'group-video', // 去掉视频
+      'emotion', // 去掉表情
+      'insertLink', // 去掉插入链接
+      'todo', // 去掉待办
     ],
     insertKeys: {
       index: 0,
@@ -196,7 +199,7 @@
     // 触发添加 需要的删除图片和插入图片
     emit('addDeletePicture', deleteList);
     emit('addInsertPicture', realInsertList);
-
+    console.log(editor.getAllMenuKeys());
     if (editor == null) return;
     editor.destroy();
   });

@@ -1,4 +1,4 @@
-export interface Qu {
+class Qu {
   /**
    * ID
    */
@@ -12,7 +12,7 @@ export interface Qu {
   /**
    * 关联题库标题
    */
-  repoText?:string;
+  repoText?: string;
 
   /**
    * 题目内容
@@ -62,10 +62,11 @@ export interface Qu {
   /**
    * 分值(从关联表获得)
    */
-  score?:number;
+  score?: number;
 
   /**
    * 排序(从关联表获得)
    */
-  sort?:number;
+  sort?: number;
 }
+export default Qu;

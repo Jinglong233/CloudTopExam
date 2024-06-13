@@ -1,4 +1,4 @@
-export interface UserAnswer {
+class UserAnswer {
   /**
    * id
    */
@@ -49,3 +49,4 @@ export interface UserAnswer {
    */
   answer?: string;
 }
+export default UserAnswer;
