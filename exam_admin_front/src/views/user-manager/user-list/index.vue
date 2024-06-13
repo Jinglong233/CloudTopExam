@@ -115,21 +115,22 @@
                   </template>
                   添加
                 </a-button>
-                <!--导出-->
+                <!--导出导出功能待做-->
+                <!--     &lt;!&ndash;导出&ndash;&gt;
                 <a-button v-permission="['admin']" type="primary">
                   <template #icon>
                     <icon-download />
                   </template>
                   {{ $t('userList.operation.import') }}
                 </a-button>
-                <!--导出-->
+                &lt;!&ndash;导出&ndash;&gt;
                 <a-upload action="/">
                   <template #upload-button>
                     <a-button v-permission="['admin']">
                       {{ $t('userList.operation.derive') }}
                     </a-button>
                   </template>
-                </a-upload>
+                </a-upload>-->
               </a-space>
             </a-col>
           </a-row>

@@ -11,9 +11,6 @@
         <div>
           <WrongKnowledgeDistribution />
         </div>
-        <div>
-          <ContentPeriodAnalysis />
-        </div>
       </a-space>
     </a-space>
   </div>
