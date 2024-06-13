@@ -43,17 +43,20 @@
       <a-card style="height: 720px; margin-right: 20px; text-align: center">
         <a-typography-title :heading="6"> 剩余时间 </a-typography-title>
         <a-typography-title :heading="5">
-          <vue-countdown
-            v-slot="{ days, hours, minutes, seconds }"
-            :time="compTimeDiff()"
-            @end="stopCountdown()"
-          >
-            {{ String(days).padStart(2, '0') }}:{{
-              String(hours).padStart(2, '0')
-            }}:{{ String(minutes).padStart(2, '0') }}:{{
-              String(seconds).padStart(2, '0')
-            }}
-          </vue-countdown>
+          <a-spin dot :loading="!hiddenCountDown">
+            <vue-countdown
+              v-if="hiddenCountDown"
+              v-slot="{ days, hours, minutes, seconds }"
+              :time="compTimeDiff()"
+              @end="stopCountdown()"
+            >
+              {{ String(days).padStart(2, '0') }}:{{
+                String(hours).padStart(2, '0')
+              }}:{{ String(minutes).padStart(2, '0') }}:{{
+                String(seconds).padStart(2, '0')
+              }}
+            </vue-countdown>
+          </a-spin>
         </a-typography-title>
         <a-divider />
         <a-button type="primary" @click="submitExam">提交试卷</a-button>
@@ -86,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, onMounted, ref, toRaw } from 'vue';
+  import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
   import { useAppStore, useUserStore } from '@/store';
   import { Message, Modal } from '@arco-design/web-vue';
   import { useRoute, useRouter } from 'vue-router';
@@ -103,15 +106,14 @@
     addBatchStudentAnswer,
     updateStudentAnswer,
   } from '@/api/studentAnswer';
-  import { UserAnswer } from '@/types/model/po/UserAnswer';
-  import { Qu } from '@/types/model/po/Qu';
+  import UserAnswer from '@/types/model/po/UserAnswer';
+  import Qu from '@/types/model/po/Qu';
   import { QuestionType } from '@/types/model/QuestionType';
   import { GroupList } from '@/types/model/po/GroupList';
   import { ExamRecordQuery } from '@/types/model/query/ExamRecordQuery';
-  import { getNow } from '@arco-design/web-vue/es/_utils/date';
 
   // 当前时间
-  const now = ref('');
+  const now = ref(Date.now());
 
   dayjs.extend(duration);
 
@@ -123,12 +125,14 @@
   const route = useRoute();
 
   const startTime = ref();
+  // 控制倒计时组件的显示隐藏
+  const hiddenCountDown = ref(false);
 
   // stopDebug(router);
 
   const exam = ref<ExamVO>(new ExamVO());
   const paper = ref<PaperAndQuVO>({});
-  const examRecordInfo = ref();
+  const examRecordInfo = ref<ExamRecord>({});
   const userAnswerList = ref<UserAnswer[]>([]);
 
   // 当前题目
@@ -191,7 +195,7 @@
   onMounted(async () => {
     // 隐藏导航栏
     appStore.updateSettings({
-      navbar: false,
+      navbar: true,
     });
     // 获取试卷信息+用户开始记录
     const examId = route.params.examId as string;
@@ -275,6 +279,7 @@
     // 获取服务器时间
     await getServerTime().then((res: any) => {
       now.value = res.data;
+      hiddenCountDown.value = true;
     });
   });
 
@@ -448,6 +453,15 @@
       }
     });
   };
+
+  // 监听是否切换题目
+  watch(
+    () => nowQuestion.value,
+    (newValue, oldValue) => {
+      // 切换了
+      // 提交上一个题目的数据
+    }
+  );
 </script>
 
 <style scoped>

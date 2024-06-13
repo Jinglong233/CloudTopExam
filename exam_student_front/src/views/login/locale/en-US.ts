@@ -1,5 +1,5 @@
 export default {
-  'login.form.title': 'Login to  "学路有你"-学生端',
+  'login.form.title': 'Login to  CloudTopExam-学生端',
   'login.form.userName.errMsg': 'Username cannot be empty',
   'login.form.password.errMsg': 'Password cannot be empty',
   'login.form.login.errMsg': 'Login error, refresh and try again',
