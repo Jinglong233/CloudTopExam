@@ -78,14 +78,14 @@ $(function() {
 	                	"data": 'addTime',
 	                	"visible" : false,
 	                	"render": function ( data, type, row ) {
-	                		return data?moment(new Date(data)).format("YYYY-MM-DD HH:mm:ss"):"";
+	                		return data?moment(new Date(data)).format("yyyy-MM-dd HH:mm:ss"):"";
 	                	}
 	                },
 	                {
 	                	"data": 'updateTime',
 	                	"visible" : false,
 	                	"render": function ( data, type, row ) {
-	                		return data?moment(new Date(data)).format("YYYY-MM-DD HH:mm:ss"):"";
+	                		return data?moment(new Date(data)).format("yyyy-MM-dd HH:mm:ss"):"";
 	                	}
 	                },
 	                { "data": 'author', "visible" : true, "width":'10%'},
