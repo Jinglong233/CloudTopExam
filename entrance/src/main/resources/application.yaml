@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: exam
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  jackson:
+    # ????????
+    time-zone: GMT+8
+    # ?????????
+    date-format: yyyy-MM-dd HH:mm:ss
+  #????????
+server:
+  port: 8088
+  servlet:
+    context-path: /api
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
