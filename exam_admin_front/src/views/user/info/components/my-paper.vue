@@ -8,7 +8,7 @@
     <template #extra>
       <a-link @click="goPaperManager">{{ $t('userInfo.showMore') }}</a-link>
     </template>
-    <a-list :bordered="false">
+    <a-list :bordered="false" :scrollbar="true" :max-height="280">
       <a-list-item
         v-for="paper in myCreatePaper"
         :key="paper.id"
@@ -42,7 +42,7 @@
   import { Paper } from '@/types/model/po/Paper';
   import { getPaperList } from '@/api/paper';
   import { useUserStore } from '@/store';
-  import { PaperQuery } from '@/types/model/query/PaperQuery';
+  import PaperQuery from '@/types/model/query/PaperQuery';
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
