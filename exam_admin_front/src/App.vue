@@ -1,8 +1,10 @@
 <template>
-  <a-config-provider :locale="locale">
-    <router-view />
-    <global-setting />
-  </a-config-provider>
+  <a-watermark content="CloudTopExam">
+    <a-config-provider :locale="locale">
+      <router-view />
+      <global-setting />
+    </a-config-provider>
+  </a-watermark>
 </template>
 
 <script lang="ts" setup>
