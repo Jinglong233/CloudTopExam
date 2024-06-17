@@ -1,20 +1,20 @@
 spring:
   # DataSource Config
   datasource:
+    # 8.0
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/exam?useUnicode=true&characterEncoding=utf8
     username: xxxx
     password: xxxx
-  # session ????????
   session:
     timeout: 86400
     store-type: redis
   # redis ??
   redis:
-    port: 6388
-    host: 106.15.90.238
+    port: 6379
+    host: localhost
     database: 0
-    password: abc123
+    password: xxxx
     timeout: 60s
     lettuce:
       pool:
@@ -22,24 +22,18 @@ spring:
         max-active: 8
         max-wait: 10000
         min-idle: 10
-  # ?????????? smtp.qq.com
   mail:
     host: smtp.qq.com
-    # ???????????465?587?
     port: 465
-    # ???????
-    username: xxxx
-    # ???????
+    username: xxxx@qq.com
+    # 密码不是邮箱密码，是生成的密钥
     password: xxxx
-    # ??????
     default-encoding: UTF-8
-    # SSL ????
     properties:
       mail:
         smtp:
           socketFactory:
             class: javax.net.ssl.SSLSocketFactory
-        # ?? debug????????????????
         debug: true
 # xxl-job
 xxl:
@@ -56,16 +50,10 @@ xxl:
     accessToken: default_token  # 执行器通讯TOKEN [选填]：非空时启用；
 aliyun:
   oss:
-    # oss?????????
-    endpoint: oss-cn-beijing.aliyuncs.com
-    # ?????????????
+    endpoint: xxxx
     accessKeyId: xxxx
-    # ????????????oss????????????
     accessKeySecret: xxxx
-    # oss?????
-    bucketName: avatar-store
-    # ??????(M)
+    bucketName: xxx
     maxSize: 1
-    # ?????????
     dir:
-      prefix: avatar/
+      prefix: xxx

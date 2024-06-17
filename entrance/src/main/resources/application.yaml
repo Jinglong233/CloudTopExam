@@ -1,17 +1,14 @@
 spring:
   profiles:
-    active: dev
+    active: prod
   application:
-    name: exam
+    name: cloudTopExam
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
   jackson:
-    # ????????
     time-zone: GMT+8
-    # ?????????
     date-format: yyyy-MM-dd HH:mm:ss
-  #????????
 server:
   port: 8088
   servlet:
