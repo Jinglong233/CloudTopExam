@@ -56,6 +56,10 @@ CloudTopExam交流群1： **967055645**
 - gitee: https://gitee.com/Jinglong233/cloud-top-exam
 - github: https://github.com/Jinglong233/CloudTopExam
 
+# 如何获取SQL文件？
+
+[前往获取](https://jinglong233.github.io/CloudTopExamDoc/sqlDesign/%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96SQL%E6%96%87%E4%BB%B6.html)
+
 # 部分截图
 
 
