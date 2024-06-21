@@ -20,12 +20,6 @@ public interface EmailService {
      */
     Boolean sendEmailCode(String email);
 
-    /**
-     * 发送考试通知
-     *
-     * @param email
-     */
-    void setExamNotification(Exam exam);
 
     /**
      * 校验邮箱验证码

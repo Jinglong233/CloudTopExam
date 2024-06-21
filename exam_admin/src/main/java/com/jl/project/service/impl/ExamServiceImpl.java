@@ -1,34 +1,35 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jl.project.constant.MailConstant;
 import com.jl.project.entity.dto.AddExamDTO;
 import com.jl.project.entity.dto.UpdateExamDTO;
 import com.jl.project.entity.po.*;
 import com.jl.project.entity.query.*;
 import com.jl.project.entity.vo.*;
-import com.jl.project.enums.ExamRecordStateType;
-import com.jl.project.enums.OpenType;
-import com.jl.project.enums.PageSize;
-import com.jl.project.enums.QuType;
+import com.jl.project.enums.*;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.mapper.*;
 import com.jl.project.observer.correctObserver.ReviewSubject;
-import com.jl.project.service.EmailService;
 import com.jl.project.service.ExamService;
 import com.jl.project.service.PaperService;
 import com.jl.project.service.UserService;
 import com.jl.project.utils.CommonUtil;
+import com.jl.project.utils.MailUtil;
 import com.jl.project.utils.UserInfoUtil;
 import com.jl.project.utils.XxlJobUtil;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -37,6 +38,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -52,6 +54,12 @@ import java.util.List;
 public class ExamServiceImpl implements ExamService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
+
+    @Value("${spring.mail.username}")
+    private String from;
+
+    @Resource
+    private JavaMailSender javaMailSender;
 
 
     @Resource
@@ -91,9 +99,16 @@ public class ExamServiceImpl implements ExamService {
 
     @Resource
     private PaperService paperService;
+    @Resource
+    private TmplMapper<Tmpl, TmplQuery> tmplMapper;
+    @Resource
+    private MsgMapper<Msg, MsgQuery> msgMapper;
 
     @Resource
-    private EmailService emailService;
+    private MsgUserMapper<MsgUser, MsgUserQuery> msgUserMapper;
+
+  /*  @Resource
+    private EmailService emailService;*/
 
     /**
      * 根据条件查询列表
@@ -251,9 +266,12 @@ public class ExamServiceImpl implements ExamService {
         if (endTime == null || !endTime.after(startTime)) {
             throw new BusinessException("考试结束时间为空/考试结束时间应大于开始时间");
         }
-
-        // 发送考试通知
-        emailService.setExamNotification(exam);
+        ThreadUtil.execAsync(() -> {
+            // 发送邮件考试通知
+            sendExamMailNotifie(exam);
+            // 站内通知
+            sendExamNotifie(exam);
+        });
         // 创建开始考试任务
         createExamTask(examId, title, startTime, endTime);
         return true;
@@ -1005,4 +1023,157 @@ public class ExamServiceImpl implements ExamService {
         }
         return result;
     }
+
+    /**
+     * 发送考试通知（邮件通知）
+     *
+     * @param exam
+     */
+    @Transactional
+    public void sendExamMailNotifie(Exam exam) {
+        MailContent mailContent = new MailContent();
+        Tmpl tmpl = tmplMapper.selectById(MailConstant.NOTIFICATION_TMPL.toString());
+        String title = tmpl.getTitle();
+        mailContent.setSubject(title);
+        String tmplContent = tmpl.getContent();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String startTime = simpleDateFormat.format(exam.getStartTime());
+        String endTime = simpleDateFormat.format(exam.getEndTime());
+        String mailContext = String.format(tmplContent, exam.getTitle(), startTime, endTime);
+        mailContent.setContext(mailContext);
+
+        // 查询该场考试关联的所有考生
+        ExamRecordQuery examRecordQuery = new ExamRecordQuery();
+        examRecordQuery.setExamId(exam.getId());
+        List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
+
+        List<String> userEmailList = new ArrayList<>();
+        // 生成MsgId
+        String msgId = CommonUtil.getRandomId();
+        if (examRecords != null && !examRecords.isEmpty()) {
+            List<MsgUser> msgUsers = new ArrayList<>();
+            for (ExamRecord examRecord : examRecords) {
+                String userId = examRecord.getUserId();
+                User user = userMapper.selectById(userId);
+                if (user != null) { // 有邮箱才发送邮件通知
+                    String toEmail = user.getEmail();
+                    if (toEmail != null && !"".equals(toEmail.trim())) {
+                        userEmailList.add(toEmail);
+                        MsgUser msgUser = new MsgUser();
+                        msgUser.setId(CommonUtil.getRandomId());
+                        msgUser.setMsgId(msgId);
+                        // 未读状态
+                        msgUser.setState(0);
+                        msgUser.setUserId(userId);
+                        msgUsers.add(msgUser);
+                    }
+                }
+            }
+
+            // 批量插入
+            // 插入消息考试关联表
+            Integer insert = msgUserMapper.insertBatch(msgUsers);
+            if (insert <= 0) {
+                logger.warn("消息保存失败");
+            }
+
+            // 发送邮件通知
+            mailContent.setEmailList(userEmailList);
+            MailUtil.groupEmail(mailContent, javaMailSender, from);
+
+            // 插入考试消息记录
+            Msg msg = new Msg();
+            msg.setId(msgId);
+            msg.setContent(mailContext);
+            msg.setState(1);
+            msg.setReadCount(0);
+            msg.setTemplId(tmpl.getId());
+            msg.setSendCount(examRecords.size());
+            msg.setSendTime(new Date());
+            msg.setTitle(tmpl.getTitle());
+            msg.setMsgType(MsgType.EMAIL.getValue());
+            msg.setCreateUser(exam.getCreateBy());
+            User user = userMapper.selectById(exam.getCreateBy());
+            if (user == null) {
+                throw new BusinessException("创建考试用户不存在");
+            }
+            msg.setCreateUserText(user.getUserName());
+            insert = msgMapper.insert(msg);
+            if (insert <= 0) {
+                throw new BusinessException("考试通知失败(邮件通知)");
+            }
+        }
+    }
+
+
+    /**
+     * 发送考试通知（站内通知）
+     *
+     * @param exam
+     */
+    @Transactional
+    public void sendExamNotifie(Exam exam) {
+        Tmpl tmpl = tmplMapper.selectById(MailConstant.NOTIFICATION_TMPL.toString());
+        String tmplContent = tmpl.getContent();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String startTime = simpleDateFormat.format(exam.getStartTime());
+        String endTime = simpleDateFormat.format(exam.getEndTime());
+        String msgContext = String.format(tmplContent, exam.getTitle(), startTime, endTime);
+
+        // 查询该场考试关联的所有考生
+        ExamRecordQuery examRecordQuery = new ExamRecordQuery();
+        examRecordQuery.setExamId(exam.getId());
+        List<ExamRecord> examRecords = examRecordMapper.selectList(examRecordQuery);
+
+        // 生成MsgId
+        String msgId = CommonUtil.getRandomId();
+        if (examRecords != null && !examRecords.isEmpty()) {
+            List<MsgUser> msgUsers = new ArrayList<>();
+            for (ExamRecord examRecord : examRecords) {
+                String userId = examRecord.getUserId();
+                User user = userMapper.selectById(userId);
+                if (user != null) {
+                    MsgUser msgUser = new MsgUser();
+                    msgUser.setId(CommonUtil.getRandomId());
+                    msgUser.setMsgId(msgId);
+                    // 未读状态
+                    msgUser.setState(0);
+                    msgUser.setUserId(userId);
+                    msgUsers.add(msgUser);
+                }
+            }
+
+            // 批量插入
+            // 插入消息考试关联表
+            Integer insert = msgUserMapper.insertBatch(msgUsers);
+            if (insert <= 0) {
+                logger.warn("消息保存失败");
+            }
+
+            // 插入考试消息记录
+            Msg msg = new Msg();
+            msg.setId(msgId);
+            msg.setContent(msgContext);
+            msg.setState(1);
+            msg.setReadCount(0);
+            msg.setTemplId(tmpl.getId());
+            msg.setSendCount(examRecords.size());
+            msg.setSendTime(new Date());
+            msg.setTitle(tmpl.getTitle());
+            msg.setMsgType(MsgType.NOTIFICATION.getValue());
+            msg.setCreateUser(exam.getCreateBy());
+            User user = userMapper.selectById(exam.getCreateBy());
+            if (user == null) {
+                throw new BusinessException("创建考试用户不存在");
+            }
+            msg.setCreateUserText(user.getUserName());
+            insert = msgMapper.insert(msg);
+            if (insert <= 0) {
+                throw new BusinessException("考试通知失败(站内通知)");
+            }
+        }
+    }
+
 }
