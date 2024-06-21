@@ -48,7 +48,7 @@ public class RecommendServiceImpl implements RecommendService {
     @Override
     public List<String> getRecommendQuList() {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         // 获取同专业的所有学生Id
         String deptCode = loginUserInfo.getDeptCode();
         // 获取年级

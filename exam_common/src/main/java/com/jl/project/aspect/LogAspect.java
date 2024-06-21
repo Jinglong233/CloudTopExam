@@ -122,9 +122,10 @@ public class LogAspect {
      * 处理操作日志
      */
     private ResponseVO handleOperationLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws ExecutionException, InterruptedException {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
         // 操作人
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         String username = loginUserInfo.getUserName();
 
 

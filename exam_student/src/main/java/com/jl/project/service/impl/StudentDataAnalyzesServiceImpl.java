@@ -44,7 +44,7 @@ public class StudentDataAnalyzesServiceImpl implements StudentDataAnalyzesServic
     public Integer getTrainCount() {
         // 获取当前登录用户
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         TrainQuery trainQuery = new TrainQuery();
         trainQuery.setUserId(loginUserInfo.getId());
@@ -57,7 +57,7 @@ public class StudentDataAnalyzesServiceImpl implements StudentDataAnalyzesServic
     public Integer getExamCount() {
         // 获取当前登录用户
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         ExamRecordQuery examRecordQuery = new ExamRecordQuery();
         examRecordQuery.setUserId(loginUserInfo.getId());
         Integer count = examRecordMapper.selectCount(examRecordQuery);
@@ -67,7 +67,7 @@ public class StudentDataAnalyzesServiceImpl implements StudentDataAnalyzesServic
     @Override
     public Map<String, List> getMyRecentExam() {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         ExamQuery examQuery = null;
         Map<String, List> map = new HashMap<>();

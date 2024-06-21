@@ -110,17 +110,15 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public Boolean getUnBindEmailCode() throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         sendEmailCode(loginUserInfo.getEmail());
         return true;
     }
 
     @Override
     public Boolean getBindEmailCode(String email) throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo( stringRedisTemplate);
         // 检验登录用户是否已经绑定邮箱
         UserQuery userQuery = new UserQuery();
         userQuery.setEmail(email);
@@ -155,8 +153,7 @@ public class EmailServiceImpl implements EmailService {
         }
 
         // 更新该用户的邮箱
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         String userId = loginUserInfo.getId();
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -169,9 +166,7 @@ public class EmailServiceImpl implements EmailService {
             throw new BusinessException("邮箱绑定失败");
         }
 
-        LoginResponseVo loginResponseVo = new LoginResponseVo();
-        BeanUtil.copyProperties(user, loginResponseVo);
-        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
 
         return true;
     }
@@ -185,8 +180,7 @@ public class EmailServiceImpl implements EmailService {
         }
 
         // 更新该用户的邮箱
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         String userId = loginUserInfo.getId();
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -198,9 +192,7 @@ public class EmailServiceImpl implements EmailService {
         if (result <= 0) {
             throw new BusinessException("邮箱解绑失败");
         }
-        LoginResponseVo loginResponseVo = new LoginResponseVo();
-        BeanUtil.copyProperties(user, loginResponseVo);
-        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
 
         return true;
     }

@@ -30,8 +30,7 @@ import java.io.IOException;
 @Api(tags = "学生登录、登出相关")
 @RestController
 @RequestMapping("/student")
-@SaCheckLogin
-@SaCheckRole("student")
+
 public class StudentController {
     @Resource
     private StudentService studentService;
@@ -47,6 +46,7 @@ public class StudentController {
     @RequestMapping("login")
     @GlobalInterceptor(checkParams = true)
     @SaIgnore
+    @SaCheckLogin
     public SaResult login(@RequestBody @VerifyParam LoginDTO user) throws BusinessException {
         LoginResponseVo result = studentService.login(user);
         return SaResult.ok("登录成功").setData(result);
@@ -59,7 +59,7 @@ public class StudentController {
      */
     @ApiOperation(value = "学生退出登录")
     @RequestMapping("logout")
-    @SaIgnore
+    @SaCheckRole("student")
     public SaResult logout() {
         Boolean result = studentService.logout();
         return SaResult.ok(result?"登出成功":"登出失败").setData(result);
@@ -72,6 +72,8 @@ public class StudentController {
      */
     @ApiOperation(value = "学生获取个人信息")
     @RequestMapping("info")
+    @SaCheckLogin
+    @SaCheckRole("student")
     public SaResult getLoginUserInfo() {
         User result = studentService.getLoginUserInfo();
         return SaResult.ok().setData(result);
@@ -84,6 +86,8 @@ public class StudentController {
     @ApiOperation(value = "学生更新个人信息")
     @RequestMapping("updateUserById")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckLogin
+    @SaCheckRole("student")
     public SaResult updateUserById(@RequestBody @VerifyParam UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = studentService.updateUserById(updateUserDTO);
         return SaResult.ok(result?"更新成功":"更新失败").setData(result);
@@ -99,6 +103,8 @@ public class StudentController {
     @ApiOperation(value = "修改密码")
     @RequestMapping("updateUserPassword")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckLogin
+    @SaCheckRole("student")
     public SaResult updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
         Boolean result = studentService.updateUserPassword(updateUserPasswordDTO);
         return SaResult.ok().setData(result);
@@ -111,6 +117,8 @@ public class StudentController {
     @ApiOperation(value = "学生注销账户(预留)")
     @RequestMapping("deleteUserById")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckLogin
+    @SaCheckRole("student")
     public SaResult deleteUserById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         Boolean result = studentService.deleteUserById(id);
         return SaResult.ok(result ? "删除成功" : "删除失败").setData(result);
@@ -127,7 +135,6 @@ public class StudentController {
     @ApiOperation(value = "获取找回密码邮箱验证码")
     @RequestMapping("getRetrievePasswordCode")
     @GlobalInterceptor(checkParams = true)
-    @SaIgnore
     public SaResult getRetrievePasswordCode(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
         Boolean result = studentService.getRetrievePasswordCode(retrievePasswordDTO);
         return SaResult.ok().setData(result);
@@ -142,7 +149,6 @@ public class StudentController {
     @ApiOperation(value = "找回密码")
     @RequestMapping("retrievePassword")
     @GlobalInterceptor(checkParams = true)
-    @SaIgnore
     public SaResult retrievePassword(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
         Boolean result = studentService.retrievePassword(retrievePasswordDTO);
         return SaResult.ok().setData(result);
@@ -157,6 +163,8 @@ public class StudentController {
     @ApiOperation(value = "学生头像上传")
     @PostMapping("/upload/avatar")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckLogin
+    @SaCheckRole("student")
     public SaResult uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws IOException {
         Boolean result  = studentService.uploadAvatar(file);
         return SaResult.ok().setData(result);

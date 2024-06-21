@@ -1,7 +1,6 @@
 package com.jl.project.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
@@ -25,7 +24,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/msg")
 @SaCheckLogin
-@SaCheckRole("admin")
 public class MsgController {
 
     @Resource

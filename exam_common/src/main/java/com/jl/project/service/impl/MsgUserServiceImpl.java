@@ -150,7 +150,7 @@ public class MsgUserServiceImpl implements MsgUserService {
     @Override
     public Integer getMyUnreadCount() throws BusinessException {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         MsgQuery msgQuery = new MsgQuery();
         msgQuery.setMsgType(MsgType.NOTIFICATION.getValue());
         List<Msg> msgList = msgMapper.selectList(msgQuery);
@@ -174,7 +174,7 @@ public class MsgUserServiceImpl implements MsgUserService {
     @Override
     public PaginationResultVO<MsgVO> getNotification(SimplePage simplePage) {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         List<MsgVO> result = new ArrayList<>();
 
@@ -219,7 +219,7 @@ public class MsgUserServiceImpl implements MsgUserService {
     @Override
     public PaginationResultVO<MsgVO> getUnReadNotification(SimplePage simplePage) {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         List<MsgVO> result = new ArrayList<>();
 
@@ -255,7 +255,7 @@ public class MsgUserServiceImpl implements MsgUserService {
     @Override
     public PaginationResultVO<MsgVO> getReadNotification(SimplePage simplePage) {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         List<MsgVO> result = new ArrayList<>();
 

@@ -272,7 +272,7 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
         PaginationResultVO<ErrorVO> resultVO = new PaginationResultVO<>();
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         String userId = loginUserInfo.getId();
         if (userId == null) {
             throw new BusinessException("缺少参数");
@@ -346,7 +346,7 @@ public class StudentAnswerServiceImpl implements StudentAnswerService {
     @Override
     public WrongKnowledgeVO getErrorKnowledge() {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         List<String> userId = new ArrayList<>();
         userId.add(loginUserInfo.getId());
         List<Book> bookList = bookMapper.getBookListByUserIds(userId);

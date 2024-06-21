@@ -356,7 +356,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department = updateDeptDTO.getDepartment();
         department.setUpdateTime(new Date());
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         department.setUpdateBy(loginUserInfo.getId());
         Integer integer = departmentMapper.updateById(department, updateDeptDTO.getId());
         return integer > 0;

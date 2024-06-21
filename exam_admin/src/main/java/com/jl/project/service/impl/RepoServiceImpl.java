@@ -93,7 +93,7 @@ public class RepoServiceImpl implements RepoService {
 
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         repo.setCreateBy(loginUserInfo.getId());
 
         Integer result = repoMapper.insert(repo);
@@ -263,7 +263,7 @@ public class RepoServiceImpl implements RepoService {
         HttpServletRequest request =
                 ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         repo.setUpdateBy(loginUserInfo.getId());
         repo.setUpdateTime(new Date());
 

@@ -1,5 +1,6 @@
 package com.jl.project.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import com.jl.project.entity.dto.AddGroupListDTO;
 import com.jl.project.entity.dto.AddPaperDTO;
@@ -277,16 +278,15 @@ public class PaperServiceImpl implements PaperService {
     @Transactional
     public Boolean deletePaperById(String paperId) {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        Boolean admin = UserInfoUtil.isAdmin(request, stringRedisTemplate);
         Paper paper = paperMapper.selectById(paperId);
         if (paper == null) {
             throw new BusinessException("试卷信息不存在");
         }
 
-        Boolean mySelf = UserInfoUtil.isMySelf(request, stringRedisTemplate, paper.getCreateBy());
+        Boolean mySelf = UserInfoUtil.isMySelf(paper.getCreateBy());
 
-        if (!admin && !mySelf) {
-            throw new BusinessException("无权限删除");
+        if (!mySelf) {
+            StpUtil.checkRole("admin");
         }
 
 

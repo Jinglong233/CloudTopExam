@@ -28,7 +28,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/msgUser")
 @SaCheckLogin
-@SaCheckRole("admin")
 public class MsgUserController {
 
     @Resource

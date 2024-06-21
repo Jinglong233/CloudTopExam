@@ -87,7 +87,7 @@ public class SubjectServiceImpl implements SubjectService {
         subject.setCreateTime(new Date());
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         subject.setCreateBy(loginUserInfo.getId());
 
         String parentId = addSubjectDTO.getParentId();
@@ -164,7 +164,7 @@ public class SubjectServiceImpl implements SubjectService {
         String subjectId = updateSubjectDTO.getId();
         subject.setUpdateTime(new Date());
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         subject.setUpdateBy(loginUserInfo.getId());
 
         // 判断是否同级有同名学科

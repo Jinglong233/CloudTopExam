@@ -118,7 +118,7 @@ public class QuServiceImpl implements QuService {
         qu.setId(quId);
         qu.setCreateTime(new Date());
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         qu.setCreateBy(loginUserInfo.getId());
 
         String repoId = qu.getRepoId();
@@ -256,7 +256,7 @@ public class QuServiceImpl implements QuService {
 
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.getRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
 
         String oldRepoId = oldQu.getRepoId();
@@ -380,7 +380,7 @@ public class QuServiceImpl implements QuService {
 
         // 判断能否被删除
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         if (!loginUserInfo.getId().equals(qu.getCreateBy())) {
             if (!"admin".equals(loginUserInfo.getRole())) {
                 throw new BusinessException("无权限删除");
@@ -630,7 +630,7 @@ public class QuServiceImpl implements QuService {
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
 
         //获取工作簿

@@ -186,7 +186,7 @@ public class ExamServiceImpl implements ExamService {
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         exam.setCreateBy(loginUserInfo.getId());
         exam.setCreateTime(new Date());
         Integer addExamResult = examMapper.insert(exam);
@@ -336,7 +336,7 @@ public class ExamServiceImpl implements ExamService {
         BeanUtil.copyProperties(updateExamDTO, exam);
         exam.setUpdateTime(new Date());
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         exam.setUpdateBy(loginUserInfo.getId());
 
 
@@ -513,7 +513,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public Boolean deleteExamById(String examId) throws BusinessException {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
         // 1. 查询考试信息
         Exam exam = examMapper.selectById(examId);

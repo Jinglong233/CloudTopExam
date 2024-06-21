@@ -1,8 +1,8 @@
 package com.jl.project.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.ClientException;
@@ -11,7 +11,6 @@ import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
 import com.google.gson.Gson;
-import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.LoginDTO;
 import com.jl.project.entity.dto.RetrievePasswordDTO;
 import com.jl.project.entity.dto.UpdateUserDTO;
@@ -43,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.jl.project.constant.UserConstant.TOKEN;
 import static com.jl.project.constant.UserConstant.USER_PREFIX;
@@ -141,23 +139,18 @@ public class StudentServiceImpl implements StudentService {
      * 根据Id更新
      */
     public Boolean updateUserById(UpdateUserDTO updateDeptDTO) throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
         String id = updateDeptDTO.getId();
 
         // 判断是否是本人
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
-        if (!id.equals(loginUserInfo.getId())) {
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
+        if (!UserInfoUtil.isMySelf(id)) {
             // 如果不是本人，再次得判断是否是管理员
-            String role = UserInfoUtil.getLoginUserRole(request, stringRedisTemplate);
-            if (!"admin".equals(role)) {
-                throw new BusinessException("无权限修改");
-            }
+            StpUtil.checkRole("admin");
         }
 
         // 1. 获取用户的信息
         User user = updateDeptDTO.getUser();
-        String password = user.getPassword();
 
 //        不同于管理员，这里不用修改密码和部门
 
@@ -170,15 +163,10 @@ public class StudentServiceImpl implements StudentService {
         // 3. 更新
         Integer result = userMapper.updateById(user, id);
 
-        // 4. 更改缓存中的用户信息
-        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + id);
-        if (token != null) {
-            // 更新该登录用户缓存的信息
-            Gson gson = new Gson();
-            User afterUpdate = userMapper.selectById(id);
-            String json = gson.toJson(afterUpdate);
-            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
-        }
+
+        //  更新redis中缓存的信息
+        user = userMapper.selectById(id);
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
         return result > 0;
     }
 
@@ -216,6 +204,7 @@ public class StudentServiceImpl implements StudentService {
         if (list.isEmpty()) {
             throw new BusinessException("用户不存在");
         }
+
         User resultUser = list.get(0);
         // 2. 加密
         String encryptPassword = MD5Util.getMD5Encode(user.getPassword(), resultUser.getSalt());
@@ -224,30 +213,23 @@ public class StudentServiceImpl implements StudentService {
         if (!encryptPassword.equals(resultUser.getPassword())) {
             throw new BusinessException("密码错误");
         }
+
         // 判断该用户是否被禁用
-        if(resultUser.getState() == 1){
+        if (resultUser.getState() == 1) {
             throw new BusinessException("该用户被禁用");
         }
 
-        // 4. 生成token
-        Gson gson = new Gson();
-        String token = UUID.randomUUID().toString();
+        // 登录
+        StpUtil.login(resultUser.getId());
 
-        // 使用两对k-v保证同一账号一地登录。通过token获取用户信息
-        // token格式：user前缀 + userId + token
-        // 5. 判断是否已经登录
-        String oldToken = stringRedisTemplate.opsForValue().get(USER_PREFIX + resultUser.getId());
-        if (oldToken != null) { // 已经登录
-            // 删除原来的登录token
-            stringRedisTemplate.delete(USER_PREFIX + TOKEN + oldToken);
-        }
-        stringRedisTemplate.opsForValue().set(USER_PREFIX + resultUser.getId(), token);
-        stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, gson.toJson(resultUser), Constant.EXPIRED_30, TimeUnit.MINUTES);
+        Gson gson = new Gson();
+
+        stringRedisTemplate.opsForValue().set(USER_PREFIX + resultUser.getId(), gson.toJson(resultUser));
 
         LoginResponseVo loginResponseVo = new LoginResponseVo();
         BeanUtil.copyProperties(resultUser, loginResponseVo);
-        loginResponseVo.setToken(token);
-
+        // 4. 设置token
+        loginResponseVo.setToken(StpUtil.getTokenValue());
         return loginResponseVo;
     }
 
@@ -258,16 +240,16 @@ public class StudentServiceImpl implements StudentService {
      */
     @Override
     public User getLoginUserInfo() throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String token = request.getHeader("Authorization");
-        if (token == null) {
-            throw new BusinessException(ResponseCodeEnum.CODE_401);
-        }
         Gson gson = new Gson();
-        String jsonUser = stringRedisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
+        Object loginId = StpUtil.getLoginId();
+        String jsonUser = stringRedisTemplate.opsForValue().get(USER_PREFIX + loginId.toString());
         User user = gson.fromJson(jsonUser, User.class);
         if (user == null) {
-            throw new BusinessException(ResponseCodeEnum.CODE_401);
+            // 从数据库查
+            user = userMapper.selectById(loginId.toString());
+            if (user == null) {
+                throw new BusinessException(ResponseCodeEnum.CODE_401);
+            }
         }
         return user;
     }
@@ -286,8 +268,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         // 获取登录用户
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
 
 
         String userId = loginUserInfo.getId();
@@ -339,18 +320,9 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessException("保存头像信息失败");
         }
 
-        // 刷新用户缓存信息
-
-        // 10. 更改缓存中的用户信息
-        String token = stringRedisTemplate.opsForValue().get(USER_PREFIX + userId);
-        if (token != null) {
-            // 更新该登录用户缓存的信息
-            Gson gson = new Gson();
-            User afterUpdate = userMapper.selectById(userId);
-            String json = gson.toJson(afterUpdate);
-            stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, json);
-        }
-
+        //  更新redis中缓存的信息
+        user = userMapper.selectById(userId);
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
         return true;
     }
 
@@ -429,19 +401,16 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessException("更新密码失败");
         }
         // 更新redis中的信息
-        LoginResponseVo loginResponseVo = new LoginResponseVo();
-        BeanUtil.copyProperties(user, loginResponseVo);
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        UserInfoUtil.refreshRedisUserInfo(request, stringRedisTemplate, loginResponseVo);
+        //  更新redis中缓存的信息
+        user = userMapper.selectById(user.getId());
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
         return true;
 
     }
 
     @Override
     public Boolean updateUserPassword(UpdateUserPasswordDTO updateUserPasswordDTO) {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-
-        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(request, stringRedisTemplate);
+        LoginResponseVo loginUserInfo = UserInfoUtil.getLoginUserInfo(stringRedisTemplate);
         // 判断是否是原用户
         if (!updateUserPasswordDTO.getUserId().equals(loginUserInfo.getId())) {
             throw new BusinessException("无权限修改");
@@ -481,8 +450,9 @@ public class StudentServiceImpl implements StudentService {
         user.setUpdateTime(new Date());
         user.setUpdateBy(loginUserInfo.getId());
 
-        //  删除redis中缓存的信息（如果有）
-        stringRedisTemplate.delete(USER_PREFIX + TOKEN + loginUserInfo.getToken());
+        //  更新redis中缓存的信息
+        user = userMapper.selectById(userId);
+        UserInfoUtil.refreshRedisUserInfo(stringRedisTemplate, user);
 
         Integer result = userMapper.updateById(user, userId);
         return result > 0;
