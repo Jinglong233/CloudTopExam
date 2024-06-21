@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class BookQuery extends SimplePage {
+class BookQuery extends BaseQuery {
   id?: string;
 
   idFuzzy?: string;

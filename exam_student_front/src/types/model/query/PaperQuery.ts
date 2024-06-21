@@ -1,4 +1,6 @@
-export interface PaperQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class PaperQuery extends BaseQuery {
   /**
    * 试卷ID
    */
@@ -74,3 +76,4 @@ export interface PaperQuery {
 
   updateByFuzzy?: string;
 }
+export default PaperQuery;

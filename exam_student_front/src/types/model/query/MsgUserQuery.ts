@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-export interface MsgUserQuery extends SimplePage {
+class MsgUserQuery extends BaseQuery {
   /**
    * ID
    */
@@ -27,3 +27,4 @@ export interface MsgUserQuery extends SimplePage {
    */
   state?: number;
 }
+export default MsgUserQuery;

@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class RepoQuery extends SimplePage {
+class RepoQuery extends BaseQuery {
   /**
    * ID
    */
@@ -102,5 +102,7 @@ class RepoQuery extends SimplePage {
   updateBy?: string;
 
   updateByFuzzy?: string;
+
+  orderBy = 'create_time';
 }
 export default RepoQuery;

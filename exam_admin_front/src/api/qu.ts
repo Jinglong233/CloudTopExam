@@ -1,8 +1,8 @@
 import axios from 'axios';
 import QuQuery from '@/types/model/query/QuQuery';
-import { Qu } from '@/types/model/po/Qu';
-import { AddQuAndAnswerDTO } from '@/types/model/dto/AddQuAndAnswerDTO';
-import { QuAndAnswerVO } from '@/types/model/vo/QuAndAnswerVO';
+import Qu from '@/types/model/po/Qu';
+import AddQuAndAnswerDTO from '@/types/model/dto/AddQuAndAnswerDTO';
+import QuAndAnswerVO from '@/types/model/vo/QuAndAnswerVO';
 import { UpdateQuAndAnswerDTO } from '@/types/model/dto/UpdateQuAndAnswerDTO';
 import { RandomSelectQuDTO } from '@/types/model/dto/RandomSelectQuDTO';
 import QuExcludeQuery from '@/types/model/query/QuExcludeQuery';

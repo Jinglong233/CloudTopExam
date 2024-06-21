@@ -1,6 +1,6 @@
-import SimplePage from '../po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class PaperQuery extends SimplePage {
+class PaperQuery extends BaseQuery {
   /**
    * 试卷ID
    */
@@ -75,5 +75,7 @@ class PaperQuery extends SimplePage {
   updateBy?: string;
 
   updateByFuzzy?: string;
+
+  orderBy = 'create_time';
 }
 export default PaperQuery;

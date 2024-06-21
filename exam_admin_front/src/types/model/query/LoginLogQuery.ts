@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class LoginLogQuery extends SimplePage {
+class LoginLogQuery extends BaseQuery {
   /**
    * ID
    */
@@ -47,5 +47,7 @@ class LoginLogQuery extends SimplePage {
   loginAddress?: string;
 
   loginAddressFuzzy?: string;
+
+  orderBy = 'login_time';
 }
 export default LoginLogQuery;

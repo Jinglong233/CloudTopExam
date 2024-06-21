@@ -1,4 +1,4 @@
-export interface UserAnswerQuery {
+class UserAnswerQuery extends BaseQuery {
   /**
    * id
    */

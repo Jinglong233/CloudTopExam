@@ -1,4 +1,6 @@
-export interface ClassQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class ClassQuery extends BaseQuery {
   /**
    * ID
    */
@@ -37,3 +39,5 @@ export interface ClassQuery {
    */
   sort?: number;
 }
+
+export default ClassQuery;

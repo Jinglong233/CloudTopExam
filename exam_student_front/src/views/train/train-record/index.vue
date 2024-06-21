@@ -7,9 +7,9 @@
         :pagination="{
           showTotal: true,
           showPageSize: true,
-          total: pageInfo.total,
-          pageSize: pageInfo.pageSize,
-          current: pageInfo.pageNo,
+          total: pagination.total,
+          pageSize: pagination.pageSize,
+          current: pagination.pageNo,
         }"
         :scroll="{ x: 100, y: 550 }"
         @page-change="pageChange"
@@ -51,37 +51,37 @@
   import { useRouter } from 'vue-router';
   import { TrainRecord } from '@/types/model/po/TrainRecord';
   import { getTrain } from '@/api/train';
-  import { TrainQuery } from '@/types/model/query/TrainQuery';
-  import { SimplePage } from '@/types/model/po/SimplePage';
+  import TrainQuery from '@/types/model/query/TrainQuery';
+  import SimplePage from '@/types/model/po/SimplePage';
   import { Message } from '@arco-design/web-vue';
   import { useUserStore } from '@/store';
+  import usePagination from '@/hooks/pagination';
 
   const { t } = useI18n();
 
   const router = useRouter();
+  const { pagination, setPagination } = usePagination();
 
   const userStore = useUserStore();
 
+  const trainSearch = ref<TrainQuery>(new TrainQuery());
+
   const trainRecordList = ref<TrainRecord[]>([]);
 
-  // 分页信息
-  const pageInfo = ref<SimplePage>({
-    pageNo: 1,
-    pageSize: 10,
-    pageTotal: 0,
-    total: 0,
-  });
   const reloadRecordList = async (trainQuery: TrainQuery) => {
+    trainQuery.userId = userStore.id;
     await getTrain(trainQuery).then((res: any) => {
       if (res) {
         trainRecordList.value = res.data.list;
-        pageInfo.value.total = res.data.totalCount;
-        pageInfo.value.pageSize = res.data.pageSize;
-        pageInfo.value.pageNo = res.data.pageNo;
-        pageInfo.value.pageTotal = res.data.pageTotal;
+        setPagination({
+          total: res.data.totalCount,
+          pageSize: res.data.pageSize,
+          pageNo: res.data.pageNo,
+          pageTotal: res.data.pageTotal,
+        });
       } else {
         Message.warning({
-          content: res.data.info,
+          content: res.data.msg,
           duration: 2000,
         });
       }
@@ -89,21 +89,24 @@
   };
 
   onMounted(async () => {
-    await reloadRecordList({ userId: userStore.id, ...pageInfo.value });
+    await reloadRecordList(trainSearch.value);
   });
   // 页码变化
   const pageChange = (pageNo: number) => {
-    pageInfo.value.pageNo = pageNo;
+    trainSearch.value.pageNo = pageNo;
   };
   // 每页数据量变化
   const pageSizeChange = (pageSize: number) => {
-    pageInfo.value.pageSize = pageSize;
+    trainSearch.value.pageSize = pageSize;
   };
 
   // 监视页码变化
-  watch(pageInfo.value, async (newPageInfo, oldPageInfo) => {
-    await reloadRecordList({ userId: userStore.id, ...pageInfo.value });
-  });
+  watch(
+    () => [trainSearch.value.pageNo, trainSearch.value.pageSize],
+    async (newValue, oldValue) => {
+      await reloadRecordList(trainSearch.value);
+    }
+  );
   const columns = [
     {
       title: t('train.columns.trainTime'),

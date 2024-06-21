@@ -1,4 +1,6 @@
-export interface DepartmentQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class DepartmentQuery extends BaseQuery {
   /**
    * ID
    */
@@ -83,3 +85,4 @@ export interface DepartmentQuery {
    */
   sort?: number;
 }
+export default DepartmentQuery;

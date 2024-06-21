@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class ExamRecordQuery extends SimplePage {
+class ExamRecordQuery extends BaseQuery {
   /**
    * ID
    */

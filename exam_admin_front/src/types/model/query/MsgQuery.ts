@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class MsgQuery extends SimplePage {
+class MsgQuery extends BaseQuery {
   /**
    * ID
    */
@@ -71,5 +71,7 @@ class MsgQuery extends SimplePage {
   createUserText?: string;
 
   createUserTextFuzzy?: string;
+
+  orderBy = 'send_time';
 }
 export default MsgQuery;

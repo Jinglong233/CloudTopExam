@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-export interface ExamRecordQuery extends SimplePage {
+class ExamRecordQuery extends BaseQuery {
   /**
    * ID
    */
@@ -94,4 +94,7 @@ export interface ExamRecordQuery extends SimplePage {
    * 作答状态0:未作答1:未完成2:已交卷
    */
   state?: number;
+
+  orderBy = 'start_time';
 }
+export default ExamRecordQuery;

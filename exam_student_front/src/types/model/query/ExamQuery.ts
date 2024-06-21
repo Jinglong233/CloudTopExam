@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-export interface ExamQuery extends SimplePage {
+class ExamQuery extends BaseQuery {
   /**
    * ID
    */
@@ -116,4 +116,7 @@ export interface ExamQuery extends SimplePage {
   createBy?: string;
 
   createByFuzzy?: string;
+
+  orderBy = 'start_time';
 }
+export default ExamQuery;

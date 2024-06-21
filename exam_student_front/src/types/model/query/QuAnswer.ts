@@ -1,4 +1,6 @@
-export interface QuAnswerQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class QuAnswerQuery extends BaseQuery {
   /**
    * 答案ID
    */
@@ -39,3 +41,4 @@ export interface QuAnswerQuery {
 
   analysisFuzzy?: string;
 }
+export default QuAnswerQuery;

@@ -1,6 +1,6 @@
-import { SimplePage } from "@/types/model/po/SimplePage";
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-export interface QuQuery extends SimplePage {
+class QuQuery extends BaseQuery {
   /**
    * ID
    */
@@ -84,5 +84,5 @@ export interface QuQuery extends SimplePage {
    * 题型
    */
   quType?: number;
-
 }
+export default QuQuery;

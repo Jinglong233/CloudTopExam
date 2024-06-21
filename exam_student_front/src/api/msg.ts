@@ -2,7 +2,7 @@ import axios from 'axios';
 import { MsgUserQuery } from '@/types/model/query/MsgUserQuery';
 import { MsgVO } from '@/types/model/vo/MsgVO';
 import { MsgUser } from '@/types/model/po/MsgUser';
-import { SimplePage } from '@/types/model/po/SimplePage';
+import SimplePage from '@/types/model/po/SimplePage';
 import { Msg } from '@/types/model/po/Msg';
 import { UpdateMsgUserDTo } from '@/types/model/dto/UpdateMsgUserDTo';
 

@@ -268,12 +268,11 @@
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { Message, Modal } from '@arco-design/web-vue';
   import { deleteExamById, getExamList, getExamQrCode } from '@/api/exam';
-  import ExamQuery from '@/types/model/query/ExamQuery';
   import { ExamVO } from '@/types/model/vo/ExamVO';
   import { useUserStore } from '@/store';
   import usePagination from '@/hooks/pagination';
-  import PaperQuery from '@/types/model/query/PaperQuery';
   import SimplePage from '@/types/model/po/SimplePage';
+  import ExamQuery from '@/types/model/query/ExamQuery';
 
   const { loading, setLoading } = useLoading(true);
   const { pagination, setPagination } = usePagination();

@@ -193,11 +193,11 @@
 <script lang="ts" setup>
   import { useI18n } from 'vue-i18n';
   import { onMounted, ref, toRefs, watch } from 'vue';
-  import { UserQuery } from '@/types/model/query/UserQuery';
+  import UserQuery from '@/types/model/query/UserQuery';
   import { getDeptTree } from '@/api/department';
   import { getDeptText } from '@/utils/common';
   import { getUserList } from '@/api/user';
-  import { SimplePage } from '@/types/model/po/SimplePage';
+  import SimplePage from '@/types/model/po/SimplePage';
   import { SendMessageDTO } from '@/types/model/dto/SendMessageDTO';
   import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
   import { User } from '@/types/model/po/User';
@@ -380,7 +380,7 @@
           await sendMessage(sendMessageForm.value).then((res: any) => {
             if (res.data === true) {
               Message.success({
-                content: '发送成功',
+                content: res.msg,
                 duration: 2000,
               });
 

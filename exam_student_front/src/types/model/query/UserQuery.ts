@@ -1,4 +1,6 @@
-export interface UserQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class UserQuery extends BaseQuery {
   /**
    * ID
    */
@@ -118,3 +120,4 @@ export interface UserQuery {
 
   updateByEnd?: string;
 }
+export default UserQuery;

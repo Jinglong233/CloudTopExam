@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class UserQuery extends SimplePage {
+class UserQuery extends BaseQuery {
   /**
    * ID
    */
@@ -119,5 +119,7 @@ class UserQuery extends SimplePage {
   updateByStart?: string;
 
   updateByEnd?: string;
+
+  orderBy = 'create_time';
 }
 export default UserQuery;

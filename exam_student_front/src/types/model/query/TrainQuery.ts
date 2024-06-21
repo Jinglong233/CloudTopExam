@@ -1,6 +1,6 @@
-import { SimplePage } from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-export interface TrainQuery extends SimplePage {
+class TrainQuery extends BaseQuery {
   /**
    * ID
    */
@@ -78,4 +78,7 @@ export interface TrainQuery extends SimplePage {
    */
 
   quType?: number;
+
+  orderBy = 'train_time';
 }
+export default TrainQuery;

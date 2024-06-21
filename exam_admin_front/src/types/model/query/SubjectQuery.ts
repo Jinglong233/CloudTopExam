@@ -1,4 +1,6 @@
-export interface SubjectQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class SubjectQuery extends BaseQuery {
   /**
    * ID
    */
@@ -73,3 +75,4 @@ export interface SubjectQuery {
 
   updateByFuzzy?: string;
 }
+export default SubjectQuery;

@@ -1,4 +1,6 @@
-export interface RepoExamQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class RepoExamQuery extends BaseQuery {
   /**
    * ID
    */
@@ -60,3 +62,4 @@ export interface RepoExamQuery {
    */
   saqScore?: number;
 }
+export default RepoExamQuery;

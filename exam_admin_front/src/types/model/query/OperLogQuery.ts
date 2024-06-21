@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class OperLogQuery extends SimplePage {
+class OperLogQuery extends BaseQuery {
   /**
    * ID
    */
@@ -80,6 +80,8 @@ class OperLogQuery extends SimplePage {
    * 操作类型（增删改查...）
    */
   operType?: number;
+
+  orderBy = 'oper_time';
 }
 
 export default OperLogQuery;

@@ -1,4 +1,6 @@
-export interface RepoQuery {
+import BaseQuery from '@/types/model/query/BaseQuery';
+
+class RepoQuery extends BaseQuery {
   /**
    * ID
    */
@@ -100,5 +102,5 @@ export interface RepoQuery {
   updateBy?: string;
 
   updateByFuzzy?: string;
-
 }
+export default RepoQuery;

@@ -1,6 +1,6 @@
-import SimplePage from '@/types/model/po/SimplePage';
+import BaseQuery from '@/types/model/query/BaseQuery';
 
-class QuQuery extends SimplePage {
+class QuQuery extends BaseQuery {
   /**
    * ID
    */
@@ -91,5 +91,7 @@ class QuQuery extends SimplePage {
   knowledge?: string;
 
   knowledgeFuzzy?: string;
+
+  orderBy = 'create_time';
 }
 export default QuQuery;
