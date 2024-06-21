@@ -1,5 +1,6 @@
 package com.jl.project.entity.query;
 
+import com.jl.project.enums.QuerySort;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -27,6 +28,26 @@ public class BaseQuery {
      */
     @Schema(description = "页面排序")
     private String orderBy;
+
+
+    /**
+     * 顺序
+     */
+    @Schema(description = "顺序")
+    private String sequence;
+
+    public BaseQuery() {
+        //  默认倒叙
+        sequence = QuerySort.DESC.getValue();
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
 
     public SimplePage getSimplePage() {
         return simplePage;
