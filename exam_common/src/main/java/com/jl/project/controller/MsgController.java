@@ -1,6 +1,7 @@
 package com.jl.project.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
@@ -34,9 +35,10 @@ public class MsgController {
      */
     @RequestMapping("sendMessage")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
     public SaResult sendMessage(@RequestBody @VerifyParam(require = true) SendMessageDTO sendMessageDTO) {
         Boolean result = msgService.sendMessage(sendMessageDTO);
-        return SaResult.ok(result ? "发送成功" : "发送失败");
+        return SaResult.ok(result ? "发送成功" : "发送失败").setData(result);
     }
 
     /**
@@ -44,6 +46,7 @@ public class MsgController {
      */
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
     public SaResult loadDatalist(@RequestBody MsgQuery query) {
         PaginationResultVO<Msg> result = msgService.findListByPage(query);
         return SaResult.ok().setData(result);

@@ -1,5 +1,6 @@
 package com.jl.project.aspect;
 
+import cn.dev33.satoken.util.SaResult;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
@@ -10,7 +11,6 @@ import com.jl.project.entity.po.OperLog;
 import com.jl.project.entity.query.LoginLogQuery;
 import com.jl.project.entity.query.OperLogQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.enums.LogType;
 import com.jl.project.enums.LoginLogState;
 import com.jl.project.exception.BusinessException;
@@ -20,9 +20,11 @@ import com.jl.project.utils.AddressUtil;
 import com.jl.project.utils.UserInfoUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -31,8 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-/*@Aspect
-@Component*/
+@Aspect
+@Component
 public class LogAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
@@ -48,7 +50,7 @@ public class LogAspect {
     private LoginLogMapper<LoginLog, LoginLogQuery> loginLogMapper;
 
     @Around("@annotation(operationLog)")
-    public ResponseVO doAround(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
+    public SaResult doAround(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
         int logType = operationLog.logType().getValue();
         // 操作日志
         if (LogType.OPERATION_LOG.getValue().equals(logType)) {
@@ -65,7 +67,7 @@ public class LogAspect {
     /**
      * 处理登录日志
      */
-    private ResponseVO handleLoginLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
+    private SaResult handleLoginLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         LoginLog log = new LoginLog();
@@ -83,7 +85,7 @@ public class LogAspect {
 
         //操作人IP
         String ip = request.getRemoteAddr();
-        ResponseVO result = null;
+        SaResult result = null;
         log.setId(null);
 
         // 设置IP
@@ -97,7 +99,7 @@ public class LogAspect {
         log.setLoginAddress(AddressUtil.getRealAddressByIp(ip));
 
         try {
-            result = (ResponseVO) joinPoint.proceed();
+            result = (SaResult) joinPoint.proceed();
             log.setOperMsg(LoginLogState.SUCCESS.getType());
             log.setLoginState(LoginLogState.SUCCESS.getValue());
             return result;
@@ -121,7 +123,7 @@ public class LogAspect {
     /**
      * 处理操作日志
      */
-    private ResponseVO handleOperationLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws ExecutionException, InterruptedException {
+    private SaResult handleOperationLog(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws ExecutionException, InterruptedException {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
         // 操作人
@@ -129,7 +131,7 @@ public class LogAspect {
         String username = loginUserInfo.getUserName();
 
 
-        ResponseVO result = null;
+        SaResult result = null;
         OperLog log = new OperLog();
 
         // 操作人姓名
@@ -166,7 +168,7 @@ public class LogAspect {
         // 操作类型
         log.setOperType(operationLog.oper().getValue());
         try {
-            result = (ResponseVO) joinPoint.proceed();
+            result = (SaResult) joinPoint.proceed();
             Gson gson = new Gson();
             log.setReturnArg(gson.toJson(result));
             log.setSuccess(1);
