@@ -1,7 +1,6 @@
 package com.jl.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -27,6 +26,7 @@ import com.xxl.job.core.handler.annotation.XxlJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -57,6 +57,10 @@ public class ExamServiceImpl implements ExamService {
 
     @Value("${spring.mail.username}")
     private String from;
+
+
+    @Resource
+    private ApplicationContext applicationContext;
 
     @Resource
     private JavaMailSender javaMailSender;
@@ -107,8 +111,6 @@ public class ExamServiceImpl implements ExamService {
     @Resource
     private MsgUserMapper<MsgUser, MsgUserQuery> msgUserMapper;
 
-  /*  @Resource
-    private EmailService emailService;*/
 
     /**
      * 根据条件查询列表
@@ -266,12 +268,12 @@ public class ExamServiceImpl implements ExamService {
         if (endTime == null || !endTime.after(startTime)) {
             throw new BusinessException("考试结束时间为空/考试结束时间应大于开始时间");
         }
-        ThreadUtil.execAsync(() -> {
-            // 发送邮件考试通知
-            sendExamMailNotifie(exam);
-            // 站内通知
-            sendExamNotifie(exam);
-        });
+
+        // 发送邮件考试通知
+        sendExamMailNotifie(exam);
+        // 站内通知
+        sendExamNotifie(exam);
+
         // 创建开始考试任务
         createExamTask(examId, title, startTime, endTime);
         return true;
@@ -1029,7 +1031,6 @@ public class ExamServiceImpl implements ExamService {
      *
      * @param exam
      */
-    @Transactional
     public void sendExamMailNotifie(Exam exam) {
         MailContent mailContent = new MailContent();
         Tmpl tmpl = tmplMapper.selectById(MailConstant.NOTIFICATION_TMPL.toString());
@@ -1112,7 +1113,6 @@ public class ExamServiceImpl implements ExamService {
      *
      * @param exam
      */
-    @Transactional
     public void sendExamNotifie(Exam exam) {
         Tmpl tmpl = tmplMapper.selectById(MailConstant.NOTIFICATION_TMPL.toString());
         String tmplContent = tmpl.getContent();

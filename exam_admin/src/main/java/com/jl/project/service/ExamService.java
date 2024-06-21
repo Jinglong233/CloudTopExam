@@ -98,4 +98,5 @@ public interface ExamService {
     List<WrongQuVO> getExamQuAnalyse(String examId);
 
     List<WrongQuVO> getPaperQuAnalyse(String paperId);
+
 }
