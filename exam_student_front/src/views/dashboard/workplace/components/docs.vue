@@ -6,30 +6,18 @@
     :body-style="{ paddingTop: 0 }"
     style="height: 166px"
   >
-    <template #extra>
-      <a-link>{{ $t('workplace.viewMore') }}</a-link>
-    </template>
     <a-row>
-      <a-col :span="12">
-        <a-link>
-          {{ $t('workplace.docs.productOverview') }}
+      <a-space align="center">
+        <a-tag color="green">开发文档: </a-tag>
+        <a-link href="https://jinglong233.github.io/CloudTopExamDoc/">
+          点击前往地址
         </a-link>
-      </a-col>
-      <a-col :span="12">
-        <a-link>
-          {{ $t('workplace.docs.userGuide') }}
-        </a-link>
-      </a-col>
-      <a-col :span="12">
-        <a-link>
-          {{ $t('workplace.docs.workflow') }}
-        </a-link>
-      </a-col>
-      <a-col :span="12">
-        <a-link>
-          {{ $t('workplace.docs.interfaceDocs') }}
-        </a-link>
-      </a-col>
+      </a-space>
+    </a-row>
+    <a-row>
+      <a-space align="center">
+        <a-tag color="green"> CloudTopExam交流群: </a-tag>967055645
+      </a-space>
     </a-row>
   </a-card>
 </template>
