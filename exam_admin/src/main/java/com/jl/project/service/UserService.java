@@ -96,12 +96,6 @@ public interface UserService {
      */
     Boolean uploadAvatar(MultipartFile file) throws BusinessException, IOException;
 
-    /**
-     * 退出登录
-     *
-     * @return
-     */
-    Boolean logout();
 
     /**
      * 获取用户总数

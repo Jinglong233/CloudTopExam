@@ -1,8 +1,8 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.service.OSSService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/oss")
-public class OSSController extends ABaseController {
+public class OSSController {
     @Resource
     private OSSService ossService;
 
@@ -31,10 +31,10 @@ public class OSSController extends ABaseController {
      * @return
      */
     @RequestMapping("upload/image")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO uploadImage(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult uploadImage(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) {
         String result = ossService.uploadImage(file);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -42,10 +42,10 @@ public class OSSController extends ABaseController {
      * @param url
      */
     @RequestMapping("delete/image")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO deleteImage(@RequestBody @VerifyParam(require = true) String url) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteImage(@RequestBody @VerifyParam(require = true) String url) {
         ossService.deleteImage(url);
-        return getSuccessResponseVO(true);
+        return SaResult.ok().setData(true);
     }
 
     /**
@@ -53,10 +53,10 @@ public class OSSController extends ABaseController {
      * @param urlList
      */
     @RequestMapping("deleteBatch/image")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO deleteBatchImage(@RequestBody List<String> urlList) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteBatchImage(@RequestBody List<String> urlList) {
         ossService.deleteBatchImage(urlList);
-        return getSuccessResponseVO(true);
+        return SaResult.ok().setData(true);
     }
 
 

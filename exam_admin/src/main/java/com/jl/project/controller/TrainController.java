@@ -1,10 +1,13 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.Train;
 import com.jl.project.entity.query.TrainQuery;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.TrainService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,74 +23,82 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/train")
-public class TrainController extends ABaseController{
+@SaCheckLogin
+@SaCheckRole("admin")
+public class TrainController {
 
-	@Resource
-	private TrainService trainService;
+    @Resource
+    private TrainService trainService;
 
-	/**
-	 * 根据条件分页查询
-	 */
-	@RequestMapping("loadDataList")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO loadDatalist(TrainQuery query) {
-		return getSuccessResponseVO(trainService.findListByPage(query));
-	}
+    /**
+     * 根据条件分页查询
+     */
+    @RequestMapping("loadDataList")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(TrainQuery query) {
+        PaginationResultVO<Train> result = trainService.findListByPage(query);
+        return SaResult.ok().setData(result);
+    }
 
-	/**
-	 * 新增
-	 */
-	@RequestMapping("add")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO add(Train bean) {
-		return getSuccessResponseVO(this.trainService.add(bean));
-	}
+    /**
+     * 新增
+     */
+    @RequestMapping("add")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(Train bean) {
+        Integer result = this.trainService.add(bean);
+        return SaResult.ok(result > 0 ? "添加成功" : "添加失败").setData(result);
+    }
 
-	/**
-	 * 批量新增
-	 */
-	@RequestMapping("addBatch")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO addBatch(@RequestBody List<Train> listBean) {
-		return getSuccessResponseVO(this.trainService.addBatch(listBean));
-	}
+    /**
+     * 批量新增
+     */
+    @RequestMapping("addBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addBatch(@RequestBody List<Train> listBean) {
+        Integer result = this.trainService.addBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加成功" : "批量添加失败").setData(result);
+    }
 
-	/**
-	 * 批量新增或修改
-	 */
-	@RequestMapping("addOrUpdateBatch")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO addOrUpdateBatch(@RequestBody List<Train> listBean) {
-		return getSuccessResponseVO(this.trainService.addOrUpdateBatch(listBean));
-	}
+    /**
+     * 批量新增或修改
+     */
+    @RequestMapping("addOrUpdateBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addOrUpdateBatch(@RequestBody List<Train> listBean) {
+        Integer result = this.trainService.addOrUpdateBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
+    }
 
-	/**
-	 * 根据Id查询
-	 */
+    /**
+     * 根据Id查询
+     */
 
-	@RequestMapping("getTrainById")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO getTrainById(String id) {
-		return getSuccessResponseVO(this.trainService.getTrainById(id));
-	}
+    @RequestMapping("getTrainById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getTrainById(String id) {
+        Train result = this.trainService.getTrainById(id);
+        return SaResult.ok().setData(result);
+    }
 
-	/**
-	 * 根据Id更新
-	 */
-	@RequestMapping("updateTrainById")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO updateTrainById(Train bean, String id) {
-		return getSuccessResponseVO(this.trainService.updateTrainById(bean, id));
-	}
+    /**
+     * 根据Id更新
+     */
+    @RequestMapping("updateTrainById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateTrainById(Train bean, String id) {
+        Integer result = this.trainService.updateTrainById(bean, id);
+        return SaResult.ok(result > 0 ? "更新成功" : "更新失败");
+    }
 
-	/**
-	 * 根据Id删除
-	 */
-	@RequestMapping("deleteTrainById")
-	@GlobalInterceptor(checkLogin = true,checkParams = true)
-	public ResponseVO deleteTrainById(@RequestBody @VerifyParam(require = true) String id) {
-		this.trainService.deleteTrainById(id);
-		return getSuccessResponseVO(null);
-	}
+    /**
+     * 根据Id删除
+     */
+    @RequestMapping("deleteTrainById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteTrainById(@RequestBody @VerifyParam(require = true) String id) {
+        Integer result = this.trainService.deleteTrainById(id);
+        return SaResult.ok(result > 0 ? "删除成功" : "删除失败");
+    }
 
 }

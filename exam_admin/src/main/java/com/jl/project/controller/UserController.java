@@ -1,5 +1,11 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.annotation.SaMode;
+import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.OperationLog;
 import com.jl.project.annotation.VerifyParam;
@@ -7,17 +13,18 @@ import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.User;
 import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
-import com.jl.project.entity.vo.PaginationResultVO;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.enums.LogType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -29,7 +36,8 @@ import java.util.List;
 @Api(tags = "管理员管理用户")
 @RestController
 @RequestMapping("/user")
-public class UserController extends ABaseController {
+@SaCheckLogin
+public class UserController {
 
     @Resource
     private UserService userService;
@@ -42,11 +50,13 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "管理员/教师登录")
     @RequestMapping("login")
-    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    @GlobalInterceptor(checkParams = true)
     @OperationLog(logType = LogType.LOGIN_LOG)
-    public ResponseVO login(@RequestBody @VerifyParam LoginDTO loginDTO) {
+    @SaIgnore
+    @SaCheckRole("admin")
+    public SaResult login(@RequestBody @VerifyParam LoginDTO loginDTO) {
         LoginResponseVo result = userService.login(loginDTO);
-        return getSuccessResponseVO(result, "登录成功");
+        return SaResult.ok("登录成功").setData(result);
     }
 
     /**
@@ -56,10 +66,12 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "管理员/教师退出登录")
     @RequestMapping("logout")
-    @GlobalInterceptor(checkLogin = true)
-    public ResponseVO logout() {
-        Boolean result = userService.logout();
-        return getSuccessResponseVO(result, "退出成功");
+    @SaCheckRole(value = {"admin", "teacher"},mode = SaMode.OR)
+    public SaResult logout() {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        String token = request.getHeader("Authorization");
+        StpUtil.logoutByTokenValue(token);
+        return SaResult.ok("退出成功");
     }
 
     /**
@@ -69,21 +81,23 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "通过token获取登录用户信息")
     @RequestMapping("info")
-    @GlobalInterceptor(checkLogin = true)
-    public ResponseVO getLoginUserInfo() throws BusinessException {
+    @SaCheckRole("admin")
+    public SaResult getLoginUserInfo() throws BusinessException {
         LoginResponseVo result = userService.getLoginUserInfo();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 新增（注册）
+     * 本系统注册只有管理员才可以添加用户
      */
     @ApiOperation(value = "注册")
     @RequestMapping("register")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
-    public ResponseVO register(@RequestBody @VerifyParam AddUserDTO addUserDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult register(@RequestBody @VerifyParam AddUserDTO addUserDTO) throws BusinessException {
         Boolean result = userService.register(addUserDTO);
-        return getSuccessResponseVO(result, "添加成功");
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -93,9 +107,9 @@ public class UserController extends ABaseController {
      * @return
      */
     @RequestMapping("loadUserList")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO loadDatalist(@RequestBody UserQuery query) {
-        return getSuccessResponseVO(userService.findListByPage(query));
+    @SaCheckRole("admin")
+    public SaResult loadDatalist(@RequestBody UserQuery query) {
+        return SaResult.ok().setData(userService.findListByPage(query));
     }
 
 
@@ -107,10 +121,9 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "分页获取部门人员")
     @RequestMapping("loadDeptUserList")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO loadDeptUserList(@RequestBody UserQuery query) throws BusinessException {
-        PaginationResultVO result = userService.loadDeptUserList(query);
-        return getSuccessResponseVO(result, "获取成功");
+    @SaCheckRole("admin")
+    public SaResult loadDeptUserList(@RequestBody UserQuery query) throws BusinessException {
+        return SaResult.ok("获取成功").setData(userService.loadDeptUserList(query));
     }
 
     /**
@@ -118,10 +131,11 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "更新用户信息")
     @RequestMapping("updateUserById")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO updateUserById(@RequestBody @VerifyParam UpdateUserDTO updateUserDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult updateUserById(@RequestBody @VerifyParam UpdateUserDTO updateUserDTO) throws BusinessException {
         Boolean result = userService.updateUserById(updateUserDTO);
-        return getSuccessResponseVO(result, "更新成功");
+        return SaResult.ok("更新成功").setData(result);
     }
 
     /**
@@ -129,10 +143,11 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "删除用户")
     @RequestMapping("deleteUserById")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
-    public ResponseVO deleteUserById(@VerifyParam(require = true) @RequestBody String id) throws BusinessException {
+    @GlobalInterceptor( checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult deleteUserById(@VerifyParam(require = true) @RequestBody String id) throws BusinessException {
         Boolean result = userService.deleteUserById(id);
-        return getSuccessResponseVO(result, result ? "删除成功" : "删除失败");
+        return SaResult.ok(result ? "删除成功" : "删除失败").setData(result);
     }
 
 
@@ -143,10 +158,10 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "用户上传头像")
     @PostMapping("/upload/avatar")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws BusinessException, IOException {
-        Boolean result = userService.uploadAvatar(file);
-        return getSuccessResponseVO(result);
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult uploadAvatar(@RequestParam("file") @VerifyParam(require = true) MultipartFile file) throws BusinessException, IOException {
+        return SaResult.ok().setData(userService.uploadAvatar(file));
     }
 
     /**
@@ -154,9 +169,10 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "根据Id查询用户信息")
     @RequestMapping("getUserById")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
-    public ResponseVO getUserById(@RequestBody @VerifyParam(require = true) String id) {
-        return getSuccessResponseVO(userService.getUserById(id));
+    @GlobalInterceptor( checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult getUserById(@RequestBody @VerifyParam(require = true) String id) {
+        return SaResult.ok().setData(userService.getUserById(id));
     }
 
     /**
@@ -166,10 +182,11 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "获取用户总数")
     @RequestMapping("userCount")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true, checkParams = true)
-    public ResponseVO getUserCount(@RequestBody @VerifyParam(require = true) UserQuery userQuery) throws BusinessException {
+    @GlobalInterceptor( checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult getUserCount(@RequestBody @VerifyParam(require = true) UserQuery userQuery) throws BusinessException {
         Integer result = userService.getUserCount(userQuery);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -179,10 +196,11 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "修改用户密码")
     @RequestMapping("updateUserPassword")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult updateUserPassword(@RequestBody @VerifyParam(require = true) UpdateUserPasswordDTO updateUserPasswordDTO) throws BusinessException {
         Boolean result = userService.updateUserPassword(updateUserPasswordDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -194,10 +212,11 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "获取找回密码邮箱验证码")
     @RequestMapping("getRetrievePasswordCode")
-    @GlobalInterceptor(checkLogin = false, checkParams = true)
-    public ResponseVO getRetrievePasswordCode(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    @SaIgnore
+    public SaResult getRetrievePasswordCode(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
         Boolean result = userService.getRetrievePasswordCode(retrievePasswordDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -207,31 +226,33 @@ public class UserController extends ABaseController {
      */
     @ApiOperation(value = "找回密码")
     @RequestMapping("retrievePassword")
-    @GlobalInterceptor(checkLogin = false, checkParams = true)
-    public ResponseVO retrievePassword(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    @SaIgnore
+    public SaResult retrievePassword(@RequestBody @VerifyParam(require = true) RetrievePasswordDTO retrievePasswordDTO) throws BusinessException {
         Boolean result = userService.retrievePassword(retrievePasswordDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
-    // 下面未做
 
     /**
      * 批量新增
      */
     @ApiOperation(value = "批量导入用户信息接口（预留）")
     @RequestMapping("addBatch")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO addBatch(@RequestBody @VerifyParam List<User> listBean) {
-        return getSuccessResponseVO(this.userService.addBatch(listBean));
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult addBatch(@RequestBody @VerifyParam List<User> listBean) {
+        return SaResult.ok().setData(this.userService.addBatch(listBean));
     }
 
     /**
      * 批量新增或修改
      */
     @RequestMapping("addOrUpdateBatch")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO addOrUpdateBatch(@RequestBody @VerifyParam List<User> listBean) {
-        return getSuccessResponseVO(this.userService.addOrUpdateBatch(listBean));
+    @GlobalInterceptor(checkParams = true)
+    @SaCheckRole("admin")
+    public SaResult addOrUpdateBatch(@RequestBody @VerifyParam List<User> listBean) {
+        return SaResult.ok().setData(this.userService.addOrUpdateBatch(listBean));
     }
 
 

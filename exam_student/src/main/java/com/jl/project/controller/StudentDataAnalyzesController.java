@@ -1,7 +1,9 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.service.StudentDataAnalyzesService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,7 +14,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/student")
-public class StudentDataAnalyzesController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class StudentDataAnalyzesController {
 
     @Resource
     private StudentDataAnalyzesService studentDataAnalyzesService;
@@ -23,10 +27,9 @@ public class StudentDataAnalyzesController extends ABaseController {
      * @return
      */
     @RequestMapping("/trainCount")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true)
-    public ResponseVO getTrainCount() {
+    public SaResult getTrainCount() {
         Integer result = studentDataAnalyzesService.getTrainCount();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -35,10 +38,9 @@ public class StudentDataAnalyzesController extends ABaseController {
      * @return
      */
     @RequestMapping("/examCount")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true)
-    public ResponseVO getExamCount() {
+    public SaResult getExamCount() {
         Integer result = studentDataAnalyzesService.getExamCount();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -48,9 +50,8 @@ public class StudentDataAnalyzesController extends ABaseController {
      * @return
      */
     @RequestMapping("/myRecentExam")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true)
-    public ResponseVO getMyRecentExam() {
+    public SaResult getMyRecentExam() {
         Map<String, List> result = studentDataAnalyzesService.getMyRecentExam();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 }

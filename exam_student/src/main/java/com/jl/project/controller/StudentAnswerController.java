@@ -1,13 +1,18 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.BookQuery;
 import com.jl.project.entity.query.UserAnswerQuery;
-import com.jl.project.entity.vo.*;
-import com.jl.project.exception.BusinessException;
+import com.jl.project.entity.vo.CorrectUserAnswerDTO;
+import com.jl.project.entity.vo.ErrorVO;
+import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.WrongKnowledgeVO;
 import com.jl.project.service.StudentAnswerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +30,9 @@ import java.util.List;
 @Tag(name = "用户答案表Controller", description = "用户答案表Controller")
 @RestController
 @RequestMapping("/studentAnswer")
-public class StudentAnswerController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class StudentAnswerController {
 
     @Resource
     private StudentAnswerService studentAnswerService;
@@ -35,10 +42,10 @@ public class StudentAnswerController extends ABaseController {
      * 获取用户作答列表
      */
     @RequestMapping("getDataList")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) {
         List<UserAnswer> result = studentAnswerService.findListByParam(userAnswerQuery);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -46,20 +53,20 @@ public class StudentAnswerController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO add(@RequestBody @VerifyParam AddUserAnswerDTO addUserAnswerDTO) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(@RequestBody @VerifyParam AddUserAnswerDTO addUserAnswerDTO) {
         List<UserAnswer> result = studentAnswerService.add(addUserAnswerDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 根据Id更新
      */
     @RequestMapping("updateStudentAnswerById")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO updateUserAnswerById(@RequestBody @VerifyParam CorrectUserAnswerDTO correctUserAnswerDTO) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateUserAnswerById(@RequestBody @VerifyParam CorrectUserAnswerDTO correctUserAnswerDTO) {
         List<UserAnswer> result = studentAnswerService.updateUserAnswerById(correctUserAnswerDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -69,17 +76,13 @@ public class StudentAnswerController extends ABaseController {
      * @return
      */
     @RequestMapping("errorCount")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
-    public ResponseVO errorCount(@RequestBody BookQuery bookQuery) {
-        PaginationResultVO<ErrorVO> result = null;
-        try {
-            result = studentAnswerService.errorCount(bookQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
-    }
+    @GlobalInterceptor(checkParams = true)
+    public SaResult errorCount(@RequestBody BookQuery bookQuery) {
+        PaginationResultVO<ErrorVO>
+                result = studentAnswerService.errorCount(bookQuery);
+        return SaResult.ok().setData(result);
 
+    }
 
 
     /**
@@ -88,15 +91,12 @@ public class StudentAnswerController extends ABaseController {
      * @return
      */
     @RequestMapping("errorKnowledge")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true, checkParams = true)
-        public ResponseVO getErrorKnowledge() {
-        WrongKnowledgeVO result = null;
-        try {
-            result = studentAnswerService.getErrorKnowledge();
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getErrorKnowledge() {
+        WrongKnowledgeVO
+                result = studentAnswerService.getErrorKnowledge();
+        return SaResult.ok().setData(result);
+
     }
 
 }

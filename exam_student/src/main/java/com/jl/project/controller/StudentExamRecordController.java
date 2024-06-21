@@ -1,10 +1,14 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
+import com.jl.project.entity.po.ExamRecord;
 import com.jl.project.entity.query.ExamRecordQuery;
 import com.jl.project.entity.vo.AnsweredRecordVO;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.StudentExamRecordService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +25,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/student")
-public class StudentExamRecordController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class StudentExamRecordController{
 
     @Resource
     private StudentExamRecordService studentExamRecordService;
@@ -30,9 +36,10 @@ public class StudentExamRecordController extends ABaseController {
      * 根据条件分页查询
      */
     @RequestMapping("loadDataList")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO loadDatalist(@RequestBody @VerifyParam ExamRecordQuery query) {
-        return getSuccessResponseVO(studentExamRecordService.getStudentExamRecord(query));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(@RequestBody @VerifyParam ExamRecordQuery query) {
+        PaginationResultVO<ExamRecord> result = studentExamRecordService.getStudentExamRecord(query);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -43,11 +50,11 @@ public class StudentExamRecordController extends ABaseController {
      * @return
      */
     @RequestMapping("getAnsweredRecord")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getAnsweredRecord(@RequestBody @VerifyParam(require = true) String userId) {
-        List<AnsweredRecordVO> resultVO =
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getAnsweredRecord(@RequestBody @VerifyParam(require = true) String userId) {
+        List<AnsweredRecordVO> result =
                 studentExamRecordService.getAnsweredRecord(userId);
-        return getSuccessResponseVO(resultVO);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -55,10 +62,10 @@ public class StudentExamRecordController extends ABaseController {
      * 考生开始作答（这里只接收 userId 和 ExamId）
      */
     @RequestMapping("startAnswer")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO startAnswer(@RequestBody @VerifyParam ExamRecordQuery query) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult startAnswer(@RequestBody @VerifyParam ExamRecordQuery query) {
         Date result = studentExamRecordService.startAnswer(query);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 

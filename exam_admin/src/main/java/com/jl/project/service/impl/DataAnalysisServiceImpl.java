@@ -193,7 +193,6 @@ public class DataAnalysisServiceImpl implements DataAnalysisService {
 
     @Override
     public List<String> getKnowledgeList() {
-
         List<String> result = bookMapper.selectKnContentList();
         return result;
     }

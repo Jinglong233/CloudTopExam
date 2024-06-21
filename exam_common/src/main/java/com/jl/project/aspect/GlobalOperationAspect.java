@@ -10,14 +10,12 @@ import com.jl.project.enums.ResponseCodeEnum;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.utils.VerifyUtils;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -31,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 import static com.jl.project.constant.UserConstant.TOKEN;
 import static com.jl.project.constant.UserConstant.USER_PREFIX;
 
-@Aspect
-@Component
+/*@Aspect
+@Component*/
 public class GlobalOperationAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalOperationAspect.class);
@@ -41,14 +39,6 @@ public class GlobalOperationAspect {
 
     private static final String TYPE_INTEGER = "java.lang.Integer";
     private static final String TYPE_LONG = "java.lang.Long";
-
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-
-    @Pointcut("@annotation(com.jl.project.annotation.GlobalInterceptor)")
-    private void requestInterceptor() {
-
-    }
 
     @Before("requestInterceptor()")
     public void interceptorDo(JoinPoint point) throws BusinessException {
@@ -62,13 +52,6 @@ public class GlobalOperationAspect {
             if (null == interceptor) {
                 return;
             }
-
-
-            // 校验登录（同时也检测了管理员、学生）
-            if (interceptor.checkLogin() || interceptor.checkAdmin() || interceptor.checkStudent()) {
-                checkLogin(interceptor.checkAdmin(),interceptor.checkStudent());
-            }
-
             // 校验参数
             if (interceptor.checkParams()) {
                 validateParams(method, arguments);
@@ -82,46 +65,6 @@ public class GlobalOperationAspect {
         } catch (Throwable e) {
             logger.error("全局拦截器异常", e);
             throw new BusinessException(ResponseCodeEnum.CODE_500);
-        }
-    }
-
-    /**
-     * 检查是否登录
-     *
-     * @param checkAdmin   是否需要管理员身份
-     * @param checkStudent 是否需要学生身份
-     * @throws BusinessException
-     */
-    private void checkLogin(Boolean checkAdmin, Boolean checkStudent) throws BusinessException {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String token = request.getHeader("Authorization");
-        if (StrUtil.isEmpty(token)) {
-            throw new BusinessException(ResponseCodeEnum.CODE_401);
-        }
-        // 获取redis中缓存的登录凭证
-        String result = stringRedisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
-        if (result == null) {
-            throw new BusinessException(ResponseCodeEnum.CODE_901);
-        }
-
-        // token续期
-        stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, result, Constant.EXPIRED_30, TimeUnit.MINUTES);
-
-        // 通过token继续获取userInfo
-        String userInfoStr = stringRedisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
-        if (StrUtil.isEmpty(userInfoStr)) {
-            throw new BusinessException(ResponseCodeEnum.CODE_901);
-        }
-        Gson gson = new Gson();
-        User user = gson.fromJson(userInfoStr, User.class);
-        // 检验是否需要管理员权限
-        if (checkAdmin && !"admin".equals(user.getRole())) {
-            throw new BusinessException(ResponseCodeEnum.CODE_404);
-        }
-
-        // 检验是否需要学生身份
-        if (checkStudent && !"student".equals(user.getRole())) {
-            throw new BusinessException(ResponseCodeEnum.CODE_404);
         }
     }
 

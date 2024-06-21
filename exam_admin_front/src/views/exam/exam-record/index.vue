@@ -226,7 +226,6 @@
 
   // 获取答卷详情
   const getRecordDetail = (record: any) => {
-    console.log('recordId', record);
     router.push({
       name: 'ExamRecordDetail',
       params: {

@@ -1,5 +1,8 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddPaperDTO;
@@ -8,7 +11,6 @@ import com.jl.project.entity.po.Paper;
 import com.jl.project.entity.query.PaperQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.PaperAndQuVO;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.PaperService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +27,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/paper")
-public class PaperController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("admin")
+public class PaperController {
 
     @Resource
     private PaperService paperService;
@@ -34,10 +38,10 @@ public class PaperController extends ABaseController {
      * 根据Id查询试卷详细信息
      */
     @RequestMapping("getPaperDetailById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getPaperDetailById(@RequestBody @VerifyParam(require = true) String id) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getPaperDetailById(@RequestBody @VerifyParam(require = true) String id) {
         PaperAndQuVO result = paperService.getPaperDetailById(id);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -45,20 +49,20 @@ public class PaperController extends ABaseController {
      * 根据Id更新
      */
     @RequestMapping("updatePaperById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO updatePaperById(@RequestBody @VerifyParam UpdatePaperAndQuDTO bean) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updatePaperById(@RequestBody @VerifyParam UpdatePaperAndQuDTO bean) throws BusinessException {
         Boolean result = paperService.updatePaperById(bean);
-        return getSuccessResponseVO(result);
+        return SaResult.ok(result ? "更新成功" : "更新失败");
     }
 
     /**
      * 根据Id删除
      */
     @RequestMapping("deletePaperById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO deletePaperById(@RequestBody @VerifyParam(require = true) String id) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deletePaperById(@RequestBody @VerifyParam(require = true) String id) {
         Boolean result = paperService.deletePaperById(id);
-        return getSuccessResponseVO(result);
+        return SaResult.ok(result ? "删除成功" : "删除失败");
     }
 
 
@@ -66,10 +70,10 @@ public class PaperController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO add(@RequestBody AddPaperDTO paperDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(@RequestBody AddPaperDTO paperDTO) throws BusinessException {
         Boolean result = paperService.add(paperDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok(result ? "添加成功" : "添加失败").setData(result);
     }
 
 
@@ -77,10 +81,10 @@ public class PaperController extends ABaseController {
      * 根据条件分页查询
      */
     @RequestMapping("loadDataList")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO loadDatalist(@RequestBody PaperQuery query) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(@RequestBody PaperQuery query) throws BusinessException {
         PaginationResultVO<Paper> result = paperService.loadDatalist(query);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -88,39 +92,42 @@ public class PaperController extends ABaseController {
      * 批量新增
      */
     @RequestMapping("addBatch")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO addBatch(@RequestBody List<Paper> listBean) {
-        return getSuccessResponseVO(this.paperService.addBatch(listBean));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addBatch(@RequestBody List<Paper> listBean) {
+        Integer result = this.paperService.addBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加成功" : "批量添加失败").setData(result);
+
     }
 
     /**
      * 批量新增或修改
      */
     @RequestMapping("addOrUpdateBatch")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO addOrUpdateBatch(@RequestBody List<Paper> listBean) {
-        return getSuccessResponseVO(this.paperService.addOrUpdateBatch(listBean));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addOrUpdateBatch(@RequestBody List<Paper> listBean) {
+        Integer result = this.paperService.addOrUpdateBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
+
     }
 
     /**
      * 根据Id查询
      */
-
     @RequestMapping("getPaperById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getPaperById(@RequestBody @VerifyParam(require = true) String id) {
-        return getSuccessResponseVO(this.paperService.getPaperById(id));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getPaperById(@RequestBody @VerifyParam(require = true) String id) {
+        Paper result = this.paperService.getPaperById(id);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 获取试卷总数
      */
-
     @RequestMapping("paperCount")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getPaperCount(@RequestBody PaperQuery paperQuery) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getPaperCount(@RequestBody PaperQuery paperQuery) throws BusinessException {
         Integer result = paperService.getPaperCount(paperQuery);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 

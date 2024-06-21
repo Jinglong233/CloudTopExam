@@ -1,12 +1,12 @@
 package com.jl.project.service.impl;
 
+import cn.dev33.satoken.secure.SaSecureUtil;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSSClient;
 import com.google.gson.Gson;
-import com.jl.project.constant.Constant;
 import com.jl.project.entity.dto.*;
 import com.jl.project.entity.po.Department;
 import com.jl.project.entity.po.User;
@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.jl.project.constant.UserConstant.TOKEN;
@@ -100,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
         User resultUser = list.get(0);
         // 2. 加密
-        String encryptPassword = MD5Util.getMD5Encode(user.getPassword(), resultUser.getSalt());
+        String encryptPassword = SaSecureUtil.md5(user.getPassword()+resultUser.getSalt());
 
         // 3. 判断加密之后字符串是否相等
         if (!encryptPassword.equals(resultUser.getPassword())) {
@@ -112,44 +111,22 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("该用户被禁用");
         }
 
-        // 4. 生成token
-        Gson gson = new Gson();
-        String token = UUID.randomUUID().toString();
+        // 登录
+        StpUtil.login(resultUser.getId());
 
-        // 使用两对k-v保证同一账号一地登录。通过token获取用户信息
-        // token格式：user前缀 + userId + token
-        // 5. 判断是否已经登录
-        String oldToken = stringRedisTemplate.opsForValue().get(USER_PREFIX + resultUser.getId());
-        if (oldToken != null) { // 已经登录
-            // 删除原来的登录token
-            stringRedisTemplate.delete(USER_PREFIX + TOKEN + oldToken);
-        }
-        stringRedisTemplate.opsForValue().set(USER_PREFIX + resultUser.getId(), token);
-        stringRedisTemplate.opsForValue().set(USER_PREFIX + TOKEN + token, gson.toJson(resultUser), Constant.EXPIRED_30, TimeUnit.MINUTES);
+        Gson gson = new Gson();
+
+        stringRedisTemplate.opsForValue().set(USER_PREFIX + resultUser.getId(), gson.toJson(resultUser));
 
         LoginResponseVo loginResponseVo = new LoginResponseVo();
         BeanUtil.copyProperties(resultUser, loginResponseVo);
-        loginResponseVo.setToken(token);
-
+        // 4. 设置token
+        loginResponseVo.setToken(StpUtil.getTokenValue());
         return loginResponseVo;
     }
 
 
-    /**
-     * 退出登录
-     *
-     * @return
-     */
-    @Override
-    public Boolean logout() {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String authorization = request.getHeader("Authorization");
-        if (authorization == null) {
-            return true;
-        }
-        // 清除token缓存
-        return stringRedisTemplate.delete(USER_PREFIX + TOKEN + authorization);
-    }
+
 
 
     /**

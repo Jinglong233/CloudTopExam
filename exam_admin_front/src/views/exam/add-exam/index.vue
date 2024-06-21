@@ -559,7 +559,6 @@
       );
     } catch {
       saveLoading.value = false;
-      console.log();
     } finally {
       saveLoading.value = false;
     }

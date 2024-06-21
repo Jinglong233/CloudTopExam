@@ -1,5 +1,8 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.AddDepartmentDTO;
@@ -8,7 +11,7 @@ import com.jl.project.entity.dto.UpdateDeptSortDTO;
 import com.jl.project.entity.po.Department;
 import com.jl.project.entity.query.DepartmentQuery;
 import com.jl.project.entity.vo.DepartmentTreeVO;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.DepartmentService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +28,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/department")
-public class DepartmentController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("admin")
+public class DepartmentController{
 
     @Resource
     private DepartmentService departmentService;
@@ -35,10 +40,10 @@ public class DepartmentController extends ABaseController {
      * 新增
      */
     @RequestMapping("add")
-    @GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-    public ResponseVO add(@RequestBody @VerifyParam AddDepartmentDTO bean) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(@RequestBody @VerifyParam AddDepartmentDTO bean) throws BusinessException {
         Boolean result = departmentService.add(bean);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -47,10 +52,10 @@ public class DepartmentController extends ABaseController {
      * @return
      */
     @RequestMapping("/treeList")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getTreeList()  throws BusinessException{
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getTreeList()  throws BusinessException{
         List<DepartmentTreeVO> result = departmentService.getTreeList();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -60,10 +65,10 @@ public class DepartmentController extends ABaseController {
      * @return
      */
     @RequestMapping("/sort")
-    @GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-    public ResponseVO departmentSort(@RequestBody @VerifyParam UpdateDeptSortDTO sort) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult departmentSort(@RequestBody @VerifyParam UpdateDeptSortDTO sort) throws BusinessException {
         Boolean result = departmentService.departmentSort(sort);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
 
     }
 
@@ -71,10 +76,10 @@ public class DepartmentController extends ABaseController {
      * 根据Id更新
      */
     @RequestMapping("updateDepartmentById")
-    @GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-    public ResponseVO updateDepartmentById(@RequestBody @VerifyParam UpdateDeptDTO updateDeptDTO) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateDepartmentById(@RequestBody @VerifyParam UpdateDeptDTO updateDeptDTO) throws BusinessException {
         Boolean result = departmentService.updateDepartmentById(updateDeptDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -82,29 +87,30 @@ public class DepartmentController extends ABaseController {
      * 根据Id删除
      */
     @RequestMapping("deleteDepartmentById")
-    @GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-    public ResponseVO deleteDepartmentById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteDepartmentById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         Boolean result = departmentService.deleteDepartmentById(id);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 根据条件分页查询
      */
     @RequestMapping("loadDataList")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO loadDatalist(@RequestBody @VerifyParam DepartmentQuery query) {
-        return getSuccessResponseVO(departmentService.findListByPage(query));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(@RequestBody @VerifyParam DepartmentQuery query) {
+        PaginationResultVO<Department> result = departmentService.findListByPage(query);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 根据Id返回所有的子部门Id（包括自己）
      */
     @RequestMapping("getChildDeptById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getChildDeptById(@RequestBody @VerifyParam(require = true) String parentId) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getChildDeptById(@RequestBody @VerifyParam(require = true) String parentId) {
         List<String> result = departmentService.getChildDeptById(parentId);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -113,19 +119,20 @@ public class DepartmentController extends ABaseController {
      * 根据Id查询
      */
     @RequestMapping("getDepartmentById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getDepartmentById(@RequestBody @VerifyParam(require = true) String id) {
-        return getSuccessResponseVO(departmentService.getDepartmentById(id));
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getDepartmentById(@RequestBody @VerifyParam(require = true) String id) {
+        Department result = departmentService.getDepartmentById(id);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 获取部门数量
      */
     @RequestMapping("deptCount")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getDeptCount(@RequestBody @VerifyParam DepartmentQuery departmentQuery) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getDeptCount(@RequestBody @VerifyParam DepartmentQuery departmentQuery) throws BusinessException {
         Integer result = departmentService.getDeptCount(departmentQuery);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -133,10 +140,10 @@ public class DepartmentController extends ABaseController {
      * 获取专业
      */
     @RequestMapping("profession")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getProfession() throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getProfession() throws BusinessException {
         List<DepartmentTreeVO> result = departmentService.getProfession();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -145,17 +152,19 @@ public class DepartmentController extends ABaseController {
      * 批量新增
      */
     @RequestMapping("addBatch")
-    public ResponseVO addBatch(@RequestBody List<Department> listBean) {
-        return getSuccessResponseVO(this.departmentService.addBatch(listBean));
+    public SaResult addBatch(@RequestBody List<Department> listBean) {
+        Integer result = this.departmentService.addBatch(listBean);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 批量新增或修改
      */
     @RequestMapping("addOrUpdateBatch")
-    public ResponseVO addOrUpdateBatch(@RequestBody List<Department> listBean) {
+    public SaResult addOrUpdateBatch(@RequestBody List<Department> listBean) {
+        Integer result = this.departmentService.addOrUpdateBatch(listBean);
+        return SaResult.ok().setData(result);
 
-        return getSuccessResponseVO(this.departmentService.addOrUpdateBatch(listBean));
     }
 
 }

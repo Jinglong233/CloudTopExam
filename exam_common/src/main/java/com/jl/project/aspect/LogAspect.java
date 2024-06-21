@@ -20,11 +20,9 @@ import com.jl.project.utils.AddressUtil;
 import com.jl.project.utils.UserInfoUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -33,8 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-@Aspect
-@Component
+/*@Aspect
+@Component*/
 public class LogAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);

@@ -1,10 +1,13 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.Role;
 import com.jl.project.entity.query.RoleQuery;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.RoleService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,74 +23,86 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/role")
-public class RoleController extends ABaseController{
+@SaCheckLogin
+@SaCheckRole("admin")
+public class RoleController {
 
-	@Resource
-	private RoleService roleService;
+    @Resource
+    private RoleService roleService;
 
-	/**
-	 * 根据条件分页查询
-	 */
-	@RequestMapping("loadDataList")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO loadDatalist(@RequestBody RoleQuery query) {
-		return getSuccessResponseVO(roleService.findListByPage(query));
-	}
+    /**
+     * 根据条件分页查询
+     */
+    @RequestMapping("loadDataList")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(@RequestBody RoleQuery query) {
+        PaginationResultVO<Role> result = roleService.findListByPage(query);
+        return SaResult.ok().setData(result);
+    }
 
-	/**
-	 * 新增
-	 */
-	@RequestMapping("add")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO add(@RequestBody Role bean) {
-		return getSuccessResponseVO(this.roleService.add(bean));
-	}
+    /**
+     * 新增
+     */
+    @RequestMapping("add")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(@RequestBody Role bean) {
+        Integer result = this.roleService.add(bean);
+        return SaResult.ok(result > 0 ? "添加成功" : "添加失败").setData(result);
 
-	/**
-	 * 批量新增
-	 */
-	@RequestMapping("addBatch")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO addBatch(@RequestBody List<Role> listBean) {
-		return getSuccessResponseVO(this.roleService.addBatch(listBean));
-	}
+    }
 
-	/**
-	 * 批量新增或修改
-	 */
-	@RequestMapping("addOrUpdateBatch")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO addOrUpdateBatch(@RequestBody List<Role> listBean) {
-		return getSuccessResponseVO(this.roleService.addOrUpdateBatch(listBean));
-	}
+    /**
+     * 批量新增
+     */
+    @RequestMapping("addBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addBatch(@RequestBody List<Role> listBean) {
+        Integer result = this.roleService.addBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加成功" : "批量添加失败").setData(result);
 
-	/**
-	 * 根据Id查询
-	 */
+    }
 
-	@RequestMapping("getRoleById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO getRoleById(@RequestBody @VerifyParam(require = true) String id) {
-		return getSuccessResponseVO(this.roleService.getRoleById(id));
-	}
+    /**
+     * 批量新增或修改
+     */
+    @RequestMapping("addOrUpdateBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addOrUpdateBatch(@RequestBody List<Role> listBean) {
+        Integer result = this.roleService.addOrUpdateBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
 
-	/**
-	 * 根据Id更新
-	 */
-	@RequestMapping("updateRoleById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO updateRoleById(Role bean, String id) {
-		return getSuccessResponseVO(this.roleService.updateRoleById(bean, id));
-	}
+    }
 
-	/**
-	 * 根据Id删除
-	 */
-	@RequestMapping("deleteRoleById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO deleteRoleById(String id) {
-		this.roleService.deleteRoleById(id);
-		return getSuccessResponseVO(null);
-	}
+    /**
+     * 根据Id查询
+     */
+
+    @RequestMapping("getRoleById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getRoleById(@RequestBody @VerifyParam(require = true) String id) {
+        Role result = this.roleService.getRoleById(id);
+        return SaResult.ok().setData(result);
+
+    }
+
+    /**
+     * 根据Id更新
+     */
+    @RequestMapping("updateRoleById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateRoleById(Role bean, String id) {
+        Integer result = this.roleService.updateRoleById(bean, id);
+        return SaResult.ok(result > 0 ? "更新成功" : "更新失败");
+    }
+
+    /**
+     * 根据Id删除
+     */
+    @RequestMapping("deleteRoleById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteRoleById(String id) {
+        Integer result = this.roleService.deleteRoleById(id);
+        return SaResult.ok(result > 0 ? "删除成功" : "删除失败");
+    }
 
 }

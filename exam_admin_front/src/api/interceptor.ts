@@ -5,8 +5,7 @@ import { getToken } from '@/utils/auth';
 import router from '@/router';
 
 export interface HttpResponse<T = unknown> {
-  status: string;
-  info: string;
+  msg: string;
   code: number;
   data: T;
 }
@@ -38,24 +37,25 @@ axios.interceptors.response.use(
     const res = response.data;
     if (res.code === 401 || res.code === 901) {
       Message.warning({
-        content: res.info,
+        content: res.msg,
         duration: 2000,
       });
       router.push({ name: 'login' });
       return null;
     }
-    if (res.status === 'error') {
-      Message.error({
-        content: res.info,
+    if (res.code === 403) {
+      Message.warning({
+        content: '无权限',
         duration: 2000,
       });
-      return res;
+      return Promise.reject(new Error(res.msg || '请求出错'));
     }
+
     if (res.code === 200) {
       return res;
     }
 
-    return Promise.reject(new Error(res.info || '请求出错'));
+    return Promise.reject(new Error(res.msg || '请求出错'));
   },
   (error) => {
     Message.error({

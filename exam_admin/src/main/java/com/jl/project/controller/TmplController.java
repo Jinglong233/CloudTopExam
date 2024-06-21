@@ -1,9 +1,12 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.query.TmplQuery;
-import com.jl.project.entity.vo.ResponseVO;
+import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.TmplService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,74 +22,85 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/tmpl")
-public class TmplController extends ABaseController{
+@SaCheckLogin
+@SaCheckRole("admin")
+public class TmplController {
 
-	@Resource
-	private TmplService tmplService;
+    @Resource
+    private TmplService tmplService;
 
-	/**
-	 * 根据条件分页查询
-	 */
-	@RequestMapping("loadDataList")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO loadDatalist(TmplQuery query) {
-		return getSuccessResponseVO(tmplService.findListByPage(query));
-	}
+    /**
+     * 根据条件分页查询
+     */
+    @RequestMapping("loadDataList")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(TmplQuery query) {
+        PaginationResultVO<Tmpl> result = tmplService.findListByPage(query);
+        return SaResult.ok().setData(result);
+    }
 
-	/**
-	 * 新增
-	 */
-	@RequestMapping("add")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO add(Tmpl bean) {
-		return getSuccessResponseVO(this.tmplService.add(bean));
-	}
+    /**
+     * 新增
+     */
+    @RequestMapping("add")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult add(Tmpl bean) {
+        Integer result = this.tmplService.add(bean);
+        return SaResult.ok(result > 0 ? "添加成功" : "添加失败").setData(result);
+    }
 
-	/**
-	 * 批量新增
-	 */
-	@RequestMapping("addBatch")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO addBatch(@RequestBody List<Tmpl> listBean) {
-		return getSuccessResponseVO(this.tmplService.addBatch(listBean));
-	}
+    /**
+     * 批量新增
+     */
+    @RequestMapping("addBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addBatch(@RequestBody List<Tmpl> listBean) {
+        Integer result = this.tmplService.addBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加成功" : "批量添加失败").setData(result);
 
-	/**
-	 * 批量新增或修改
-	 */
-	@RequestMapping("addOrUpdateBatch")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO addOrUpdateBatch(@RequestBody List<Tmpl> listBean) {
-		return getSuccessResponseVO(this.tmplService.addOrUpdateBatch(listBean));
-	}
+    }
 
-	/**
-	 * 根据Id查询
-	 */
+    /**
+     * 批量新增或修改
+     */
+    @RequestMapping("addOrUpdateBatch")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult addOrUpdateBatch(@RequestBody List<Tmpl> listBean) {
+        Integer result = this.tmplService.addOrUpdateBatch(listBean);
+        return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
 
-	@RequestMapping("getTmplById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO getTmplById(String id) {
-		return getSuccessResponseVO(this.tmplService.getTmplById(id));
-	}
+    }
 
-	/**
-	 * 根据Id更新
-	 */
-	@RequestMapping("updateTmplById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO updateTmplById(Tmpl bean, String id) {
-		return getSuccessResponseVO(this.tmplService.updateTmplById(bean, id));
-	}
+    /**
+     * 根据Id查询
+     */
 
-	/**
-	 * 根据Id删除
-	 */
-	@RequestMapping("deleteTmplById")
-	@GlobalInterceptor(checkLogin = true,checkAdmin = true,checkParams = true)
-	public ResponseVO deleteTmplById(String id) {
-		this.tmplService.deleteTmplById(id);
-		return getSuccessResponseVO(null);
-	}
+    @RequestMapping("getTmplById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getTmplById(String id) {
+        Tmpl result = this.tmplService.getTmplById(id);
+        return SaResult.ok().setData(result);
+    }
+
+    /**
+     * 根据Id更新
+     */
+    @RequestMapping("updateTmplById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateTmplById(Tmpl bean, String id) {
+        Integer result = this.tmplService.updateTmplById(bean, id);
+        return SaResult.ok(result > 0 ? "更新成功" : "更新失败");
+
+    }
+
+    /**
+     * 根据Id删除
+     */
+    @RequestMapping("deleteTmplById")
+    @GlobalInterceptor(checkParams = true)
+    public SaResult deleteTmplById(String id) {
+        Integer result = this.tmplService.deleteTmplById(id);
+        return SaResult.ok(result > 0 ? "删除成功" : "删除失败");
+    }
 
 }

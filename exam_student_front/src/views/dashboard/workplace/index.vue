@@ -52,9 +52,6 @@
   const announceList = ref<Msg[]>([]);
 
   onMounted(async () => {
-    await getErrorKnowledge().then((res: any) => {
-      console.log('sssss', res);
-    });
     await getAnnouncement().then((res: any) => {
       if (res.data && res.data.length > 3) {
         announceList.value = res.data.splice(0, 3);

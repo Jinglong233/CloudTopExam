@@ -1,10 +1,15 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.query.ErrorCountQuery;
-import com.jl.project.entity.vo.*;
-import com.jl.project.exception.BusinessException;
+import com.jl.project.entity.vo.ErrorVO;
+import com.jl.project.entity.vo.PaginationResultVO;
+import com.jl.project.entity.vo.WrongCountSummaryVO;
+import com.jl.project.entity.vo.WrongDeptCommon;
 import com.jl.project.service.DataAnalysisService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +21,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/dataAnalysis")
-public class DataAnalysisController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("admin")
+public class DataAnalysisController {
 
     @Resource
     private DataAnalysisService dataAnalysisService;
@@ -26,10 +33,9 @@ public class DataAnalysisController extends ABaseController {
      * 获取知识点
      */
     @RequestMapping("knowledgeList")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO getKnowledgeList() {
+    public SaResult getKnowledgeList() {
         List<String> result = dataAnalysisService.getKnowledgeList();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -38,10 +44,9 @@ public class DataAnalysisController extends ABaseController {
      * @return
      */
     @RequestMapping("sexProportion")
-    @GlobalInterceptor(checkAdmin = true, checkLogin = true)
-    public ResponseVO getSexProportion() {
+    public SaResult getSexProportion() {
         List<Map<String, Object>> result = dataAnalysisService.getSexProportion();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -51,10 +56,9 @@ public class DataAnalysisController extends ABaseController {
      * @return
      */
     @RequestMapping("recentExamInfo")
-    @GlobalInterceptor(checkLogin = true)
-    public ResponseVO getRecentExamInfo() {
+    public SaResult getRecentExamInfo() {
         Map<String, List> result = dataAnalysisService.getRecentExamInfo();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -63,40 +67,36 @@ public class DataAnalysisController extends ABaseController {
      * @return
      */
     @RequestMapping("quTypeProportion")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO getQuTypeProportion() {
+    public SaResult getQuTypeProportion() {
         WrongDeptCommon result = dataAnalysisService.getQuTypeProportion();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 获取错题占比前五的知识点
      */
     @RequestMapping("topFiveWrongTopics")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO getTopFiveWrongTopics() {
+    public SaResult getTopFiveWrongTopics() {
         WrongDeptCommon result = dataAnalysisService.getTopFiveWrongTopics();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 时间段错题分析统计
      */
     @RequestMapping("temporalErrorAnalysis")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO getTemporalErrorAnalysis() {
+    public SaResult getTemporalErrorAnalysis() {
         WrongDeptCommon result = dataAnalysisService.getTemporalErrorAnalysis();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 分类获取每个题型中每个知识点的错题统计
      */
     @RequestMapping("getWrongCountSummary")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true)
-    public ResponseVO getWrongCountSummary() {
+    public SaResult getWrongCountSummary() {
         List<WrongCountSummaryVO> result = dataAnalysisService.getWrongCountSummary();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -104,10 +104,10 @@ public class DataAnalysisController extends ABaseController {
      * 根据部门获取知识点统计
      */
     @RequestMapping("wrongDeptWrongKn")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true,checkParams = true)
-    public ResponseVO getWrongDeptWrongKn(@RequestBody @VerifyParam(require = true) String deptCode) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getWrongDeptWrongKn(@RequestBody @VerifyParam(require = true) String deptCode) {
         WrongDeptCommon result = dataAnalysisService.getWrongDeptWrongKn(deptCode);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -115,10 +115,10 @@ public class DataAnalysisController extends ABaseController {
      * 根据部门获取学科统计
      */
     @RequestMapping("wrongDeptSubject")
-    @GlobalInterceptor(checkLogin = true, checkAdmin = true,checkParams = true)
-    public ResponseVO getWrongDeptSubject(@RequestBody @VerifyParam(require = true) String deptCode) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getWrongDeptSubject(@RequestBody @VerifyParam(require = true) String deptCode) {
         WrongDeptCommon result = dataAnalysisService.getWrongDeptSubject(deptCode);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
@@ -128,18 +128,11 @@ public class DataAnalysisController extends ABaseController {
      * @return
      */
     @RequestMapping("errorCount")
-    @GlobalInterceptor(checkLogin = true,  checkParams = true)
-    public ResponseVO errorCount(@RequestBody ErrorCountQuery errorCountQuery) {
-        PaginationResultVO<ErrorVO> result = null;
-        try {
-            result = dataAnalysisService.errorCount(errorCountQuery);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
+    @GlobalInterceptor(checkParams = true)
+    public SaResult errorCount(@RequestBody ErrorCountQuery errorCountQuery) {
+        PaginationResultVO<ErrorVO> result = dataAnalysisService.errorCount(errorCountQuery);
+        return SaResult.ok().setData(result);
     }
-
-
 
 
 }

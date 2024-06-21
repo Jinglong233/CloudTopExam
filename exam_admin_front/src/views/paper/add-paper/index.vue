@@ -889,7 +889,6 @@
       // 重置临时大题
       tempGroup = new AddGroupListDTO();
     }
-    console.log('addPaperForm', toRaw(addPaperForm.value));
     addTypeVisible.value = false;
   };
 

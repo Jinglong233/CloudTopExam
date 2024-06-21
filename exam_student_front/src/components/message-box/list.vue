@@ -77,7 +77,8 @@
   };
 
   const getMsgDetail = (msg: Msg) => {
-    console.log('11111', msg);
+    // todo 消息详情待做
+    console.log('msg', msg);
   };
   const showMax = 3;
 </script>

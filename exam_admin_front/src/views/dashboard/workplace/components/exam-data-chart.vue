@@ -23,11 +23,6 @@
   import { AnyObject } from '@/types/global';
   import { getRecentExamInfo } from '@/api/dataAnalysis';
 
-  onMounted(async () => {
-    await getRecentExamInfo().then((res: any) => {
-      console.log(res);
-    });
-  });
   function graphicFactory(side: AnyObject) {
     return {
       type: 'text',

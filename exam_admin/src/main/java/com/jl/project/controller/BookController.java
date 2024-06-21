@@ -1,8 +1,10 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.entity.po.Book;
 import com.jl.project.entity.query.BookQuery;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.service.BookService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,69 +22,70 @@ import java.util.List;
 @Tag(name = "错题本Controller", description = "错题本Controller")
 @RestController
 @RequestMapping("/book")
-public class BookController extends ABaseController{
+@SaCheckLogin
+@SaCheckRole("admin")
+public class BookController {
 
-	@Resource
-	private BookService bookService;
+    @Resource
+    private BookService bookService;
 
 
+    /**
+     * 根据条件分页查询
+     */
+    @RequestMapping("loadDataList")
+    public SaResult loadDatalist(BookQuery query) {
+        return SaResult.ok().setData(bookService.findListByPage(query));
+    }
 
-	/**
-	 * 根据条件分页查询
-	 */
-	@RequestMapping("loadDataList")
-	public ResponseVO loadDatalist(BookQuery query) {
-		return getSuccessResponseVO(bookService.findListByPage(query));
-	}
+    /**
+     * 新增
+     */
+    @RequestMapping("add")
+    public SaResult add(Book bean) {
+        return SaResult.ok().setData(this.bookService.add(bean));
+    }
 
-	/**
-	 * 新增
-	 */
-	@RequestMapping("add")
-	public ResponseVO add(Book bean) {
-		return getSuccessResponseVO(this.bookService.add(bean));
-	}
+    /**
+     * 批量新增
+     */
+    @RequestMapping("addBatch")
+    public SaResult addBatch(@RequestBody List<Book> listBean) {
+        return SaResult.ok().setData(this.bookService.addBatch(listBean));
+    }
 
-	/**
-	 * 批量新增
-	 */
-	@RequestMapping("addBatch")
-	public ResponseVO addBatch(@RequestBody List<Book> listBean) {
-		return getSuccessResponseVO(this.bookService.addBatch(listBean));
-	}
+    /**
+     * 批量新增或修改
+     */
+    @RequestMapping("addOrUpdateBatch")
+    public SaResult addOrUpdateBatch(@RequestBody List<Book> listBean) {
+        return SaResult.ok().setData(this.bookService.addOrUpdateBatch(listBean));
+    }
 
-	/**
-	 * 批量新增或修改
-	 */
-	@RequestMapping("addOrUpdateBatch")
-	public ResponseVO addOrUpdateBatch(@RequestBody List<Book> listBean) {
-		return getSuccessResponseVO(this.bookService.addOrUpdateBatch(listBean));
-	}
+    /**
+     * 根据Id查询
+     */
 
-	/**
-	 * 根据Id查询
-	 */
+    @RequestMapping("getBookById")
+    public SaResult getBookById(String id) {
+        return SaResult.ok().setData(this.bookService.getBookById(id));
+    }
 
-	@RequestMapping("getBookById")
-	public ResponseVO getBookById(String id) {
-		return getSuccessResponseVO(this.bookService.getBookById(id));
-	}
+    /**
+     * 根据Id更新
+     */
+    @RequestMapping("updateBookById")
+    public SaResult updateBookById(Book bean, String id) {
+        return SaResult.ok().setData(this.bookService.updateBookById(bean, id));
+    }
 
-	/**
-	 * 根据Id更新
-	 */
-	@RequestMapping("updateBookById")
-	public ResponseVO updateBookById(Book bean, String id) {
-		return getSuccessResponseVO(this.bookService.updateBookById(bean, id));
-	}
-
-	/**
-	 * 根据Id删除
-	 */
-	@RequestMapping("deleteBookById")
-	public ResponseVO deleteBookById(String id) {
-		this.bookService.deleteBookById(id);
-		return getSuccessResponseVO(null);
-	}
+    /**
+     * 根据Id删除
+     */
+    @RequestMapping("deleteBookById")
+    public SaResult deleteBookById(String id) {
+        Integer result = this.bookService.deleteBookById(id);
+        return SaResult.ok(result > 0 ? "删除成功" : "删除失败");
+    }
 
 }

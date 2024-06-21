@@ -155,17 +155,6 @@
     return deptCode.value?.[0];
   });
 
-  // 监视页码变化
-  watch(
-    () => deptCode.value,
-    async (newValue, oldValue) => {
-      // 将树状列表选择的数组转化为单个值
-      if (Array.isArray(deptCode.value)) {
-        console.log(deptCode.value?.[0]);
-      }
-      // reloadAllData(deptCode.value);
-    }
-  );
 </script>
 
 <style scoped lang="less">

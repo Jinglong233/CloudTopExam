@@ -199,25 +199,26 @@
                   v-permission="['admin']"
                   type="primary"
                   status="danger"
-                  @click="deleteUserVisible = true"
+                  @click="deleteUserBefore(record.id)"
                 >
                   {{ $t('userList.columns.delete') }}
                 </a-button>
               </a-space>
-              <!--删除确认框-->
-              <a-modal
-                :visible="deleteUserVisible"
-                @ok="deleteOk(record.id)"
-                @cancel="deleteUserVisible = false"
-              >
-                <template #title> 删除提醒 </template>
-                <div> 确认删除该用户？ </div>
-              </a-modal>
             </template>
           </a-table>
         </a-card>
       </a-col>
     </a-row>
+
+    <!--删除确认框-->
+    <a-modal
+      :visible="deleteUserVisible"
+      @ok="deleteOk()"
+      @cancel="deleteUserVisible = false"
+    >
+      <template #title> 删除提醒 </template>
+      <div> 确认删除该用户？ </div>
+    </a-modal>
 
     <!--查看用户信息模态框-->
     <a-modal
@@ -497,6 +498,8 @@
 
   const { t } = useI18n();
 
+  const deleteUserId = ref('');
+
   // 部门树列表
   const deptTree = ref<[]>();
 
@@ -531,6 +534,11 @@
 
   const permission = usePermission();
   const userStore = useUserStore();
+
+  const deleteUserBefore = (id: string) => {
+    deleteUserVisible.value = true;
+    deleteUserId.value = id;
+  };
 
   // 加载用户列表
   const reloadUserList = async (userQuery: UserQuery) => {
@@ -683,8 +691,8 @@
   };
 
   // 删除确认
-  const deleteOk = async (id: string) => {
-    await deleteUserByIb(id).then(async (res: any) => {
+  const deleteOk = async () => {
+    await deleteUserByIb(deleteUserId.value).then(async (res: any) => {
       deleteUserVisible.value = false;
       await reloadUserList({ ...pagination.value, ...userSearch.value });
     });

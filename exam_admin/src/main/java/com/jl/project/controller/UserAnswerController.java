@@ -1,11 +1,13 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.UpdateUserAnswerDTO;
 import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserAnswerService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +24,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/userAnswer")
-public class UserAnswerController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("admin")
+public class UserAnswerController {
 
     @Resource
     private UserAnswerService userAnswerService;
@@ -32,23 +36,19 @@ public class UserAnswerController extends ABaseController {
      * 获取用户答案
      */
     @RequestMapping("getDataList")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) throws BusinessException{
-        List<UserAnswer> result =  userAnswerService.findListByParam(userAnswerQuery);
-        return getSuccessResponseVO(result);
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) throws BusinessException {
+        List<UserAnswer> result = userAnswerService.findListByParam(userAnswerQuery);
+        return SaResult.ok().setData(result);
     }
 
     // 根据Id更新
     @RequestMapping("updateById")
-    @GlobalInterceptor(checkLogin = true,checkParams = true)
-    public ResponseVO updateById(@RequestBody UpdateUserAnswerDTO userAnswer) {
-        Boolean result = null;
-        try {
-            result = userAnswerService.updateUserAnswerById(userAnswer);
-        } catch (BusinessException e) {
-            return getErrorResponseVO(null, e.getCode(), e.getMessage());
-        }
-        return getSuccessResponseVO(result);
+    @GlobalInterceptor(checkParams = true)
+    public SaResult updateById(@RequestBody UpdateUserAnswerDTO userAnswer) {
+        Boolean result = userAnswerService.updateUserAnswerById(userAnswer);
+
+        return SaResult.ok(result ? "更新成功" : "更新失败");
     }
 
 

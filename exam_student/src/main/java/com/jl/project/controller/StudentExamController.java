@@ -1,11 +1,13 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.dto.SubmitExamDTO;
 import com.jl.project.entity.vo.ExamResultVO;
 import com.jl.project.entity.vo.ExamVO;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.StudentExamService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +25,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/student")
-public class StudentExamController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class StudentExamController {
 
     @Resource
     private StudentExamService studentExamService;
@@ -32,20 +36,20 @@ public class StudentExamController extends ABaseController {
      * 根据学生Id查询考试列表
      */
     @RequestMapping("loadStudentExamList")
-    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
-    public ResponseVO loadDatalist(@RequestBody @VerifyParam(require = true) String userId) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult loadDatalist(@RequestBody @VerifyParam(require = true) String userId) throws BusinessException {
         List<ExamVO> result = studentExamService.loadStudentExamList(userId);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
     /**
      * 提交试卷
      */
     @RequestMapping("submitExam")
-    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
-    public ResponseVO submitExam(@RequestBody @VerifyParam SubmitExamDTO submitExamDTO) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult submitExam(@RequestBody @VerifyParam SubmitExamDTO submitExamDTO) {
         Boolean result = studentExamService.submitExam(submitExamDTO);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
@@ -53,10 +57,10 @@ public class StudentExamController extends ABaseController {
      * 回显考试结果
      */
     @RequestMapping("examResult")
-    @GlobalInterceptor(checkLogin = true, checkParams = true, checkStudent = true)
-    public ResponseVO getExamResult(@RequestBody @VerifyParam(require = true) String examRecordId) {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getExamResult(@RequestBody @VerifyParam(require = true) String examRecordId) {
         ExamResultVO result = studentExamService.getExamResult(examRecordId);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 }

@@ -799,7 +799,6 @@
         quList: [],
       };
     }
-    console.log('updatePaperForm', toRaw(updatePaperForm.value));
     addTypeVisible.value = false;
   };
 
@@ -863,7 +862,6 @@
   watch(
     updatePaperForm,
     (newData: any, oldData: any) => {
-      console.log('监听');
       let questionCount = 0; // 总题数
       let score = 0; // 分数
       randomSelectQuForm.value.excludes = []; // 重置排除列表(随机组题)

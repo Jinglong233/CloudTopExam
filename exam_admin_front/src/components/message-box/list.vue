@@ -76,7 +76,8 @@
   };
 
   const getMsgDetail = (msg: Msg) => {
-    console.log('11111', msg);
+    // todo 待写
+    console.log('msgDetail', msg);
   };
   const showMax = 3;
 </script>

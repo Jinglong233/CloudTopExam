@@ -15,26 +15,4 @@ public @interface GlobalInterceptor {
      * @return
      */
     boolean checkParams() default false;
-
-    /**
-     * 校验登录
-     *
-     * @return
-     */
-    boolean checkLogin() default true;
-
-    /**
-     * 校验超级管理员
-     *
-     * @return
-     */
-    boolean checkAdmin() default false;
-
-
-    /**
-     * 校验学生
-     *
-     * @return
-     */
-    boolean checkStudent() default false;
 }

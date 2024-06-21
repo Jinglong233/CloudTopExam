@@ -1,7 +1,8 @@
 package com.jl.project.controller;
 
-import com.jl.project.annotation.GlobalInterceptor;
-import com.jl.project.entity.vo.ResponseVO;
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.service.RecommendService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +15,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/recommend")
-public class RecommendController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class RecommendController{
     @Resource
     private RecommendService recommendService;
 
@@ -25,9 +28,8 @@ public class RecommendController extends ABaseController {
      * @return
      */
     @RequestMapping(value = "getRecommendQuList")
-    @GlobalInterceptor(checkLogin = true, checkStudent = true)
-    public ResponseVO getRecommendQuList() {
+    public SaResult getRecommendQuList() {
         List<String> result = recommendService.getRecommendQuList();
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 }

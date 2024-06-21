@@ -1,20 +1,29 @@
 package com.jl.project.utils;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
+import com.jl.project.entity.po.User;
+import com.jl.project.entity.query.UserQuery;
 import com.jl.project.entity.vo.LoginResponseVo;
 import com.jl.project.enums.ResponseCodeEnum;
 import com.jl.project.enums.RoleType;
 import com.jl.project.exception.BusinessException;
+import com.jl.project.mapper.UserMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Repository;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import static com.jl.project.constant.UserConstant.TOKEN;
 import static com.jl.project.constant.UserConstant.USER_PREFIX;
 
+@Repository
 public class UserInfoUtil {
 
+@Resource
+private UserMapper<User, UserQuery> userMapper;
 
     /**
      * 获取登录用户的信息
@@ -26,7 +35,8 @@ public class UserInfoUtil {
     public static LoginResponseVo getLoginUserInfo(HttpServletRequest request, StringRedisTemplate redisTemplate) {
         String token = request.getHeader("Authorization");
         Gson gson = new Gson();
-        String jsonUser = redisTemplate.opsForValue().get(USER_PREFIX + TOKEN + token);
+        Object loginId = StpUtil.getLoginId();
+        String jsonUser = redisTemplate.opsForValue().get(USER_PREFIX + loginId.toString());
         LoginResponseVo user = gson.fromJson(jsonUser, LoginResponseVo.class);
         if (user == null) {
             throw new BusinessException(ResponseCodeEnum.CODE_401);

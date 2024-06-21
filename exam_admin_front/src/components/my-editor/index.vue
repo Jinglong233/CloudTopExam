@@ -199,7 +199,6 @@
     // 触发添加 需要的删除图片和插入图片
     emit('addDeletePicture', deleteList);
     emit('addInsertPicture', realInsertList);
-    console.log(editor.getAllMenuKeys());
     if (editor == null) return;
     editor.destroy();
   });

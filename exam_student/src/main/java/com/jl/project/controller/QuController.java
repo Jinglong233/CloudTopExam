@@ -1,9 +1,11 @@
 package com.jl.project.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import com.jl.project.annotation.GlobalInterceptor;
 import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.vo.QuAndAnswerVo;
-import com.jl.project.entity.vo.ResponseVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.QuService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +21,9 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/student")
-public class QuController extends ABaseController {
+@SaCheckLogin
+@SaCheckRole("student")
+public class QuController{
 
     @Resource
     private QuService quService;
@@ -29,10 +33,10 @@ public class QuController extends ABaseController {
      * 根据Id查询
      */
     @RequestMapping("getQuById")
-    @GlobalInterceptor(checkLogin = true, checkParams = true)
-    public ResponseVO getQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
+    @GlobalInterceptor(checkParams = true)
+    public SaResult getQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
         QuAndAnswerVo result = quService.getQuById(id);
-        return getSuccessResponseVO(result);
+        return SaResult.ok().setData(result);
     }
 
 
