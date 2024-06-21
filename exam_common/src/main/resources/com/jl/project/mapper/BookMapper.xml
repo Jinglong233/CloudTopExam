@@ -23,8 +23,7 @@
     </resultMap>
     <!--通用查询列-->
     <sql id="base_column_list">
-        id
-        ,user_id,qu_id,qu_content,subject_id,wrong_count,qu_type,kn_content
+        id,user_id,qu_id,qu_content,subject_id,wrong_count,qu_type,kn_content
     </sql>
     <!--基础查询条件-->
     <sql id="base_query_condition">
@@ -88,7 +87,7 @@
         FROM book
         <include refid="query_condition"/>
         <if test="query.orderBy!=null">
-            order by ${query.OrderBy}
+            order by ${query.orderBy} ${query.sequence}
         </if>
         <if test="query.simplePage!=null">
             limit #{query.simplePage.start},#{query.simplePage.end}
@@ -254,9 +253,7 @@
         <foreach collection="list" item="item" separator=",">
             (#{item.id},#{item.userId},#{item.quId},#{item.quContent},#{item.subjectId},#{item.wrongCount},#{item.quType},#{item.knContent})
         </foreach>
-        on DUPLICATE key update id= VALUES(id),user_id= VALUES(user_id),qu_id= VALUES(qu_id),qu_content=
-        VALUES(qu_content),subject_id= VALUES(subject_id),wrong_count= VALUES(wrong_count),qu_type=
-        VALUES(qu_type),kn_content= VALUES(kn_content)
+        on DUPLICATE key update id= VALUES(id),user_id= VALUES(user_id),qu_id= VALUES(qu_id),qu_content= VALUES(qu_content),subject_id= VALUES(subject_id),wrong_count= VALUES(wrong_count),qu_type= VALUES(qu_type),kn_content= VALUES(kn_content)
     </insert>
 
 
@@ -301,9 +298,7 @@
 
     <!--根据Id删除-->
     <delete id="deleteById">
-        delete
-        from book
-        where id = #{id}
+        delete from book where id=#{id}
     </delete>
 
     <!-- 查询指定用户集合的错题记录 -->
@@ -358,7 +353,5 @@
         </if>
 
     </select>
-
-
 </mapper>
 

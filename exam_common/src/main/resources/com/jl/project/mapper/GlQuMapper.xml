@@ -63,7 +63,7 @@
 		FROM gl_qu
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}

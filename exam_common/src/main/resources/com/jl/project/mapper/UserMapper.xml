@@ -112,7 +112,7 @@
 			and email like concat('%', #{query.emailFuzzy}, '%')
 		</if>
 		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
-			and dept_code like concat(#{query.deptCodeFuzzy}, '%')
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
 		</if>
 		<if test="query.deptTextFuzzy != null and query.deptTextFuzzy != '' ">
 			and dept_text like concat('%', #{query.deptTextFuzzy}, '%')
@@ -165,7 +165,7 @@
 		FROM user
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}

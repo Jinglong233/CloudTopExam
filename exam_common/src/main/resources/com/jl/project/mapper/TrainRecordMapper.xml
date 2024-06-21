@@ -84,7 +84,7 @@
 		FROM train_record
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}
@@ -297,8 +297,6 @@
 	<delete id="deleteById">
 		delete from train_record where id=#{id}
 	</delete>
-
-
 	<!--批量删除未作答的记录-->
 	<delete id="deleteNoAnswerRecord">
 		delete from train_record where answered=0

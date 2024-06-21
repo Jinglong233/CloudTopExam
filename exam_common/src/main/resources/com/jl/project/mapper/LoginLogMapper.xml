@@ -82,7 +82,7 @@
 		FROM login_log
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}
@@ -96,7 +96,9 @@
 	</select>
 	<!--插入（匹配有值的字段）-->
 	<insert id="insert" parameterType="com.jl.project.entity.po.LoginLog">
-
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
 		INSERT INTO login_log
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -220,18 +222,18 @@
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.LoginLog">
-		INSERT INTO login_log(id,user_name,ip,login_state,login_time,oper_msg,login_address)values
+		INSERT INTO login_log(user_name,ip,login_state,login_time,oper_msg,login_address)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
+			(#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.LoginLog">
 		INSERT INTO 
-		login_log(id,user_name,ip,login_state,login_time,oper_msg,login_address)values
+		login_log(user_name,ip,login_state,login_time,oper_msg,login_address)values
 		<foreach collection="list" item="item" separator=",">
-			(#{item.id},#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
+			(#{item.userName},#{item.ip},#{item.loginState},#{item.loginTime},#{item.operMsg},#{item.loginAddress})
 		</foreach>
 			on DUPLICATE key update id= VALUES(id),user_name= VALUES(user_name),ip= VALUES(ip),login_state= VALUES(login_state),login_time= VALUES(login_time),oper_msg= VALUES(oper_msg),login_address= VALUES(login_address)
 	</insert>

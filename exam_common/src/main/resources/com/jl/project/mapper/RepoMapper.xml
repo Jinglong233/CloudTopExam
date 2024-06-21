@@ -9,7 +9,7 @@
 		<!-- 部门编码（专业） -->
 		<result column="dept_code" property="deptCode"/>
 		<!-- 部门名称 -->
-		<result column="dept_Text" property="deptText"/>
+		<result column="dept_text" property="deptText"/>
 		<!-- 学科ID -->
 		<result column="subject_id" property="subjectId"/>
 		<!-- 学科名称 -->
@@ -39,7 +39,7 @@
 	</resultMap>
 	<!--通用查询列-->
 	<sql id="base_column_list">
-		id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by
+		id,dept_code,dept_text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by
 	</sql>
 	<!--基础查询条件-->
 	<sql id="base_query_condition">
@@ -50,7 +50,7 @@
 			and dept_code = #{query.deptCode}
 		</if>
 		<if test="query.deptText != null and query.deptText!= ''">
-			and dept_Text = #{query.deptText}
+			and dept_text = #{query.deptText}
 		</if>
 		<if test="query.subjectId != null and query.subjectId!= ''">
 			and subject_id = #{query.subjectId}
@@ -98,10 +98,10 @@
 			and id like concat('%', #{query.idFuzzy}, '%')
 		</if>
 		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
-			and dept_code like concat(#{query.deptCodeFuzzy}, '%')
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
 		</if>
 		<if test="query.deptTextFuzzy != null and query.deptTextFuzzy != '' ">
-			and dept_Text like concat('%', #{query.deptTextFuzzy}, '%')
+			and dept_text like concat('%', #{query.deptTextFuzzy}, '%')
 		</if>
 		<if test="query.subjectIdFuzzy != null and query.subjectIdFuzzy != '' ">
 			and subject_id like concat('%', #{query.subjectIdFuzzy}, '%')
@@ -148,7 +148,7 @@
 		FROM repo
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}
@@ -172,7 +172,7 @@
 				dept_code,
 			</if>
 			<if test="bean.deptText != null">
-				dept_Text,
+				dept_text,
 			</if>
 			<if test="bean.subjectId != null">
 				subject_id,
@@ -277,7 +277,7 @@
 				dept_code,
 			</if>
 			<if test="bean.deptText != null">
-				dept_Text,
+				dept_text,
 			</if>
 			<if test="bean.subjectId != null">
 				subject_id,
@@ -375,7 +375,7 @@
 				dept_code= VALUES(dept_code),
 			</if>
 			<if test="bean.deptText != null">
-				dept_Text= VALUES(dept_Text),
+				dept_text= VALUES(dept_text),
 			</if>
 			<if test="bean.subjectId != null">
 				subject_id= VALUES(subject_id),
@@ -421,7 +421,7 @@
 
 	<!--添加（批量插入）-->
 	<insert id="insertBatch" parameterType="com.jl.project.entity.po.Repo">
-		INSERT INTO repo(id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
+		INSERT INTO repo(id,dept_code,dept_text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
 		<foreach collection="list" item="item" separator=",">
 			(#{item.id},#{item.deptCode},#{item.deptText},#{item.subjectId},#{item.subjectText},#{item.totalCount},#{item.subCount},#{item.objCount},#{item.title},#{item.isExam},#{item.isTrain},#{item.remark},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
 		</foreach>
@@ -430,11 +430,11 @@
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="com.jl.project.entity.po.Repo">
 		INSERT INTO 
-		repo(id,dept_code,dept_Text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
+		repo(id,dept_code,dept_text,subject_id,subject_text,total_count,sub_count,obj_count,title,is_exam,is_train,remark,create_time,create_by,update_time,update_by)values
 		<foreach collection="list" item="item" separator=",">
 			(#{item.id},#{item.deptCode},#{item.deptText},#{item.subjectId},#{item.subjectText},#{item.totalCount},#{item.subCount},#{item.objCount},#{item.title},#{item.isExam},#{item.isTrain},#{item.remark},#{item.createTime},#{item.createBy},#{item.updateTime},#{item.updateBy})
 		</foreach>
-			on DUPLICATE key update id= VALUES(id),dept_code= VALUES(dept_code),dept_Text= VALUES(dept_Text),subject_id= VALUES(subject_id),subject_text= VALUES(subject_text),total_count= VALUES(total_count),sub_count= VALUES(sub_count),obj_count= VALUES(obj_count),title= VALUES(title),is_exam= VALUES(is_exam),is_train= VALUES(is_train),remark= VALUES(remark),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
+			on DUPLICATE key update id= VALUES(id),dept_code= VALUES(dept_code),dept_text= VALUES(dept_text),subject_id= VALUES(subject_id),subject_text= VALUES(subject_text),total_count= VALUES(total_count),sub_count= VALUES(sub_count),obj_count= VALUES(obj_count),title= VALUES(title),is_exam= VALUES(is_exam),is_train= VALUES(is_train),remark= VALUES(remark),create_time= VALUES(create_time),create_by= VALUES(create_by),update_time= VALUES(update_time),update_by= VALUES(update_by)
 	</insert>
 
 
@@ -456,7 +456,7 @@
 				dept_code = #{bean.deptCode},
 			</if>
 			<if test="bean.deptText != null">
-				dept_Text = #{bean.deptText},
+				dept_text = #{bean.deptText},
 			</if>
 			<if test="bean.subjectId != null">
 				subject_id = #{bean.subjectId},

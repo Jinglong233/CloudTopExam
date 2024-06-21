@@ -14,7 +14,7 @@
 		<result column="title" property="title"/>
 		<!-- 总分 -->
 		<result column="total_score" property="totalScore"/>
-		<!-- 每个小题的分数 -->
+		<!-- 每个小题的分数（当每个题目给定分数的时候。可以不用） -->
 		<result column="per_score" property="perScore"/>
 		<!-- 选项是否乱序0:否1:是 -->
 		<result column="item_rand" property="itemRand"/>
@@ -83,7 +83,7 @@
 		FROM group_list
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}

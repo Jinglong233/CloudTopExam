@@ -26,7 +26,7 @@
 		<result column="request_arg" property="requestArg"/>
 		<!-- 返回参数 -->
 		<result column="return_arg" property="returnArg"/>
-		<!-- 操作类型（增删改查...） -->
+		<!-- 操作类型（增删改...） -->
 		<result column="oper_type" property="operType"/>
 	</resultMap>
 	<!--通用查询列-->
@@ -119,7 +119,7 @@
 		FROM oper_log
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}

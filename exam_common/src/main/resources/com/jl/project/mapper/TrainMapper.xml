@@ -6,7 +6,7 @@
 	<resultMap id="base_result_map" type="com.jl.project.entity.po.Train">
 		<!-- ID -->
 		<id column="id" property="id"/>
-		<!-- 题库ID -->
+		<!-- 题库ID（智能训练模式下非必须） -->
 		<result column="repo_id" property="repoId"/>
 		<!-- 回答数量 -->
 		<result column="answer_count" property="answerCount"/>
@@ -102,7 +102,7 @@
 		FROM train
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}

@@ -79,7 +79,7 @@
 			and title like concat('%', #{query.titleFuzzy}, '%')
 		</if>
 		<if test="query.deptCodeFuzzy != null and query.deptCodeFuzzy != '' ">
-			and dept_code like concat(#{query.deptCodeFuzzy}, '%')
+			and dept_code like concat('%', #{query.deptCodeFuzzy}, '%')
 		</if>
 		<if test="query.createTimeStart != null and query.createTimeStart != '' ">
 			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
@@ -114,7 +114,7 @@
 		FROM paper
 		<include refid="query_condition"/>
 		<if test="query.orderBy!=null">
-			order by ${query.OrderBy}
+			order by ${query.orderBy} ${query.sequence}
 		</if>
 		<if test="query.simplePage!=null">
 			limit #{query.simplePage.start},#{query.simplePage.end}
