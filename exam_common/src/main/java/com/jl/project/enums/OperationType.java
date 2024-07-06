@@ -1,7 +1,7 @@
 package com.jl.project.enums;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-13 12:58
  **/
 public enum OperationType {

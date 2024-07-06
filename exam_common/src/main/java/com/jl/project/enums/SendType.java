@@ -3,7 +3,7 @@ package com.jl.project.enums;
 /**
  * 发送类型
  *
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-08 20:04
  **/
 public enum SendType {

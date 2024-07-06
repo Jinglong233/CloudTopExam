@@ -14,6 +14,8 @@ import com.jl.project.entity.vo.ClassfiyByQuTypeVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.RepoService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +29,7 @@ import java.util.Map;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "题库操作")
 @RestController
 @RequestMapping("/repo")
 @SaCheckLogin
@@ -39,6 +42,7 @@ public class RepoController {
     /**
      * 添加题库
      */
+    @ApiOperation("添加题库")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     public SaResult add(@RequestBody @VerifyParam AddRepoDTO repoDTO) throws BusinessException {
@@ -49,6 +53,7 @@ public class RepoController {
     /**
      * 根据Id删除题库
      */
+    @ApiOperation("根据Id删除题库")
     @RequestMapping("deleteRepoById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteRepoById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
@@ -59,6 +64,7 @@ public class RepoController {
     /**
      * 根据Id更新题库
      */
+    @ApiOperation("根据Id更新题库")
     @RequestMapping("updateRepoById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateRepoById(@RequestBody @VerifyParam UpdateRepoDTO repoDTO) throws BusinessException {
@@ -71,6 +77,7 @@ public class RepoController {
      *
      * @return
      */
+    @ApiOperation("根据id获取题库中对应题型的难度分类")
     @RequestMapping("classifyByQuType")
     public SaResult classifyByQuType(@RequestBody @VerifyParam Map<String, Object> request) throws BusinessException {
         String repoId = (String) request.get("repoId");
@@ -82,6 +89,7 @@ public class RepoController {
     /**
      * 根据Id查询题库信息
      */
+    @ApiOperation("根据Id查询题库信息")
     @RequestMapping("getRepoById")
     public SaResult getRepoById(@RequestBody @VerifyParam(require = true) String id) {
         Repo result = repoService.getRepoById(id);
@@ -92,16 +100,17 @@ public class RepoController {
     /**
      * 根据条件查询
      */
+    @ApiOperation("根据条件查询")
     @RequestMapping("loadRepoList")
     public SaResult loadRepoList(@RequestBody RepoQuery query) throws BusinessException {
         PaginationResultVO<Repo> result = repoService.loadRepoList(query);
         return SaResult.ok().setData(result);
     }
-//    下面接口未测试
 
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<Repo> listBean) {
         Integer result = this.repoService.addBatch(listBean);
@@ -111,6 +120,7 @@ public class RepoController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<Repo> listBean) {
         Integer result = this.repoService.addOrUpdateBatch(listBean);

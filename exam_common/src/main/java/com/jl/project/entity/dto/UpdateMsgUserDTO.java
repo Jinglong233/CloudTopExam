@@ -4,7 +4,7 @@ import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.po.MsgUser;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-12 12:59
  **/
 public class UpdateMsgUserDTO {

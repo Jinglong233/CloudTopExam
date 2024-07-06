@@ -10,6 +10,8 @@ import com.jl.project.entity.query.ExamRecordQuery;
 import com.jl.project.entity.vo.AnsweredRecordVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.StudentExamRecordService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "学生考试记录")
 @RestController
 @RequestMapping("/student")
 @SaCheckLogin
@@ -35,6 +38,7 @@ public class StudentExamRecordController{
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(@RequestBody @VerifyParam ExamRecordQuery query) {
@@ -49,6 +53,7 @@ public class StudentExamRecordController{
      * @param userId
      * @return
      */
+    @ApiOperation("获取已经作答的考试记录")
     @RequestMapping("getAnsweredRecord")
     @GlobalInterceptor(checkParams = true)
     public SaResult getAnsweredRecord(@RequestBody @VerifyParam(require = true) String userId) {
@@ -61,6 +66,7 @@ public class StudentExamRecordController{
     /**
      * 考生开始作答（这里只接收 userId 和 ExamId）
      */
+    @ApiOperation("考生开始作答")
     @RequestMapping("startAnswer")
     @GlobalInterceptor(checkParams = true)
     public SaResult startAnswer(@RequestBody @VerifyParam ExamRecordQuery query) {

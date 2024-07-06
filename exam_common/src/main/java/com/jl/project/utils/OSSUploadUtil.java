@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * 阿里云OSS对象存储文件上传工具类
  *
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-17 17:26
  **/
 public class OSSUploadUtil {

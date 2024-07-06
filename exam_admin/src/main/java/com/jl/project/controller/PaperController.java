@@ -13,6 +13,8 @@ import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.PaperAndQuVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.PaperService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "试卷操作")
 @RestController
 @RequestMapping("/paper")
 @SaCheckLogin
@@ -37,6 +40,7 @@ public class PaperController {
     /**
      * 根据Id查询试卷详细信息
      */
+    @ApiOperation("根据Id查询试卷详细信息")
     @RequestMapping("getPaperDetailById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getPaperDetailById(@RequestBody @VerifyParam(require = true) String id) {
@@ -48,6 +52,7 @@ public class PaperController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updatePaperById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updatePaperById(@RequestBody @VerifyParam UpdatePaperAndQuDTO bean) throws BusinessException {
@@ -58,6 +63,7 @@ public class PaperController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deletePaperById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deletePaperById(@RequestBody @VerifyParam(require = true) String id) {
@@ -69,6 +75,7 @@ public class PaperController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     public SaResult add(@RequestBody AddPaperDTO paperDTO) throws BusinessException {
@@ -80,6 +87,7 @@ public class PaperController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(@RequestBody PaperQuery query) throws BusinessException {
@@ -91,6 +99,7 @@ public class PaperController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addBatch(@RequestBody List<Paper> listBean) {
@@ -102,6 +111,7 @@ public class PaperController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addOrUpdateBatch(@RequestBody List<Paper> listBean) {
@@ -113,6 +123,7 @@ public class PaperController {
     /**
      * 根据Id查询
      */
+    @ApiOperation("根据Id查询")
     @RequestMapping("getPaperById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getPaperById(@RequestBody @VerifyParam(require = true) String id) {
@@ -123,6 +134,7 @@ public class PaperController {
     /**
      * 获取试卷总数
      */
+    @ApiOperation("获取试卷总数")
     @RequestMapping("paperCount")
     @GlobalInterceptor(checkParams = true)
     public SaResult getPaperCount(@RequestBody PaperQuery paperQuery) throws BusinessException {

@@ -14,6 +14,8 @@ import com.jl.project.entity.vo.DepartmentTreeVO;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.DepartmentService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,7 @@ import java.util.List;
 @RequestMapping("/department")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "部门操作")
 public class DepartmentController{
 
     @Resource
@@ -39,6 +42,7 @@ public class DepartmentController{
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     public SaResult add(@RequestBody @VerifyParam AddDepartmentDTO bean) throws BusinessException {
@@ -51,6 +55,7 @@ public class DepartmentController{
      *
      * @return
      */
+    @ApiOperation("获取树状列表")
     @RequestMapping("/treeList")
     @GlobalInterceptor(checkParams = true)
     public SaResult getTreeList()  throws BusinessException{
@@ -64,6 +69,7 @@ public class DepartmentController{
      * @param sort
      * @return
      */
+    @ApiOperation("部门排序")
     @RequestMapping("/sort")
     @GlobalInterceptor(checkParams = true)
     public SaResult departmentSort(@RequestBody @VerifyParam UpdateDeptSortDTO sort) throws BusinessException {
@@ -75,6 +81,7 @@ public class DepartmentController{
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateDepartmentById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateDepartmentById(@RequestBody @VerifyParam UpdateDeptDTO updateDeptDTO) throws BusinessException {
@@ -86,6 +93,7 @@ public class DepartmentController{
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteDepartmentById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteDepartmentById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
@@ -96,6 +104,7 @@ public class DepartmentController{
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(@RequestBody @VerifyParam DepartmentQuery query) {
@@ -106,6 +115,7 @@ public class DepartmentController{
     /**
      * 根据Id返回所有的子部门Id（包括自己）
      */
+    @ApiOperation("根据Id返回所有的子部门Id（包括自己）")
     @RequestMapping("getChildDeptById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getChildDeptById(@RequestBody @VerifyParam(require = true) String parentId) {
@@ -118,6 +128,7 @@ public class DepartmentController{
     /**
      * 根据Id查询
      */
+    @ApiOperation("根据Id查询")
     @RequestMapping("getDepartmentById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getDepartmentById(@RequestBody @VerifyParam(require = true) String id) {
@@ -128,6 +139,7 @@ public class DepartmentController{
     /**
      * 获取部门数量
      */
+    @ApiOperation("获取部门数量")
     @RequestMapping("deptCount")
     @GlobalInterceptor(checkParams = true)
     public SaResult getDeptCount(@RequestBody @VerifyParam DepartmentQuery departmentQuery) throws BusinessException {
@@ -139,6 +151,7 @@ public class DepartmentController{
     /**
      * 获取专业
      */
+    @ApiOperation("获取专业")
     @RequestMapping("profession")
     @GlobalInterceptor(checkParams = true)
     public SaResult getProfession() throws BusinessException {
@@ -151,6 +164,7 @@ public class DepartmentController{
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<Department> listBean) {
         Integer result = this.departmentService.addBatch(listBean);
@@ -160,6 +174,7 @@ public class DepartmentController{
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<Department> listBean) {
         Integer result = this.departmentService.addOrUpdateBatch(listBean);

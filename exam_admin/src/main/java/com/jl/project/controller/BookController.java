@@ -6,7 +6,8 @@ import cn.dev33.satoken.util.SaResult;
 import com.jl.project.entity.po.Book;
 import com.jl.project.entity.query.BookQuery;
 import com.jl.project.service.BookService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
-@Tag(name = "错题本Controller", description = "错题本Controller")
+@Api(tags = "错题本")
 @RestController
 @RequestMapping("/book")
 @SaCheckLogin
@@ -33,6 +34,7 @@ public class BookController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查")
     @RequestMapping("loadDataList")
     public SaResult loadDatalist(BookQuery query) {
         return SaResult.ok().setData(bookService.findListByPage(query));
@@ -41,6 +43,7 @@ public class BookController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     public SaResult add(Book bean) {
         return SaResult.ok().setData(this.bookService.add(bean));
@@ -49,6 +52,7 @@ public class BookController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<Book> listBean) {
         return SaResult.ok().setData(this.bookService.addBatch(listBean));
@@ -57,6 +61,7 @@ public class BookController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<Book> listBean) {
         return SaResult.ok().setData(this.bookService.addOrUpdateBatch(listBean));
@@ -65,7 +70,7 @@ public class BookController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getBookById")
     public SaResult getBookById(String id) {
         return SaResult.ok().setData(this.bookService.getBookById(id));
@@ -74,6 +79,7 @@ public class BookController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateBookById")
     public SaResult updateBookById(Book bean, String id) {
         return SaResult.ok().setData(this.bookService.updateBookById(bean, id));
@@ -82,6 +88,7 @@ public class BookController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteBookById")
     public SaResult deleteBookById(String id) {
         Integer result = this.bookService.deleteBookById(id);

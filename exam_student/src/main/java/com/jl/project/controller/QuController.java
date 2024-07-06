@@ -8,6 +8,7 @@ import com.jl.project.annotation.VerifyParam;
 import com.jl.project.entity.vo.QuAndAnswerVo;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.QuService;
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import javax.annotation.Resource;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "学生题目操作")
 @RestController
 @RequestMapping("/student")
 @SaCheckLogin

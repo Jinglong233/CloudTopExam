@@ -9,6 +9,8 @@ import com.jl.project.entity.po.QuAnswer;
 import com.jl.project.entity.query.QuAnswerQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.QuAnswerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import java.util.List;
 @RequestMapping("/quAnswer")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "选项答案操作")
 public class QuAnswerController {
 
     @Resource
@@ -33,9 +36,10 @@ public class QuAnswerController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
-public SaResult loadDatalist(@RequestBody QuAnswerQuery query) {
+    public SaResult loadDatalist(@RequestBody QuAnswerQuery query) {
         PaginationResultVO<QuAnswer> result = quAnswerService.findListByPage(query);
         return SaResult.ok().setData(result);
     }
@@ -43,9 +47,10 @@ public SaResult loadDatalist(@RequestBody QuAnswerQuery query) {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
-public SaResult add(@RequestBody QuAnswer bean) {
+    public SaResult add(@RequestBody QuAnswer bean) {
         Integer result = this.quAnswerService.add(bean);
         return SaResult.ok(result > 0 ? "添加成功" : "添加失败").setData(result);
     }
@@ -53,9 +58,10 @@ public SaResult add(@RequestBody QuAnswer bean) {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     @GlobalInterceptor(checkParams = true)
-public SaResult addBatch(@RequestBody List<QuAnswer> listBean) {
+    public SaResult addBatch(@RequestBody List<QuAnswer> listBean) {
         Integer result = this.quAnswerService.addBatch(listBean);
         return SaResult.ok(result > 0 ? "批量添加成功" : "批量添加失败").setData(result);
 
@@ -64,9 +70,10 @@ public SaResult addBatch(@RequestBody List<QuAnswer> listBean) {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
-public SaResult addOrUpdateBatch(@RequestBody List<QuAnswer> listBean) {
+    public SaResult addOrUpdateBatch(@RequestBody List<QuAnswer> listBean) {
         Integer result = this.quAnswerService.addOrUpdateBatch(listBean);
         return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
     }
@@ -74,10 +81,10 @@ public SaResult addOrUpdateBatch(@RequestBody List<QuAnswer> listBean) {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getQuAnswerById")
     @GlobalInterceptor(checkParams = true)
-public SaResult getQuAnswerById(String id) {
+    public SaResult getQuAnswerById(String id) {
         QuAnswer result = this.quAnswerService.getQuAnswerById(id);
         return SaResult.ok().setData(result);
     }
@@ -85,9 +92,10 @@ public SaResult getQuAnswerById(String id) {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateQuAnswerById")
     @GlobalInterceptor(checkParams = true)
-public SaResult updateQuAnswerById(QuAnswer bean, String id) {
+    public SaResult updateQuAnswerById(QuAnswer bean, String id) {
         Integer result = this.quAnswerService.updateQuAnswerById(bean, id);
         return SaResult.ok(result > 0 ? "更新成功" : "更新失败");
     }
@@ -95,9 +103,10 @@ public SaResult updateQuAnswerById(QuAnswer bean, String id) {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteQuAnswerById")
     @GlobalInterceptor(checkParams = true)
-public SaResult deleteQuAnswerById(@RequestBody @VerifyParam(require = true) String id) {
+    public SaResult deleteQuAnswerById(@RequestBody @VerifyParam(require = true) String id) {
         Integer result = this.quAnswerService.deleteQuAnswerById(id);
         return SaResult.ok(result > 0 ? "删除成功" : "删除失败");
 

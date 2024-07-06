@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-17 17:39
  **/
 @Service("ossService")

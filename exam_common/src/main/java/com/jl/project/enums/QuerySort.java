@@ -1,7 +1,7 @@
 package com.jl.project.enums;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-06-21 16:00
  **/
 public enum QuerySort {

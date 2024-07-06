@@ -10,6 +10,8 @@ import com.jl.project.entity.po.UserAnswer;
 import com.jl.project.entity.query.UserAnswerQuery;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.UserAnswerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/12/11
  */
+@Api(tags = "用户答案操作")
 @RestController
 @RequestMapping("/userAnswer")
 @SaCheckLogin
@@ -35,6 +38,7 @@ public class UserAnswerController {
     /**
      * 获取用户答案
      */
+    @ApiOperation("获取用户答案")
     @RequestMapping("getDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult getDataList(@RequestBody @VerifyParam UserAnswerQuery userAnswerQuery) throws BusinessException {
@@ -42,7 +46,10 @@ public class UserAnswerController {
         return SaResult.ok().setData(result);
     }
 
-    // 根据Id更新
+    /**
+     * 根据Id更新
+     */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateById(@RequestBody UpdateUserAnswerDTO userAnswer) {

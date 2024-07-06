@@ -9,6 +9,8 @@ import com.jl.project.entity.po.OperLog;
 import com.jl.project.entity.query.OperLogQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.OperLogService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import java.util.List;
 @RequestMapping("/operLog")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "操作日志")
 public class OperLogController {
 
     @Resource
@@ -33,6 +36,7 @@ public class OperLogController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor( checkParams = true)
     public SaResult loadDatalist(@RequestBody @VerifyParam(require = true) OperLogQuery query) {
@@ -43,6 +47,7 @@ public class OperLogController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     public SaResult add(OperLog bean) {
         Integer result = this.operLogService.add(bean);
@@ -52,6 +57,7 @@ public class OperLogController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<OperLog> listBean) {
         Integer result = this.operLogService.addBatch(listBean);
@@ -61,16 +67,18 @@ public class OperLogController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<OperLog> listBean) {
         Integer result = this.operLogService.addOrUpdateBatch(listBean);
         return SaResult.ok(result > 0 ? "批量添加/更新成功" : "批量添加/更新失败").setData(result);
     }
 
+
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getOperLogById")
     public SaResult getOperLogById(Integer id) {
         OperLog result = this.operLogService.getOperLogById(id);
@@ -80,6 +88,7 @@ public class OperLogController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateOperLogById")
     public SaResult updateOperLogById(OperLog bean, Integer id) {
         Integer result = this.operLogService.updateOperLogById(bean, id);
@@ -89,6 +98,7 @@ public class OperLogController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteOperLogById")
     public SaResult deleteOperLogById(Integer id) {
         Integer result = this.operLogService.deleteOperLogById(id);

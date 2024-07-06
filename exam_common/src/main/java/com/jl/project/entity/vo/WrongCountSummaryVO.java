@@ -1,7 +1,7 @@
 package com.jl.project.entity.vo;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-31 16:36
  **/
 public class WrongCountSummaryVO {

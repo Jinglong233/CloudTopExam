@@ -10,6 +10,8 @@ import com.jl.project.entity.po.Msg;
 import com.jl.project.entity.query.MsgQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.MsgService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "发送消息操作")
 @RestController
 @RequestMapping("/msg")
 @SaCheckLogin
@@ -33,6 +36,7 @@ public class MsgController {
     /**
      * 发送消息
      */
+    @ApiOperation("发送消息")
     @RequestMapping("sendMessage")
     @GlobalInterceptor(checkParams = true)
     @SaCheckRole("admin")
@@ -44,6 +48,7 @@ public class MsgController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     @SaCheckRole("admin")
@@ -57,6 +62,7 @@ public class MsgController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addBatch(@RequestBody List<Msg> listBean) {
@@ -67,6 +73,7 @@ public class MsgController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addOrUpdateBatch(@RequestBody List<Msg> listBean) {
@@ -77,7 +84,7 @@ public class MsgController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getMsgById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getMsgById(String id) {
@@ -88,6 +95,7 @@ public class MsgController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateMsgById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateMsgById(Msg bean, String id) {
@@ -99,6 +107,7 @@ public class MsgController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteMsgById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteMsgById(String id) {

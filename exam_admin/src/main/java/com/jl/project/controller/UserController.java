@@ -248,6 +248,7 @@ public class UserController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
     @SaCheckRole("admin")

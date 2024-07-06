@@ -11,6 +11,8 @@ import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.entity.vo.WrongCountSummaryVO;
 import com.jl.project.entity.vo.WrongDeptCommon;
 import com.jl.project.service.DataAnalysisService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,7 @@ import java.util.Map;
 @RequestMapping("/dataAnalysis")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "数据分析统计")
 public class DataAnalysisController {
 
     @Resource
@@ -32,6 +35,7 @@ public class DataAnalysisController {
     /**
      * 获取知识点
      */
+    @ApiOperation("获取知识点")
     @RequestMapping("knowledgeList")
     public SaResult getKnowledgeList() {
         List<String> result = dataAnalysisService.getKnowledgeList();
@@ -43,6 +47,7 @@ public class DataAnalysisController {
      *
      * @return
      */
+    @ApiOperation("获取男女占比")
     @RequestMapping("sexProportion")
     public SaResult getSexProportion() {
         List<Map<String, Object>> result = dataAnalysisService.getSexProportion();
@@ -55,6 +60,7 @@ public class DataAnalysisController {
      *
      * @return
      */
+    @ApiOperation("获取最近其他考试信息")
     @RequestMapping("recentExamInfo")
     public SaResult getRecentExamInfo() {
         Map<String, List> result = dataAnalysisService.getRecentExamInfo();
@@ -66,6 +72,7 @@ public class DataAnalysisController {
      *
      * @return
      */
+    @ApiOperation("获取题目占比信息")
     @RequestMapping("quTypeProportion")
     public SaResult getQuTypeProportion() {
         WrongDeptCommon result = dataAnalysisService.getQuTypeProportion();
@@ -75,6 +82,7 @@ public class DataAnalysisController {
     /**
      * 获取错题占比前五的知识点
      */
+    @ApiOperation("获取错题占比前五的知识点")
     @RequestMapping("topFiveWrongTopics")
     public SaResult getTopFiveWrongTopics() {
         WrongDeptCommon result = dataAnalysisService.getTopFiveWrongTopics();
@@ -84,6 +92,7 @@ public class DataAnalysisController {
     /**
      * 时间段错题分析统计
      */
+    @ApiOperation("时间段错题分析统计")
     @RequestMapping("temporalErrorAnalysis")
     public SaResult getTemporalErrorAnalysis() {
         WrongDeptCommon result = dataAnalysisService.getTemporalErrorAnalysis();
@@ -93,6 +102,7 @@ public class DataAnalysisController {
     /**
      * 分类获取每个题型中每个知识点的错题统计
      */
+    @ApiOperation("分类获取每个题型中每个知识点的错题统计")
     @RequestMapping("getWrongCountSummary")
     public SaResult getWrongCountSummary() {
         List<WrongCountSummaryVO> result = dataAnalysisService.getWrongCountSummary();
@@ -103,6 +113,7 @@ public class DataAnalysisController {
     /**
      * 根据部门获取知识点统计
      */
+    @ApiOperation("根据部门获取知识点统计")
     @RequestMapping("wrongDeptWrongKn")
     @GlobalInterceptor(checkParams = true)
     public SaResult getWrongDeptWrongKn(@RequestBody @VerifyParam(require = true) String deptCode) {
@@ -114,6 +125,7 @@ public class DataAnalysisController {
     /**
      * 根据部门获取学科统计
      */
+    @ApiOperation("根据部门获取学科统计")
     @RequestMapping("wrongDeptSubject")
     @GlobalInterceptor(checkParams = true)
     public SaResult getWrongDeptSubject(@RequestBody @VerifyParam(require = true) String deptCode) {
@@ -127,6 +139,7 @@ public class DataAnalysisController {
      * @param errorCountQuery
      * @return
      */
+    @ApiOperation("获取部门错题统计")
     @RequestMapping("errorCount")
     @GlobalInterceptor(checkParams = true)
     public SaResult errorCount(@RequestBody ErrorCountQuery errorCountQuery) {

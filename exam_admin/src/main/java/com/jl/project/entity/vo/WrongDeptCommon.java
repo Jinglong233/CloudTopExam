@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * @Description 错题知识点占比
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-06-01 10:54
  **/
 public class WrongDeptCommon {

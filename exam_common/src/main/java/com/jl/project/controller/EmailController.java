@@ -7,6 +7,7 @@ import com.jl.project.entity.dto.CheckEmailCodeDTO;
 import com.jl.project.enums.VerifyRegexEnum;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.EmailService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 /**
  * 邮件相关接口
  */
+@Api(tags = "邮件发送相关")
 @RestController
 @RequestMapping("/email")
 public class EmailController {
@@ -30,6 +32,7 @@ public class EmailController {
      * @param emailCodeDTO
      * @return
      */
+    @ApiOperation("检查验证码")
     @RequestMapping("checkCode")
     @GlobalInterceptor( checkParams = true)
     public SaResult checkCode(@RequestBody @VerifyParam CheckEmailCodeDTO emailCodeDTO) {

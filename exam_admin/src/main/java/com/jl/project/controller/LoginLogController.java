@@ -9,6 +9,8 @@ import com.jl.project.entity.po.LoginLog;
 import com.jl.project.entity.query.LoginLogQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.LoginLogService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import java.util.List;
 @RequestMapping("/loginLog")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "登录日志")
 public class LoginLogController {
 
     @Resource
@@ -33,6 +36,7 @@ public class LoginLogController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(@RequestBody @VerifyParam(require = true) LoginLogQuery query) {
@@ -45,6 +49,7 @@ public class LoginLogController {
     /**
      * 批量删除
      */
+    @ApiOperation("批量删除")
     @RequestMapping("deleteBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteLoginLogBatchById(@RequestBody List<Integer> deleteList) {
@@ -56,6 +61,7 @@ public class LoginLogController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     public SaResult add(LoginLog bean) {
         Integer result = this.loginLogService.add(bean);
@@ -65,6 +71,7 @@ public class LoginLogController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<LoginLog> listBean) {
         Integer result = this.loginLogService.addBatch(listBean);
@@ -75,6 +82,7 @@ public class LoginLogController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<LoginLog> listBean) {
         Integer result = this.loginLogService.addOrUpdateBatch(listBean);
@@ -85,7 +93,7 @@ public class LoginLogController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getLoginLogById")
     public SaResult getLoginLogById(Integer id) {
         LoginLog result = this.loginLogService.getLoginLogById(id);
@@ -95,6 +103,7 @@ public class LoginLogController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateLoginLogById")
     public SaResult updateLoginLogById(LoginLog bean, Integer id) {
         Integer result = this.loginLogService.updateLoginLogById(bean, id);
@@ -104,6 +113,7 @@ public class LoginLogController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteLoginLogById")
     public SaResult deleteLoginLogById(@RequestBody Integer id) {
         Integer result = this.loginLogService.deleteLoginLogById(id);

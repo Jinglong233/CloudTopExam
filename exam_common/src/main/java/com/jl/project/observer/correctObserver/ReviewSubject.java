@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-26 22:31
  * @Description 批阅完成被观察者
  **/

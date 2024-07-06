@@ -5,7 +5,7 @@ import com.jl.project.annotation.VerifyParam;
 import java.util.List;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-08 19:59
  **/
 public class SendMessageDTO {

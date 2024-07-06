@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-17 17:39
  **/
 public interface OSSService {

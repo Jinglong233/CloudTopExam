@@ -4,7 +4,7 @@ import com.jl.project.annotation.VerifyParam;
 
 /**
  * @Description 错题统计查询对象
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-06-01 12:21
  **/
 public class ErrorCountQuery extends BaseQuery{

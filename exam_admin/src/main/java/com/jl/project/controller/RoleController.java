@@ -9,6 +9,8 @@ import com.jl.project.entity.po.Role;
 import com.jl.project.entity.query.RoleQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.RoleService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "角色操作")
 @RestController
 @RequestMapping("/role")
 @SaCheckLogin
@@ -33,6 +36,7 @@ public class RoleController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(@RequestBody RoleQuery query) {
@@ -43,6 +47,7 @@ public class RoleController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     public SaResult add(@RequestBody Role bean) {
@@ -54,6 +59,7 @@ public class RoleController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addBatch(@RequestBody List<Role> listBean) {
@@ -65,6 +71,7 @@ public class RoleController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addOrUpdateBatch(@RequestBody List<Role> listBean) {
@@ -76,7 +83,7 @@ public class RoleController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getRoleById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getRoleById(@RequestBody @VerifyParam(require = true) String id) {
@@ -88,6 +95,7 @@ public class RoleController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateRoleById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateRoleById(Role bean, String id) {
@@ -98,6 +106,7 @@ public class RoleController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteRoleById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteRoleById(String id) {

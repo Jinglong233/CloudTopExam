@@ -8,6 +8,8 @@ import com.jl.project.entity.po.Tmpl;
 import com.jl.project.entity.query.TmplQuery;
 import com.jl.project.entity.vo.PaginationResultVO;
 import com.jl.project.service.TmplService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequestMapping("/tmpl")
 @SaCheckLogin
 @SaCheckRole("admin")
+@Api(tags = "消息模板")
 public class TmplController {
 
     @Resource
@@ -32,6 +35,7 @@ public class TmplController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadDataList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadDatalist(TmplQuery query) {
@@ -42,6 +46,7 @@ public class TmplController {
     /**
      * 新增
      */
+    @ApiOperation("新增")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     public SaResult add(Tmpl bean) {
@@ -52,6 +57,7 @@ public class TmplController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addBatch(@RequestBody List<Tmpl> listBean) {
@@ -63,6 +69,7 @@ public class TmplController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     @GlobalInterceptor(checkParams = true)
     public SaResult addOrUpdateBatch(@RequestBody List<Tmpl> listBean) {
@@ -74,7 +81,7 @@ public class TmplController {
     /**
      * 根据Id查询
      */
-
+    @ApiOperation("根据Id查询")
     @RequestMapping("getTmplById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getTmplById(String id) {
@@ -85,6 +92,7 @@ public class TmplController {
     /**
      * 根据Id更新
      */
+    @ApiOperation("根据Id更新")
     @RequestMapping("updateTmplById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateTmplById(Tmpl bean, String id) {
@@ -96,6 +104,7 @@ public class TmplController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteTmplById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteTmplById(String id) {

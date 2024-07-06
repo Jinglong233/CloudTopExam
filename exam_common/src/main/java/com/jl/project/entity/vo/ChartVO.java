@@ -2,7 +2,7 @@ package com.jl.project.entity.vo;
 
 /**
  * @description 图表数据类型
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-05-30 17:32
  **/
 public class ChartVO {

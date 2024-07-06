@@ -19,6 +19,8 @@ import com.jl.project.enums.LogType;
 import com.jl.project.enums.OperationType;
 import com.jl.project.exception.BusinessException;
 import com.jl.project.service.QuService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -35,6 +37,7 @@ import java.util.List;
  * @author:jingLong
  * @date:2023/11/22
  */
+@Api(tags = "题目操作")
 @RestController
 @RequestMapping("/qu")
 @SaCheckLogin
@@ -47,6 +50,7 @@ public class QuController {
     /**
      * 根据条件分页查询
      */
+    @ApiOperation("根据条件分页查询")
     @RequestMapping("loadQuList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadQuList(@RequestBody @VerifyParam QuQuery query) {
@@ -57,6 +61,7 @@ public class QuController {
     /**
      * 获取题目+选项列表
      */
+    @ApiOperation("获取题目+选项列表")
     @RequestMapping("loadQuAndAnswerList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadQuAndAnswerList(@RequestBody QuQuery query) throws BusinessException {
@@ -72,6 +77,7 @@ public class QuController {
      * @return
      * @throws BusinessException
      */
+    @ApiOperation("过滤指定题目之后的题目和选项列表")
     @RequestMapping("loadExcludeQuAnAnswerList")
     @GlobalInterceptor(checkParams = true)
     public SaResult loadExcludeQuAnAnswerList(@RequestBody @VerifyParam QuExcludeQuery query) throws BusinessException {
@@ -82,6 +88,7 @@ public class QuController {
     /**
      * 新增题目和选项
      */
+    @ApiOperation("新增题目和选项")
     @RequestMapping("add")
     @GlobalInterceptor(checkParams = true)
     @OperationLog(logType = LogType.OPERATION_LOG, oper = OperationType.ADD)
@@ -93,6 +100,7 @@ public class QuController {
     /**
      * 根据题目Id更新题目和关联选项
      */
+    @ApiOperation("根据题目Id更新题目和关联选项")
     @RequestMapping("updateQuById")
     @GlobalInterceptor(checkParams = true)
     public SaResult updateQuById(@RequestBody @VerifyParam UpdateQuAndAnswerDTO bean) throws BusinessException {
@@ -103,6 +111,7 @@ public class QuController {
     /**
      * 随机抽题题目
      */
+    @ApiOperation("随机抽题题目")
     @RequestMapping("randomSelectQu")
     @GlobalInterceptor(checkParams = true)
     public SaResult randomSelectQu(@RequestBody @VerifyParam RandomSelectQuDTO selectQuDTO) throws BusinessException {
@@ -114,6 +123,7 @@ public class QuController {
     /**
      * 根据Id查询题目和对应选项的信息
      */
+    @ApiOperation("根据Id查询题目和对应选项的信息")
     @RequestMapping("getQuById")
     @GlobalInterceptor(checkParams = true)
     public SaResult getQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
@@ -125,6 +135,7 @@ public class QuController {
     /**
      * 根据Id删除
      */
+    @ApiOperation("根据Id删除")
     @RequestMapping("deleteQuById")
     @GlobalInterceptor(checkParams = true)
     public SaResult deleteQuById(@RequestBody @VerifyParam(require = true) String id) throws BusinessException {
@@ -136,6 +147,7 @@ public class QuController {
     /**
      * 获取题目数量
      */
+    @ApiOperation("获取题目数量")
     @RequestMapping("quCount")
     @GlobalInterceptor(checkParams = true)
     public SaResult getQuCount(@RequestBody @VerifyParam QuQuery query) throws BusinessException {
@@ -143,11 +155,11 @@ public class QuController {
         return SaResult.ok().setData(result);
     }
 
-//    以下接口未测试
 
     /**
      * 导出
      */
+    @ApiOperation("导出")
     @RequestMapping("export")
     @GlobalInterceptor(checkParams = true)
     public void getQuCount(HttpServletResponse response) throws BusinessException, IOException {
@@ -155,8 +167,9 @@ public class QuController {
     }
 
     /**
-     * 导入题库
+     * 批量导入
      */
+    @ApiOperation("批量导入")
     @RequestMapping("importQu")
     @GlobalInterceptor(checkParams = true)
     public SaResult importQuestions(@RequestPart("file") MultipartFile file, @RequestPart("repoId") String repoId) throws BusinessException, IOException {
@@ -167,6 +180,7 @@ public class QuController {
     /**
      * 批量新增
      */
+    @ApiOperation("批量新增")
     @RequestMapping("addBatch")
     public SaResult addBatch(@RequestBody List<Qu> listBean) {
         Integer result = this.quService.addBatch(listBean);
@@ -177,6 +191,7 @@ public class QuController {
     /**
      * 批量新增或修改
      */
+    @ApiOperation("批量新增或修改")
     @RequestMapping("addOrUpdateBatch")
     public SaResult addOrUpdateBatch(@RequestBody List<Qu> listBean) {
         Integer result = this.quService.addOrUpdateBatch(listBean);

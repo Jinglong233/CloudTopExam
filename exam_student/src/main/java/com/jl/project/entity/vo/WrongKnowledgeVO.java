@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Author huawei
+ * @Author jingLong
  * @Date 2024-06-07 15:47
  **/
 public class WrongKnowledgeVO {

@@ -4,6 +4,8 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import com.jl.project.service.RecommendService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,8 +13,11 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * 推荐器请求API
+ * Description: 题目推荐请Controller
+ * author: jingLong
+ * date: 2023/11/22
  */
+@Api(tags = "题目推荐")
 @RestController
 @RequestMapping("/recommend")
 @SaCheckLogin
@@ -23,10 +28,11 @@ public class RecommendController{
 
     /**
      * getRecommendUserList
-     * 推荐当前登录用户可关注的用户列表
+     * 推荐当前登录用户可训练题目id
      *
      * @return
      */
+    @ApiOperation("推荐当前登录用户可训练题目id")
     @RequestMapping(value = "getRecommendQuList")
     public SaResult getRecommendQuList() {
         List<String> result = recommendService.getRecommendQuList();
