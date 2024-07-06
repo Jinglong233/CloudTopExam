@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
   application:
     name: cloudTopExam
   mvc:
@@ -33,6 +33,8 @@ sa-token:
   # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
   token-style: random-32
   # 是否输出操作日志
-  is-log: true
+  is-log: false
+  #关闭控制台banner
+  is-print: off
 
 
