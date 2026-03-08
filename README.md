@@ -7,9 +7,6 @@
 [![fork](https://gitee.com/Jinglong233/cloud-top-exam/badge/fork.svg?theme=dark)](https://gitee.com/Jinglong233/cloud-top-exam)
 
 
-
-获取数据库文件请查看[说明文档](https://jinglong233.github.io/CloudTopExamDoc/)
-
 # 系统功能
 
 ## 管理/教师功能
@@ -56,10 +53,22 @@ CloudTopExam交流群1： **967055645**
 - gitee: https://gitee.com/Jinglong233/cloud-top-exam
 - github: https://github.com/Jinglong233/CloudTopExam
 
+
+
+
 # 如何获取SQL文件？
 
 运行SQl文件夹里边的sql文件。
 注意：xxl-job 和 exam 是两个数据库
+
+# 地址
+管理端：http://localhost:5173/
+学生端：http://localhost:5174/
+
+管理端登录账号：张三
+密码：abc123
+
+有了管理端的账号，就可以手动新增用户
 
 # 部分截图
 
