@@ -58,7 +58,8 @@ CloudTopExam交流群1： **967055645**
 
 # 如何获取SQL文件？
 
-[前往获取](https://jinglong233.github.io/CloudTopExamDoc/sqlDesign/%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96SQL%E6%96%87%E4%BB%B6.html)
+运行SQl文件夹里边的sql文件。
+注意：xxl-job 和 exam 是两个数据库
 
 # 部分截图
 
