@@ -42,7 +42,6 @@ dist-ssr
 *.local
 
 ### other ###
-sql
 /entrance/target/classes/com/jl/project/
 /exam_common/target/
 /entrance/src/main/test/
