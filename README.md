@@ -7,9 +7,6 @@
 [![fork](https://gitee.com/Jinglong233/cloud-top-exam/badge/fork.svg?theme=dark)](https://gitee.com/Jinglong233/cloud-top-exam)
 
 
-
-获取数据库文件请查看[说明文档](https://jinglong233.github.io/CloudTopExamDoc/)
-
 # 系统功能
 
 ## 管理/教师功能
