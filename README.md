@@ -54,7 +54,7 @@ CloudTopExam交流群1： **967055645**
 - github: https://github.com/Jinglong233/CloudTopExam
 
 # 如何获取SQL文件？
-关注公众号，回复 "CloudeTopExam"
+关注公众号，回复 "CloudTopExam"
 ![weixingongzhonghao.jpeg](image/weixingongzhonghao.jpeg)
 
 # 部分截图
